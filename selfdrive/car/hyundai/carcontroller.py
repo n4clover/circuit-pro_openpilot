@@ -108,13 +108,13 @@ class CarController():
     if CS.lkas_button_on != CS.prev_lkas_button:
       if self.cnt == 0:
         self.cnt = 1
+    if CS.lkas_button_on != CS.prev_lkas_button:
       if self.cnt == 1:
         self.cnt = 0
 
     if self.cnt == 0: # Lat and Long
-      if CS.spas_enabled:
-            # disable if steer angle reach 90 deg, otherwise mdps fault in some models
-    lkas_active = enabled and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      # disable if steer angle reach 90 deg, otherwise mdps fault in some models
+      lkas_active = enabled and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
     if self.cnt == 1: # Long only
       lkas_active = False
 
