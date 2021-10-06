@@ -610,7 +610,7 @@ class CarInterface(CarInterfaceBase):
 
     if self.CS.lkas_button_on != self.CS.prev_lkas_button and self.CC.cnt == 0:
       events.add(EventName.normalcontrol)
-    if self.CS.lkas_button_on != self.CS.prev_lkas_button and self.CC.cnt == 1:
+    elif self.CS.lkas_button_on != self.CS.prev_lkas_button:
       events.add(EventName.longcontrol)
 
   # handle button presses
