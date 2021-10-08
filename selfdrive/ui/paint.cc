@@ -575,7 +575,7 @@ static void ui_draw_vision_header(UIState *s) {
   ui_draw_vision_turnspeed(s);
   ui_draw_extras(s);
   ui_draw_vision_event(s);  
-
+}
 static void ui_draw_vision(UIState *s) {
   const UIScene *scene = &s->scene;
   // Draw augmented elements
