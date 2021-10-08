@@ -343,6 +343,7 @@ static void ui_draw_world(UIState *s) {
     }
   nvgResetScissor(s->vg);
 }
+}
 
 static void ui_draw_vision_maxspeed(UIState *s) {
   const int SET_SPEED_NA = 255;
