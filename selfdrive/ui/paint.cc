@@ -564,44 +564,6 @@ static void ui_draw_vision_bsd_right(UIState *s) {
   ui_draw_circle_image(s, bsd_x + (radius*2), bsd_y - (radius*2), radius, "bsd_r", s->scene.car_state.getRightBlindspot());
 }
 
-
-static void ui_draw_vision_header(UIState *s) {
-  NVGpaint gradient = nvgLinearGradient(s->vg, 0, header_h - (header_h / 2.5), 0, header_h,
-                                        nvgRGBAf(0, 0, 0, 0.45), nvgRGBAf(0, 0, 0, 0));
-  ui_fill_rect(s->vg, {0, 0, s->fb_w , header_h}, gradient);
-  ui_draw_vision_maxspeed(s);
-  ui_draw_vision_speedlimit(s);
-  ui_draw_vision_speed(s);
-  ui_draw_vision_turnspeed(s);
-  ui_draw_extras(s);
-  ui_draw_vision_event(s);  
-}
-static void ui_draw_vision(UIState *s) {
-  const UIScene *scene = &s->scene;
-  // Draw augmented elements
-  if (scene->world_objects_visible) {
-    ui_draw_world(s);
-  }
-  // Set Speed, Current Speed, Status/Events
-  ui_draw_vision_header(s);
-  ui_draw_vision_scc_gap(s);
-  ui_draw_vision_brake(s);
-  ui_draw_vision_autohold(s);
-  ui_draw_vision_bsd_left(s);
-  ui_draw_vision_bsd_right(s);
-  ui_draw_gps(s);
-
-
-#if UI_FEATURE_DASHCAM
-   if(s->awake && Hardware::EON())
-   {
-        int touch_x = -1, touch_y = -1;
-        int touched = touch_poll(&(s->touch), &touch_x, &touch_y, 0);
-        dashcam(s, touch_x, touch_y);
-   }
-#endif
-}
-
 static void ui_draw_vision_scc_gap(UIState *s) {
   const UIScene *scene = &s->scene;
   auto car_state = (*s->sm)["carState"].getCarState();
@@ -679,6 +641,44 @@ static void ui_draw_vision_autohold(UIState *s) {
   ui_draw_circle_image(s, center_x, center_y, radius,
         autohold > 1 ? "autohold_warning" : "autohold_active",
         brake_bg, brake_img_alpha);
+}
+
+
+static void ui_draw_vision_header(UIState *s) {
+  NVGpaint gradient = nvgLinearGradient(s->vg, 0, header_h - (header_h / 2.5), 0, header_h,
+                                        nvgRGBAf(0, 0, 0, 0.45), nvgRGBAf(0, 0, 0, 0));
+  ui_fill_rect(s->vg, {0, 0, s->fb_w , header_h}, gradient);
+  ui_draw_vision_maxspeed(s);
+  ui_draw_vision_speedlimit(s);
+  ui_draw_vision_speed(s);
+  ui_draw_vision_turnspeed(s);
+  ui_draw_extras(s);
+  ui_draw_vision_event(s);  
+}
+static void ui_draw_vision(UIState *s) {
+  const UIScene *scene = &s->scene;
+  // Draw augmented elements
+  if (scene->world_objects_visible) {
+    ui_draw_world(s);
+  }
+  // Set Speed, Current Speed, Status/Events
+  ui_draw_vision_header(s);
+  ui_draw_vision_scc_gap(s);
+  ui_draw_vision_brake(s);
+  ui_draw_vision_autohold(s);
+  ui_draw_vision_bsd_left(s);
+  ui_draw_vision_bsd_right(s);
+  ui_draw_gps(s);
+
+
+#if UI_FEATURE_DASHCAM
+   if(s->awake && Hardware::EON())
+   {
+        int touch_x = -1, touch_y = -1;
+        int touched = touch_poll(&(s->touch), &touch_x, &touch_y, 0);
+        dashcam(s, touch_x, touch_y);
+   }
+#endif
 }
 
 void ui_draw(UIState *s, int w, int h) {
