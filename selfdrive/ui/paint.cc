@@ -574,15 +574,7 @@ static void ui_draw_vision_header(UIState *s) {
   ui_draw_vision_speed(s);
   ui_draw_vision_turnspeed(s);
   ui_draw_extras(s);
-
-  if (Params().getBool("CleanUI")){
-    ui_draw_vision_event(s);  
-   
-    }
-  else{
-    bb_ui_draw_UI(s);
-  }
-}
+  ui_draw_vision_event(s);  
 
 static void ui_draw_vision(UIState *s) {
   const UIScene *scene = &s->scene;
