@@ -564,38 +564,6 @@ class CarInterface(CarInterfaceBase):
       if self.low_speed_alert and not self.CS.mdps_bus:
         events.add(EventName.belowSteerSpeed)
 
-    #TPMS Alerts - JPR
-    if CAR.STINGER:
-      minTP = 33 # Min TPMS Pressure
-    elif CAR.KONA_EV or CAR.KONA_HEV or CAR.KONA:
-      minTP = 30
-    elif CAR.ELANTRA_HEV_2021:
-      minTP = 30
-    elif CAR.K5:
-      minTP = 30
-    elif CAR.FORTE:
-      minTP = 30
-    elif CAR.GENESIS:
-      minTP = 30
-    elif CAR.NIRO_EV:
-      minTP = 30
-    elif CAR.SANTA_FE:
-      minTP = 30
-    elif CAR.GENESIS_G80:
-      minTP = 28
-    else:
-      minTP = 28
-
-    #if self.CC.DO:
-    if ret.tpmsFl < minTP and Params().get_bool('TPMS_Alerts'):
-      events.add(car.CarEvent.EventName.fl)
-    elif ret.tpmsFr < minTP and Params().get_bool('TPMS_Alerts'):
-      events.add(car.CarEvent.EventName.fr)
-    elif ret.tpmsRl < minTP and Params().get_bool('TPMS_Alerts'):
-      events.add(car.CarEvent.EventName.rl)
-    elif ret.tpmsRr < minTP and Params().get_bool('TPMS_Alerts'):
-      events.add(car.CarEvent.EventName.rr)
-
     if self.CC.longcontrol and self.CS.cruise_unavail:
       events.add(EventName.brakeUnavailable)
     #if abs(ret.steeringAngleDeg) > self.CP.maxSteeringAngleDeg and EventName.steerSaturated not in events.events:
