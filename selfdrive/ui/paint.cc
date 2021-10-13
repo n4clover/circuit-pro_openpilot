@@ -50,7 +50,7 @@ static void ui_draw_circle(UIState *s, float x, float y, float size, NVGcolor co
   nvgFill(s->vg);
 }
 
-static void ui_draw_speed_sign(UIState *s, float x, float y, int size, float speed, const char *subtext, 
+/*static void ui_draw_speed_sign(UIState *s, float x, float y, int size, float speed, const char *subtext, 
                                float subtext_size, const char *font_name, bool is_map_sourced, bool is_active) {
   NVGcolor ring_color = is_active ? COLOR_RED : COLOR_BLACK_ALPHA(.2f * 255);
   NVGcolor inner_color = is_active ? COLOR_WHITE : COLOR_WHITE_ALPHA(.35f * 255);
@@ -125,7 +125,7 @@ static void ui_draw_turn_speed_sign(UIState *s, float x, float y, int width, flo
   ui_draw_text(s, x, y + 25, speedlimit_str.c_str(), 90., text_color, font_name);
   ui_draw_text(s, x, y + 65, subtext, 30., text_color, font_name);
 }
-
+*/
 static void draw_chevron(UIState *s, float x, float y, float sz, NVGcolor fillColor, NVGcolor glowColor) {
   // glow
   float g_xo = sz/5;
@@ -532,7 +532,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     nvgStroke(s->vg);
 }
 
-static void ui_draw_vision_speedlimit(UIState *s) {
+/*static void ui_draw_vision_speedlimit(UIState *s) {
   auto longitudinal_plan = (*s->sm)["longitudinalPlan"].getLongitudinalPlan();
   const float speedLimit = longitudinal_plan.getSpeedLimit();
   const float speedLimitOffset = longitudinal_plan.getSpeedLimitOffset();
@@ -596,7 +596,7 @@ static void ui_draw_vision_turnspeed(UIState *s) {
     ui_draw_turn_speed_sign(s, speed_sign_rect.centerX(), speed_sign_rect.centerY(), speed_sign_rect.w, speed, 
                             curveSign, distToTurn > 0 ? distance_str.c_str() : "", "sans-bold", is_active);
   }
-}
+}*/
 static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w ) {
   const UIScene *scene = &s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
@@ -1221,9 +1221,9 @@ static void ui_draw_vision_header(UIState *s) {
                                         nvgRGBAf(0, 0, 0, 0.45), nvgRGBAf(0, 0, 0, 0));
   ui_fill_rect(s->vg, {0, 0, s->fb_w , header_h}, gradient);
   ui_draw_vision_maxspeed(s);
-  ui_draw_vision_speedlimit(s);
+  //ui_draw_vision_speedlimit(s);
   ui_draw_vision_speed(s);
-  ui_draw_vision_turnspeed(s);
+  //ui_draw_vision_turnspeed(s);
   ui_draw_vision_event(s);
   //bb_ui_draw_UI(s);
   ui_draw_extras(s);
