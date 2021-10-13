@@ -599,7 +599,6 @@ class CarInterface(CarInterfaceBase):
     elif ret.tpmsRr < minTP and Params().get_bool('TPMS_Alerts'):
       events.add(car.CarEvent.EventName.rr)
 
-
     if self.CC.longcontrol and self.CS.cruise_unavail:
       events.add(EventName.brakeUnavailable)
     #if abs(ret.steeringAngleDeg) > self.CP.maxSteeringAngleDeg and EventName.steerSaturated not in events.events:
@@ -610,20 +609,7 @@ class CarInterface(CarInterfaceBase):
     #  events.add(EventName.buttonCancel)
     if self.mad_mode_enabled and EventName.pedalPressed in events.events:
       events.events.remove(EventName.pedalPressed)
-
-    if Params().get_bool('spasEnabled'):
-      if self.CC.override:
-        events.add(EventName.buttonCancel)
-
-      if self.CS.mdps11_stat == 7 and not self.CC.turning_indicator_alert:
-        if self.CS.mdps11_stat == 7 and self.CC.mdps11_stat_last == 7 and not self.CC.lkas_active and self.CC.spas_active: # We need to alert driver when SPAS abort or fail.
-          events.add(EventName.steerSaturated) 
-
-      if self.CS.mdps11_stat == 6 or self.CS.mdps11_stat == 8:
-        events.add(EventName.steerTempUnavailable)
-
-    
-
+  
   # handle button presses
     for b in ret.buttonEvents:
       # do disable on button down
