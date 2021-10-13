@@ -20,7 +20,6 @@ class CarInterface(CarInterfaceBase):
     super().__init__(CP, CarController, CarState)
     self.cp2 = self.CS.get_can2_parser(CP)
     self.mad_mode_enabled = Params().get_bool('MadModeEnabled')
-    self.speed_limit = True
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
@@ -31,7 +30,7 @@ class CarInterface(CarInterfaceBase):
     gas_max_v = [2., 1.8, 1.4, 0.95, 0.60, 0.38]
 
     brake_max_bp = [0, 70., 130.]
-    brake_max_v = [-6., -4.5, -2.8]
+    brake_max_v = [CarControllerParams.ACCEL_MIN, -3., -2.1]
 
     return interp(v_current_kph, brake_max_bp, brake_max_v), interp(v_current_kph, gas_max_bp, gas_max_v)
 
@@ -42,9 +41,8 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = Params().get_bool('LongControlEnabled')
 
     ret.carName = "hyundai"
-    ret.safetyModel = car.CarParams.SafetyModel.hyundai
+    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy, 0)]
 
-    # Most Hyundai car ports are community features for now
     ret.communityFeature = True
 
     eps_modified = False
@@ -101,7 +99,7 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.deadzoneV = [0., 0.015]
     ret.longitudinalActuatorDelay = 0.2
 
-    ret.startAccel = -0.8
+    ret.startAccel = -0.4
     ret.stopAccel = -2.0
     ret.startingAccelRate = 3.2  # brake_travel/s while releasing on restart
     ret.stoppingDecelRate = 0.8  # brake_travel/s while trying to stop
