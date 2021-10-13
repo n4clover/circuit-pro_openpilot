@@ -215,7 +215,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"LongControlEnabled", PERSISTENT},
     {"MadModeEnabled", PERSISTENT},
 
-    {"IsLdwsCar", PERSISTENT},
+    {"IsLdwsCar", PERSISTENT},
     {"LaneChangeEnabled", PERSISTENT},
     {"AutoLaneChangeEnabled", PERSISTENT},
 
@@ -223,6 +223,19 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"SccSmootherSlowOnCurves", PERSISTENT},
     {"SccSmootherSyncGasPressed", PERSISTENT},
     {"StockNaviDecelEnabled", PERSISTENT},
+    {"ShowDebugUI", PERSISTENT},
+    {"CustomLeadMark", PERSISTENT},
+    {"UseSMDPSHarness", PERSISTENT},
+    {"SSCOD", PERSISTENT},
+    {"LoggerEnabled", PERSISTENT},
+    {"CleanUI", PERSISTENT},
+    {"AR", PERSISTENT},
+    {"UseLQR", PERSISTENT},
+    {"PutPrebuilt", PERSISTENT},
+    {"TPMS_Alerts", PERSISTENT},
+    {"HyundaiNaviSL", PERSISTENT},
+    {"SoftRestartTriggered", CLEAR_ON_MANAGER_START},
+};
     {"NewRadarInterface", PERSISTENT},
     {"DisableOpFcw", PERSISTENT},
     {"ShowDebugUI", PERSISTENT},
