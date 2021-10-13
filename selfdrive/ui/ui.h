@@ -47,9 +47,16 @@
 #define COLOR_BLACK_ALPHA(x) nvgRGBA(0, 0, 0, x)
 #define COLOR_WHITE nvgRGBA(255, 255, 255, 255)
 #define COLOR_WHITE_ALPHA(x) nvgRGBA(255, 255, 255, x)
-#define COLOR_RED_ALPHA(x) nvgRGBA(201, 34, 49, x)
-#define COLOR_YELLOW nvgRGBA(218, 202, 37, 255)
-#define COLOR_RED nvgRGBA(201, 34, 49, 255)
+#define COLOR_RED nvgRGBA(255, 0, 0, 255)
+#define COLOR_RED_ALPHA(x) nvgRGBA(255, 0, 0, x)
+#define COLOR_YELLOW nvgRGBA(255, 255, 0, 255)
+#define COLOR_YELLOW_ALPHA(x) nvgRGBA(255, 255, 0, x)
+#define COLOR_ENGAGED nvgRGBA(23, 134, 68, 255)
+#define COLOR_ENGAGED_ALPHA(x) nvgRGBA(23, 134, 68, x)
+#define COLOR_WARNING nvgRGBA(218, 111, 37, 255)
+#define COLOR_WARNING_ALPHA(x) nvgRGBA(218, 111, 37, x)
+#define COLOR_ENGAGEABLE nvgRGBA(23, 51, 73, 255)
+#define COLOR_ENGAGEABLE_ALPHA(x) nvgRGBA(23, 51, 73, x)
 
 typedef cereal::CarControl::HUDControl::AudibleAlert AudibleAlert;
 
@@ -87,11 +94,18 @@ const Alert CONTROLS_WAITING_ALERT = {"openpilot Unavailable", "Waiting for cont
 const Alert CONTROLS_UNRESPONSIVE_ALERT = {"TAKE CONTROL IMMEDIATELY", "Controls Unresponsive",
                                            "controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
                                            AudibleAlert::CHIME_WARNING_REPEAT};
+
+const Alert DEBUG_SNAPSHOT_ALERT = {"Debug snapshot collected", "",
+                                    "debugTapDetected", cereal::ControlsState::AlertSize::SMALL, 
+                                    AudibleAlert::CHIME_WARNING2};
 const int CONTROLS_TIMEOUT = 5;
 
 const int bdr_s = 20;
 const int header_h = 420;
 const int footer_h = 280;
+
+const int speed_sgn_r = 96;
+const int speed_sgn_touch_pad = 50;
 
 const int UI_FREQ = 20;   // Hz
 
@@ -104,9 +118,17 @@ typedef enum UIStatus {
 
 const QColor bg_colors [] = {
   [STATUS_DISENGAGED] =  QColor(0x17, 0x33, 0x49, 0xc8),
-  [STATUS_ENGAGED] = QColor(0x17, 0x86, 0x44, 0xf1),
-  [STATUS_WARNING] = QColor(0xDA, 0x6F, 0x25, 0xf1),
+  [STATUS_ENGAGED] = QColor(0x17, 0x86, 0x44, 0x01),
+  [STATUS_WARNING] = QColor(0xDA, 0x6F, 0x25, 0x01),
   [STATUS_ALERT] = QColor(0xC9, 0x22, 0x31, 0xf1),
+};
+
+const QColor tcs_colors [] = {
+  [int(cereal::LongitudinalPlan::VisionTurnControllerState::DISABLED)] =  QColor(0x0, 0x0, 0x0, 0xff),
+  [int(cereal::LongitudinalPlan::VisionTurnControllerState::ENTERING)] = QColor(0xC9, 0x22, 0x31, 0xf1),
+  [int(cereal::LongitudinalPlan::VisionTurnControllerState::TURNING)] = QColor(0xDA, 0x6F, 0x25, 0xf1),
+  [int(cereal::LongitudinalPlan::VisionTurnControllerState::LEAVING)
+  ] = QColor(0x17, 0x86, 0x44, 0xf1),
 };
 
 typedef struct {
@@ -122,6 +144,20 @@ typedef struct UIScene {
 
   mat3 view_from_calib;
   bool world_objects_visible;
+
+  // ui add
+  float cpuTempAvg;
+  bool show_debug_ui;
+  bool debug_snapshot_enabled;
+  uint64_t display_debug_alert_frame;
+
+  // Speed limit control
+  bool speed_limit_control_enabled;
+  bool speed_limit_perc_offset;
+  Rect speed_limit_sign_touch_rect;
+  double last_speed_limit_sign_tap;
+  bool leftBlinker, rightBlinker;
+  int blinkingrate;
 
   cereal::PandaState::PandaType pandaType;
 
@@ -144,6 +180,9 @@ typedef struct UIScene {
 
   // neokii dev UI
   cereal::CarControl::Reader car_control;
+  cereal::CarState::Reader car_state;
+  cereal::DeviceState::Reader deviceState;
+  cereal::ControlsState::Reader controls_state;
   cereal::CarParams::Reader car_params;
   cereal::GpsLocationData::Reader gps_ext;
   cereal::LiveParametersData::Reader live_params;
