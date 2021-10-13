@@ -4,8 +4,8 @@ import numpy as np
 from cereal import car
 from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import CAR, Buttons
-from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
+from selfdrive.car.hyundai.values import CAR, Buttons, CarControllerParams
+from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.lateral_planner import LANE_CHANGE_SPEED_MIN
 from selfdrive.car.hyundai.carstate import CarStateBase, CarState
@@ -32,6 +32,7 @@ class CarInterface(CarInterfaceBase):
     brake_max_bp = [0, 70., 130.]
     brake_max_v = [CarControllerParams.ACCEL_MIN, -3., -2.1]
 
+
     return interp(v_current_kph, brake_max_bp, brake_max_v), interp(v_current_kph, gas_max_bp, gas_max_v)
 
   @staticmethod
@@ -57,17 +58,20 @@ class CarInterface(CarInterfaceBase):
     if UseLQR:
       ret.lateralTuning.init('lqr')
 
-      ret.lateralTuning.lqr.scale = 1650.
+      ret.lateralTuning.lqr.scale = 1700.
       ret.lateralTuning.lqr.ki = 0.01
-      ret.lateralTuning.lqr.dcGain = 0.00275
+      ret.lateralTuning.lqr.dcGain = 0.0028
 
       ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
       ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
       ret.lateralTuning.lqr.c = [1., 0.]
       ret.lateralTuning.lqr.k = [-110., 451.]
       ret.lateralTuning.lqr.l = [0.33, 0.318]
-    
-    ret.steerActuatorDelay = 0.1
+
+    if not Params().get_bool('UseLQR'):
+      ret.steerActuatorDelay = 0.2
+    else:
+      ret.steerActuatorDelay = 0.1
 
     tire_stiffness_factor = 1.
     ret.steerLimitTimer = 2.5
@@ -93,17 +97,18 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kpBP = [0., 10.*CV.KPH_TO_MS, 20.*CV.KPH_TO_MS, 40.*CV.KPH_TO_MS, 70.*CV.KPH_TO_MS, 100.*CV.KPH_TO_MS, 130.*CV.KPH_TO_MS]
       ret.longitudinalTuning.kpV = [1.3, 0.98, 0.83, 0.75, 0.655, 0.57, 0.48]
       ret.longitudinalTuning.kiBP = [0., 130. * CV.KPH_TO_MS]
-      ret.longitudinalTuning.kiV = [0.05, 0.03]
+      ret.longitudinalTuning.kiV = [0.08, 0.04]
       
     ret.longitudinalTuning.deadzoneBP = [0., 100. * CV.KPH_TO_MS]
     ret.longitudinalTuning.deadzoneV = [0., 0.015]
-    ret.longitudinalActuatorDelay = 0.2
+    ret.longitudinalActuatorDelayLowerBound = 0.15
+    ret.longitudinalActuatorDelayUpperBound = 0.15
 
     ret.startAccel = -0.4
     ret.stopAccel = -2.0
-    ret.startingAccelRate = 3.2  # brake_travel/s while releasing on restart
-    ret.stoppingDecelRate = 0.8  # brake_travel/s while trying to stop
-    ret.vEgoStopping = 0.5
+    ret.startingAccelRate = 4.0  # brake_travel/s while releasing on restart
+    ret.stoppingDecelRate = 1.0  # brake_travel/s while trying to stop
+    ret.vEgoStopping = 0.6
     ret.vEgoStarting = 0.5
 
     # genesis
@@ -115,8 +120,7 @@ class CarInterface(CarInterfaceBase):
       ret.minSteerSpeed = 37 * CV.MPH_TO_MS
       ret.steerRatio = 16.5
       tire_stiffness_factor = 0.85
-      ret.maxSteeringAngleDeg = 90.
-	  
+
     elif candidate == CAR.GENESIS_G70:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
       if not UseLQR:
@@ -226,7 +230,10 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 2.766
       ret.steerRatio = 13.27 * 1.15   # 15% higher at the center seems reasonable
       ret.centerToFront = ret.wheelbase * 0.4
-      tire_stiffness_factor = 0.65
+    elif candidate in [CAR.SANTA_FE_2022]:
+      ret.mass = 1750 + STD_CARGO_KG
+      ret.wheelbase = 2.766
+      ret.centerToFront = ret.wheelbase * 0.4
     elif candidate in [CAR.SONATA, CAR.SONATA_HEV, CAR.SONATA21_HEV]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       ret.mass = 1513. + STD_CARGO_KG
@@ -252,9 +259,6 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1999. + STD_CARGO_KG
       ret.wheelbase = 2.90
       ret.centerToFront = ret.wheelbase * 0.4
-      ret.steerRatio = 13.75 * 1.15
-      if eps_modified:
-        ret.maxSteeringAngleDeg = 1000.
     elif candidate in [CAR.ELANTRA, CAR.ELANTRA_GT_I30]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       ret.mass = 1275. + STD_CARGO_KG
@@ -343,14 +347,12 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.8
       ret.mass = 1640. + STD_CARGO_KG
       ret.wheelbase = 2.845
-      ret.maxSteeringAngleDeg = 120.
       ret.centerToFront = ret.wheelbase * 0.385
     elif candidate in [CAR.GRANDEUR_IG_FL, CAR.GRANDEUR_IG_FL_HEV]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       tire_stiffness_factor = 0.8
       ret.mass = 1725. + STD_CARGO_KG
       ret.wheelbase = 2.885
-      ret.maxSteeringAngleDeg = 120.
       ret.centerToFront = ret.wheelbase * 0.385
     elif candidate == CAR.VELOSTER:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
@@ -365,7 +367,6 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 2.67
       tire_stiffness_factor = 0.7
       ret.centerToFront = ret.wheelbase * 0.4
-      ret.maxSteeringAngleDeg = 120.
     # kia
     elif candidate == CAR.SORENTO:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Kia.png img_spinner_comma.png")
@@ -381,17 +382,21 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.7
       ret.steerRatio = 13.75
       ret.centerToFront = ret.wheelbase * 0.4
+    elif candidate in [CAR.K5_2021]:
+      ret.mass = 3228. * CV.LB_TO_KG
+      ret.wheelbase = 2.85
+      tire_stiffness_factor = 0.7
     elif candidate == CAR.STINGER:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Stinger.png img_spinner_comma.png")
-      tire_stiffness_factor = 1.125 # LiveParameters (Tunder's 2020)
+      tire_stiffness_factor = 1.0
       ret.mass = 1640.0 + STD_CARGO_KG
       ret.wheelbase = 2.84
-      ret.steerRatio = 14.4 * 1.15
+      ret.steerRatio = 14.44
       ret.centerToFront = ret.wheelbase * 0.4
       if not UseLQR:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [0.]
-        ret.lateralTuning.indi.innerLoopGainV = [3.65]
+        ret.lateralTuning.indi.innerLoopGainV = [3.62]
         ret.lateralTuning.indi.outerLoopGainBP = [0.]
         ret.lateralTuning.indi.outerLoopGainV = [2.5]
         ret.lateralTuning.indi.timeConstantBP = [0.]
@@ -425,7 +430,7 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 2.78
       tire_stiffness_factor = 0.7
       ret.centerToFront = ret.wheelbase * 0.4
-    elif candidate in [CAR.NIRO_EV, CAR.NIRO_HEV, CAR.NIRO21_HEV]:
+    elif candidate in [CAR.NIRO_EV, CAR.NIRO_HEV, CAR.NIRO_HEV_2021]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Kia.png img_spinner_comma.png")
       ret.mass = 1737. + STD_CARGO_KG
       ret.wheelbase = 2.7
@@ -489,16 +494,15 @@ class CarInterface(CarInterfaceBase):
 
     ret.hasEms = 608 in fingerprint[0] and 809 in fingerprint[0]
 
-    print('fingerprint', fingerprint)
-
     ret.radarOffCan = ret.sccBus == -1
     ret.pcmCruise = not ret.radarOffCan
 
-
+    # SPAS
+    ret.spasEnabled = Params().get_bool('spasEnabled')
 
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
     if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled'):
-      ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
     return ret
     
 
@@ -555,13 +559,13 @@ class CarInterface(CarInterfaceBase):
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     UseSMDPS = Params().get_bool('UseSMDPSHarness')
     
-    if UseSMDPS == False and Params().get_bool('LowSpeedAlerts'):
+    if UseSMDPS == False:
       if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
         self.low_speed_alert = True
       if ret.vEgo > (self.CP.minSteerSpeed + 4.):
         self.low_speed_alert = False
-      if self.low_speed_alert:
-        events.add(car.CarEvent.EventName.belowSteerSpeed)
+      if self.low_speed_alert and not self.CS.mdps_bus:
+        events.add(EventName.belowSteerSpeed)
 
     #TPMS Alerts - JPR
     if CAR.STINGER:
@@ -600,17 +604,25 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.brakeUnavailable)
     #if abs(ret.steeringAngleDeg) > self.CP.maxSteeringAngleDeg and EventName.steerSaturated not in events.events:
       #events.add(EventName.steerSaturated)
-    if self.low_speed_alert and not self.CS.mdps_bus:
-      events.add(EventName.belowSteerSpeed)
     if self.CC.turning_indicator_alert:
       events.add(EventName.turningIndicatorOn)
+    #if self.CS.lkas_button_on != self.CS.prev_lkas_button:
+    #  events.add(EventName.buttonCancel)
     if self.mad_mode_enabled and EventName.pedalPressed in events.events:
       events.events.remove(EventName.pedalPressed)
 
-    if self.CS.lkas_button_on != self.CS.prev_lkas_button and self.CC.cnt == 0:
-      events.add(EventName.normalcontrol)
-    elif self.CS.lkas_button_on != self.CS.prev_lkas_button:
-      events.add(EventName.longcontrol)
+    if Params().get_bool('spasEnabled'):
+      if self.CC.override:
+        events.add(EventName.buttonCancel)
+
+      if self.CS.mdps11_stat == 7 and not self.CC.turning_indicator_alert:
+        if self.CS.mdps11_stat == 7 and self.CC.mdps11_stat_last == 7 and not self.CC.lkas_active and self.CC.spas_active: # We need to alert driver when SPAS abort or fail.
+          events.add(EventName.steerSaturated) 
+
+      if self.CS.mdps11_stat == 6 or self.CS.mdps11_stat == 8:
+        events.add(EventName.steerTempUnavailable)
+
+    
 
   # handle button presses
     for b in ret.buttonEvents:
