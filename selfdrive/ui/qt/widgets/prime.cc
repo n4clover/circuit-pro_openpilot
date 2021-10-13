@@ -120,19 +120,19 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   primeLayout->setMargin(0);
   primeWidget->setContentsMargins(60, 50, 60, 50);
 
-  QLabel* subscribed = new QLabel("✓ SUBSCRIBED");
+    QLabel* subscribed = new QLabel("✓ RetroPilot Online");
   subscribed->setStyleSheet("font-size: 41px; font-weight: bold; color: #86FF4E;");
   primeLayout->addWidget(subscribed, 0, Qt::AlignTop);
 
   primeLayout->addSpacing(60);
 
-  QLabel* commaPrime = new QLabel("comma prime");
+  QLabel* commaPrime = new QLabel("Circuit Pro HKG");
   commaPrime->setStyleSheet("font-size: 75px; font-weight: bold;");
   primeLayout->addWidget(commaPrime, 0, Qt::AlignTop);
 
   primeLayout->addSpacing(20);
 
-  QLabel* connectUrl = new QLabel("CONNECT.COMMA.AI");
+  QLabel* connectUrl = new QLabel("Welcome To The Community!");
   connectUrl->setStyleSheet("font-size: 41px; font-family: Inter SemiBold; color: #A0A0A0;");
   primeLayout->addWidget(connectUrl, 0, Qt::AlignTop);
 
@@ -145,9 +145,16 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   pointsLayout->setMargin(0);
   pointsWidget->setContentsMargins(60, 50, 60, 50);
 
-  QLabel* commaPoints = new QLabel("COMMA POINTS");
-  commaPoints->setStyleSheet("font-size: 41px; font-family: Inter SemiBold;");
+  QLabel* commaPoints = new QLabel("Please Join Our Discord.");
+  commaPoints->setStyleSheet("font-size: 50px; font-family: Inter SemiBold;");
   pointsLayout->addWidget(commaPoints, 0, Qt::AlignTop);
+
+
+  QLabel* points = new QLabel("https://discord.gg/bXGF7r8EPW");
+  points->setStyleSheet("font-size: 37px; font-weight: bold;");
+  pointsLayout->addWidget(points, 0, Qt::AlignTop);
+
+  mainLayout->addWidget(pointsWidget);
 
   points = new QLabel("0");
   points->setStyleSheet("font-size: 91px; font-weight: bold;");
