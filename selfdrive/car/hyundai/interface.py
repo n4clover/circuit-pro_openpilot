@@ -115,7 +115,8 @@ class CarInterface(CarInterfaceBase):
       ret.minSteerSpeed = 37 * CV.MPH_TO_MS
       ret.steerRatio = 16.5
       tire_stiffness_factor = 0.85
-
+      ret.maxSteeringAngleDeg = 90.
+	  
     elif candidate == CAR.GENESIS_G70:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
       if not UseLQR:
