@@ -83,14 +83,14 @@ PairingPopup::PairingPopup(QWidget *parent) : QDialogBase(parent) {
 
     vlayout->addSpacing(30);
 
-    QLabel *title = new QLabel("Pair your device to your comma account", this);
+    QLabel *title = new QLabel("Pair your device to your RetroPilot account", this);
     title->setStyleSheet("font-size: 75px; color: black;");
     title->setWordWrap(true);
     vlayout->addWidget(title);
 
     QLabel *instructions = new QLabel(R"(
       <ol type='1' style='margin-left: 15px;'>
-        <li style='margin-bottom: 50px;'>Go to https://connect.comma.ai on your phone</li>
+        <li style='margin-bottom: 50px;'>Go to https://api.retropilot.org/useradmin/overview on your phone</li>
         <li style='margin-bottom: 50px;'>Click "add new device" and scan the QR code on the right</li>
         <li style='margin-bottom: 50px;'>Bookmark connect.comma.ai to your home screen to use it like an app</li>
       </ol>
