@@ -1,7 +1,10 @@
 
+from common.numpy_fast import clip
+import numpy as np
+import os
 from cereal import car
 from common.realtime import DT_CTRL
-from common.numpy_fast import clip, interp
+from common.numpy_fast import clip
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_scc11, create_scc12, create_scc13, create_scc14, \
@@ -15,7 +18,16 @@ from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.road_speed_limiter import road_speed_limiter_get_active
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-min_set_speed = 30 * CV.KPH_TO_MS
+
+def accel_hysteresis(accel, accel_steady):
+  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
+  if accel > accel_steady + CarControllerParams.ACCEL_HYST_GAP:
+    accel_steady = accel - CarControllerParams.ACCEL_HYST_GAP
+  elif accel < accel_steady - CarControllerParams.ACCEL_HYST_GAP:
+    accel_steady = accel + CarControllerParams.ACCEL_HYST_GAP
+  accel = accel_steady
+
+  return accel, accel_steady
 
 
 SP_CARS = [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
@@ -50,6 +62,7 @@ class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.car_fingerprint = CP.carFingerprint
     self.packer = CANPacker(dbc_name)
+    self.accel_steady = 0
     self.apply_steer_last = 0
     self.steer_rate_limited = False
     self.lkas11_cnt = 0
@@ -66,7 +79,8 @@ class CarController():
     self.mad_mode_enabled = Params().get_bool('MadModeEnabled')
     self.ldws_opt = Params().get_bool('IsLdwsCar')
     self.stock_navi_decel_enabled = Params().get_bool('StockNaviDecelEnabled')
-
+    self.cnt = 0
+  
     # gas_factor, brake_factor
     # Adjust it in the range of 0.7 to 1.3
     self.scc_smoother = SccSmoother()
@@ -74,6 +88,14 @@ class CarController():
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
+    # *** compute control surfaces ***
+
+    # gas and brake
+    apply_accel = actuators.accel / CarControllerParams.ACCEL_SCALE
+    apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady)
+    apply_accel = self.scc_smoother.get_accel(CS, controls.sm, apply_accel)
+    apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE,
+                       CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
@@ -81,9 +103,26 @@ class CarController():
                                                 CarControllerParams)
 
     self.steer_rate_limited = new_steer != apply_steer
-
     # disable if steer angle reach 90 deg, otherwise mdps fault in some models
-    lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+    lkas_active = enabled and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+
+    UseSMDPS = Params().get_bool('UseSMDPSHarness')
+
+    min_set_speed = 30 * CV.KPH_TO_MS
+    # fix for Genesis hard fault at low speed
+	  # Use SMDPS and Min Steer Speed limits - JPR
+    if UseSMDPS == True:
+      min_set_speed = 0 * CV.KPH_TO_MS
+    else:
+      if CS.out.vEgo < 55 * CV.KPH_TO_MS and self.car_fingerprint == CAR.GENESIS and not CS.mdps_bus:
+        lkas_active = False
+        min_set_speed = 55 * CV.KPH_TO_MS
+      if CS.out.vEgo < 16.09 * CV.KPH_TO_MS and self.car_fingerprint == CAR.NIRO_HEV and not CS.mdps_bus:
+        lkas_active = False
+        min_set_speed = 16.09 * CV.KPH_TO_MS
+      if CS.out.vEgo < 30 * CV.KPH_TO_MS and self.car_fingerprint == CAR.ELANTRA and not CS.mdps_bus:
+        lkas_active = False
+        min_set_speed = 30 * CV.KPH_TO_MS
 
     # Disable steering while turning blinker on and speed below 60 kph
     if CS.out.leftBlinker or CS.out.rightBlinker:
@@ -96,6 +135,7 @@ class CarController():
     if not lkas_active:
       apply_steer = 0
 
+    self.apply_accel_last = apply_accel
     self.apply_steer_last = apply_steer
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
@@ -106,6 +146,8 @@ class CarController():
     enabled_speed = 38 if CS.is_set_speed_in_mph else 60
     if clu11_speed > enabled_speed or not lkas_active:
       enabled_speed = clu11_speed
+
+    controls.clu_speed_ms = clu11_speed * CS.speed_conv_to_ms
 
     if not (min_set_speed < set_speed < 255 * CV.KPH_TO_MS):
       set_speed = min_set_speed
@@ -128,7 +170,7 @@ class CarController():
     # self.prev_scc_cnt = CS.scc11["AliveCounterACC"]
     # self.scc_update_frame = frame
 
-    self.prev_scc_cnt = CS.scc11["AliveCounterACC"]
+    self.prev_scc_cnt = CS.scc11["AliveCounterACC"] if not CS.no_radar else 0
 
     self.lkas11_cnt = (self.lkas11_cnt + 1) % 0x10
 
@@ -165,7 +207,7 @@ class CarController():
       elif self.resume_wait_timer > 0:
         self.resume_wait_timer -= 1
 
-      elif abs(CS.lead_distance - self.last_lead_distance) > 0.1:
+      elif abs(CS.lead_distance - self.last_lead_distance) > 0.01:
         can_sends.append(create_clu11(self.packer, self.resume_cnt, CS.scc_bus, CS.clu11, Buttons.RES_ACCEL, clu11_speed))
         self.resume_cnt += 1
 
@@ -178,26 +220,23 @@ class CarController():
       self.last_lead_distance = 0
 
     # scc smoother
-    self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
+    self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, apply_accel, controls)
+
+    controls.apply_accel = apply_accel
+    if not CS.no_radar:
+      aReqValue = CS.scc12["aReqValue"]
+      controls.aReqValue = aReqValue
+
+      if aReqValue < controls.aReqValueMin:
+        controls.aReqValueMin = controls.aReqValue
+
+      if aReqValue > controls.aReqValueMax:
+        controls.aReqValueMax = controls.aReqValue
 
     # send scc to car if longcontrol enabled and SCC not on bus 0 or ont live
     if self.longcontrol and CS.cruiseState_enabled and (CS.scc_bus or not self.scc_live):
 
       if frame % 2 == 0:
-        
-        stopping = controls.LoC.long_control_state == LongCtrlState.stopping
-        apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, actuators.accel, stopping)
-        apply_accel = clip(apply_accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-
-        controls.apply_accel = apply_accel
-        aReqValue = CS.scc12["aReqValue"]
-        controls.aReqValue = aReqValue
-
-        if aReqValue < controls.aReqValueMin:
-          controls.aReqValueMin = controls.aReqValue
-
-        if aReqValue > controls.aReqValueMax:
-          controls.aReqValueMax = controls.aReqValue
 
         if self.stock_navi_decel_enabled:
           controls.sccStockCamAct = CS.scc11["Navi_SCC_Camera_Act"]
@@ -223,9 +262,12 @@ class CarController():
 
         if frame % 20 == 0 and CS.has_scc13:
           can_sends.append(create_scc13(self.packer, CS.scc13))
-          
         if CS.has_scc14:
-          acc_standstill = stopping if CS.out.vEgo < 2. else False
+          if CS.out.vEgo < 2.:
+            long_control_state = controls.LoC.long_control_state
+            acc_standstill = True if long_control_state == LongCtrlState.stopping else False
+          else:
+            acc_standstill = False
 
           lead = self.scc_smoother.get_lead(controls.sm)
 
