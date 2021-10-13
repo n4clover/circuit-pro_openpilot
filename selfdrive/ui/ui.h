@@ -94,18 +94,11 @@ const Alert CONTROLS_WAITING_ALERT = {"openpilot Unavailable", "Waiting for cont
 const Alert CONTROLS_UNRESPONSIVE_ALERT = {"TAKE CONTROL IMMEDIATELY", "Controls Unresponsive",
                                            "controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
                                            AudibleAlert::CHIME_WARNING_REPEAT};
-
-const Alert DEBUG_SNAPSHOT_ALERT = {"Debug snapshot collected", "",
-                                    "debugTapDetected", cereal::ControlsState::AlertSize::SMALL, 
-                                    AudibleAlert::CHIME_WARNING2};
 const int CONTROLS_TIMEOUT = 5;
 
 const int bdr_s = 20;
 const int header_h = 420;
 const int footer_h = 280;
-/*
- int speed_sgn_r = 96;
-const int speed_sgn_touch_pad = 50;*/
 
 const int UI_FREQ = 20;   // Hz
 
@@ -123,14 +116,6 @@ const QColor bg_colors [] = {
   [STATUS_ALERT] = QColor(0xC9, 0x22, 0x31, 0xf1),
 };
 
-/*const QColor tcs_colors [] = {
-  [int(cereal::LongitudinalPlan::VisionTurnControllerState::DISABLED)] =  QColor(0x0, 0x0, 0x0, 0xff),
-  [int(cereal::LongitudinalPlan::VisionTurnControllerState::ENTERING)] = QColor(0xC9, 0x22, 0x31, 0xf1),
-  [int(cereal::LongitudinalPlan::VisionTurnControllerState::TURNING)] = QColor(0xDA, 0x6F, 0x25, 0xf1),
-  [int(cereal::LongitudinalPlan::VisionTurnControllerState::LEAVING)
-  ] = QColor(0x17, 0x86, 0x44, 0xf1),
-};*/
-
 typedef struct {
   float x, y;
 } vertex_data;
@@ -147,15 +132,6 @@ typedef struct UIScene {
 
   // ui add
   float cpuTempAvg;
-  bool show_debug_ui;
-  bool debug_snapshot_enabled;
-  uint64_t display_debug_alert_frame;
-
-  // Speed limit control
-  bool speed_limit_control_enabled;
-  bool speed_limit_perc_offset;
-  Rect speed_limit_sign_touch_rect;
-  double last_speed_limit_sign_tap;
   bool leftBlinker, rightBlinker;
   int blinkingrate;
 
