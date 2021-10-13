@@ -68,6 +68,7 @@ def manager_init():
     ("HyundaiNaviSL", "0"),
     ("DisableOpFcw", "0"),
     ("NewRadarInterface", "0"),
+    ("LowSpeedAlerts", "1"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

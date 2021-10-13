@@ -236,6 +236,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"DisableOpFcw", PERSISTENT},
     {"ShowDebugUI", PERSISTENT},
     {"CustomLeadMark", PERSISTENT},
+    {"LowSpeedAlerts", PERSISTENT},
     {"SoftRestartTriggered", CLEAR_ON_MANAGER_START},
 };
 

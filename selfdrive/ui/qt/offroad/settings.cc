@@ -111,6 +111,11 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                             "Enables Tire Pressure Monitoring System Alerts for Low Tire Pressure.",
                                             "../assets/offroad/icon_road.png",
                                             this));
+  addItem(new ParamControl("LowSpeedAlerts",
+                                            "Enable TPMS Alerts",
+                                            "Enables Tire Pressure Monitoring System Alerts for Low Tire Pressure.",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
   addItem(new ParamControl("SSCOD",
                                             "Stop Screen Capture on disengage",
                                             "Stop Screen Capture on disengage, loss of steering, or any other event.",
