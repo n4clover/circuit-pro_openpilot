@@ -233,7 +233,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   finishRegistationLayout->addSpacing(30);
 
-  QLabel* registrationDescription = new QLabel("Pair your device with comma connect (connect.comma.ai) and claim your comma prime offer.");
+  QLabel* registrationDescription = new QLabel("Pair your device at api.RetroPilot.org/useradmin");
   registrationDescription->setWordWrap(true);
   registrationDescription->setStyleSheet("font-size: 55px; font-weight: light; margin-left: 55px;");
   finishRegistationLayout->addWidget(registrationDescription);
