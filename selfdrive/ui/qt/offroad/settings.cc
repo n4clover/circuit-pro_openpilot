@@ -617,6 +617,23 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
 
+  toggles.append(new ParamControl("SccSmootherSlowOnCurves",
+                                            "Enable Slow On Curves",
+                                            "",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+
+  toggles.append(new ParamControl("SccSmootherSyncGasPressed",
+                                            "Sync set speed on gas pressed",
+                                            "",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+
+  toggles.append(new ParamControl("StockNaviDecelEnabled",
+                                            "Stock Navi based deceleration",
+                                            "Use the stock navi based deceleration for longcontrol",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
   toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
                                             "",
