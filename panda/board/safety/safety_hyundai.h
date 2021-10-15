@@ -1,4 +1,4 @@
-const int HYUNDAI_MAX_STEER = 384;             // like stock
+const int HYUNDAI_MAX_STEER = 409;             // like stock
 const int HYUNDAI_MAX_RT_DELTA = 112;          // max delta torque allowed for real time checks
 const uint32_t HYUNDAI_RT_INTERVAL = 250000;   // 250ms between real time checks
 const int HYUNDAI_MAX_RATE_UP = 3;
@@ -157,6 +157,7 @@ static int hyundai_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       // update array of samples
       update_sample(&torque_driver, torque_driver_new);
     }
+    //puts("Torque from panda: "); puth(&torque_driver); puts("\n");
 
     if (hyundai_longitudinal) {
       // ACC steering wheel buttons
