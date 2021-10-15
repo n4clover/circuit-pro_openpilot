@@ -76,16 +76,6 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                   "In this mode openpilot will ignore lanelines and just drive how it thinks a human would.",
                                   "../assets/offroad/icon_road.png",
                                   this));
-  addItem(new ParamControl("ShowDebugUI",
-                                  "Show debug UI elements",
-                                  "Show UI elements that aid debugging.",
-                                  "../assets/offroad/icon_calibration.png",
-                                  this));
-  addItem(new ParamControl("PutPrebuilt",
-                                            "Prebuilt Enable",
-                                            "Create prebuilt files to speed up load time.",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
   addItem(new ParamControl("AR",
                                             "Enable Auto Record",
                                             "Starts recording on car start and stops on car off.",
