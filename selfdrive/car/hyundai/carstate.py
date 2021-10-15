@@ -168,7 +168,7 @@ class CarState(CarStateBase):
       ret.tpmsRl = cp.vl["TPMS11"]["PRESSURE_RL"] / 10 * 14.5038
       ret.tpmsRr = cp.vl["TPMS11"]["PRESSURE_RR"] / 10 * 14.5038
 
-    ret.cruiseState.speedLimit = cp.vl["Navi_HU"]["SpeedLim_Nav_Clu"] * 0.62137119223733 if Params().get_bool("HyundaiNaviSL") else 0.
+    #ret.cruiseState.speedLimit = cp.vl["Navi_HU"]["SpeedLim_Nav_Clu"] * 0.62137119223733 if Params().get_bool("HyundaiNaviSL") else 0.
 
     #Parking Sensors - JPR
     #ret.ParkFrontRight = cp.vl["PAS11"]["CF_Gway_PASDisplayFLH"]
@@ -228,6 +228,8 @@ class CarState(CarStateBase):
       self.ems11 = cp.vl["EMS11"]
       self.mdps11_strang = cp_mdps.vl["MDPS11"]["CR_Mdps_StrAng"]
       self.mdps11_stat = cp_mdps.vl["MDPS11"]["CF_Mdps_Stat"]
+      ret.mdps11_stat = cp_mdps.vl["MDPS11"]["CF_Mdps_Stat"]
+
 
     # scc smoother
     driver_override = cp.vl["TCS13"]["DriverOverride"]
