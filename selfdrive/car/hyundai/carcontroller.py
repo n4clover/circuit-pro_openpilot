@@ -134,7 +134,7 @@ class CarController():
       self.last_apply_angle = apply_angle
         
       if CS.spas_enabled:
-        spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH or CS.spas_enabled and enabled and not abs(CS.out.steeringWheelTorque) > TQ
+        spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH and not abs(CS.out.steeringWheelTorque) > TQ 
         lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5 and not abs(CS.out.steeringWheelTorque) > TQ 
         
       if not CS.spas_enabled:
