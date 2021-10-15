@@ -503,6 +503,7 @@ class Controls:
     # State specific actions
 
     if not self.active or CS.mdps11Stat == 5:
+      print("Lac Reset!")
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
 
