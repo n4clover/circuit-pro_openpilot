@@ -132,16 +132,10 @@ class CarController():
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
         apply_angle = clip(actuators.steeringAngleDeg, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)    
       self.last_apply_angle = apply_angle
-
-      if abs(CS.out.steeringWheelTorque) > TQ:
-        self.override = True
-        print("OVERRIDE")
-      else:
-        self.override = False
         
       if CS.spas_enabled:
         spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH or CS.spas_enabled and enabled and self.spas_always and not abs(CS.out.steeringWheelTorque) > TQ
-        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not spas_active and not abs(CS.out.steeringWheelTorque) > TQ 
+        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5 and not abs(CS.out.steeringWheelTorque) > TQ 
         
       if not CS.spas_enabled:
         lkas_active = enabled and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
@@ -156,10 +150,6 @@ class CarController():
         print("OVERRIDE")
       else:
         self.override = False
-      if abs(apply_angle - CS.out.steeringAngleDeg) > 10:
-        self.assist = True
-      else:
-        self.assist = False
 
     # Disable steering while turning blinker on and speed below 60 kph
     if CS.out.leftBlinker or CS.out.rightBlinker:
