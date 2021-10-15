@@ -94,7 +94,6 @@ class CarController():
       self.last_apply_angle = 0.0
       self.en_spas = 2
       self.mdps11_stat_last = 0
-      self.spas_always = Params().get_bool('spasAlways')
       self.lkas_active = False
       self.spas_active = False
       self.spas_active_last = 0
