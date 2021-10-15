@@ -201,7 +201,7 @@ struct CarState {
   cruiseGap @39 : Int32;
   autoHold @40 : Int32;
   tpms @41 : Tpms;
-  mdps11_stat @42 : Int32;
+  mdps11Stat @42 : Int32;
 
   struct Tpms {
     fl @0 :Float32;
