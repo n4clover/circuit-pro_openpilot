@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#!/usr/bin/env python3
 import os
 import numpy as np
 from cereal import car
@@ -497,6 +498,11 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = ret.sccBus == -1
     ret.pcmCruise = not ret.radarOffCan
 
+    # SPAS
+    ret.spasEnabled = Params().get_bool('spasEnabled')
+    if Params().get_bool('spasAlways'):
+      ret.steerControlType = car.CarParams.SteerControlType.angle
+
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
     if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled'):
       ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
@@ -556,13 +562,46 @@ class CarInterface(CarInterfaceBase):
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     UseSMDPS = Params().get_bool('UseSMDPSHarness')
     
-    if UseSMDPS == False and Params().get_bool('LowSpeedAlerts'):
+    if UseSMDPS == False:
       if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
         self.low_speed_alert = True
       if ret.vEgo > (self.CP.minSteerSpeed + 4.):
         self.low_speed_alert = False
       if self.low_speed_alert and not self.CS.mdps_bus:
         events.add(EventName.belowSteerSpeed)
+
+    #TPMS Alerts - JPR
+    if CAR.STINGER:
+      minTP = 33 # Min TPMS Pressure
+    elif CAR.KONA_EV or CAR.KONA_HEV or CAR.KONA:
+      minTP = 30
+    elif CAR.ELANTRA_HEV_2021:
+      minTP = 30
+    elif CAR.K5:
+      minTP = 30
+    elif CAR.FORTE:
+      minTP = 30
+    elif CAR.GENESIS:
+      minTP = 30
+    elif CAR.NIRO_EV:
+      minTP = 30
+    elif CAR.SANTA_FE:
+      minTP = 30
+    elif CAR.GENESIS_G80:
+      minTP = 28
+    else:
+      minTP = 28
+
+    #if self.CC.DO:
+    if ret.tpmsFl < minTP and Params().get_bool('TPMS_Alerts'):
+      events.add(car.CarEvent.EventName.fl)
+    elif ret.tpmsFr < minTP and Params().get_bool('TPMS_Alerts'):
+      events.add(car.CarEvent.EventName.fr)
+    elif ret.tpmsRl < minTP and Params().get_bool('TPMS_Alerts'):
+      events.add(car.CarEvent.EventName.rl)
+    elif ret.tpmsRr < minTP and Params().get_bool('TPMS_Alerts'):
+      events.add(car.CarEvent.EventName.rr)
+
 
     if self.CC.longcontrol and self.CS.cruise_unavail:
       events.add(EventName.brakeUnavailable)
@@ -574,7 +613,23 @@ class CarInterface(CarInterfaceBase):
     #  events.add(EventName.buttonCancel)
     if self.mad_mode_enabled and EventName.pedalPressed in events.events:
       events.events.remove(EventName.pedalPressed)
-  
+
+    if Params().get_bool('spasEnabled'):
+      if self.CS.mdps11_stat == 7 and not self.CC.turning_indicator_alert:
+        if self.CS.mdps11_stat == 7 and self.CC.mdps11_stat_last == 7 and not self.CC.lkas_active and self.CC.spas_active: # We need to alert driver when SPAS abort or fail.
+          events.add(EventName.steerSaturated) 
+
+      if self.CC.override:
+        events.add(EventName.buttonCancel)
+
+      if self.CC.assist:
+        events.add(EventName.assist)
+
+      if self.CS.mdps11_stat == 6 or self.CS.mdps11_stat == 8:
+        events.add(EventName.steerTempUnavailable)
+
+    
+
   # handle button presses
     for b in ret.buttonEvents:
       # do disable on button down
