@@ -590,8 +590,6 @@ class CarInterface(CarInterfaceBase):
       if self.CS.mdps11_stat == 6 or self.CS.mdps11_stat == 8:
         events.add(EventName.steerTempUnavailable)
 
-    
-
   # handle button presses
     for b in ret.buttonEvents:
       # do disable on button down
