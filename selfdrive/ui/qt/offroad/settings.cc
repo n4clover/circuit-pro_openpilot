@@ -76,11 +76,11 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                   "In this mode openpilot will ignore lanelines and just drive how it thinks a human would.",
                                   "../assets/offroad/icon_road.png",
                                   this));
-  addItem(new ParamControl("AR",
-                                            "Enable Auto Record",
-                                            "Starts recording on car start and stops on car off.",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
+  addItem(new ParamControl("ShowDebugUI",
+                                  "Show debug UI elements",
+                                  "Show UI elements that aid debugging.",
+                                  "../assets/offroad/icon_calibration.png",
+                                  this));
   addItem(new ParamControl("LoggerEnabled",
                                             "Enable Logger / Uploader",
                                             "This causes slow frame time on weak hardware.",
@@ -97,8 +97,8 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));
   addItem(new ParamControl("LowSpeedAlerts",
-                                            "Enable TPMS Alerts",
-                                            "Enables Tire Pressure Monitoring System Alerts for Low Tire Pressure.",
+                                            "Enable Low Speed Alerts",
+                                            "Enables Low Speed Alerts.",
                                             "../assets/offroad/icon_road.png",
                                             this));
   addItem(new ParamControl("SSCOD",
@@ -142,12 +142,12 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                   "../assets/offroad/icon_metric.png",
                                   this));
 #endif
-  if (params.getBool("DisableRadar_Allow")) {
+  /*if (params.getBool("DisableRadar_Allow")) {
     addItem(new ParamControl("DisableRadar",
                              "openpilot Longitudinal Control",
                              "openpilot will disable the car's radar and will take over control of gas and brakes. Warning: this disables AEB!",
                              "../assets/offroad/icon_speed_limit.png",
-                             this));
+                             this));*/
 
   }
 
@@ -639,6 +639,11 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "This outputs OP SPAS State: (The state that op is calling MDPS to) and MDPS SPAS State: (The state MDPS is actually in)",
                                             "../assets/offroad/icon_road.png",
                                             this));
+  /*toggles.append(new ParamControl("NewRadarInterface",
+                                            "Use new radar interface",
+                                            "",
+                                            "../assets/offroad/icon_road.png",
+                                            this));*/
   for(ParamControl *toggle : toggles) {
     if(main_layout->count() != 0) {
       toggleLayout->addWidget(horizontal_line());
