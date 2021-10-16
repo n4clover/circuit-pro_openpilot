@@ -75,6 +75,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerRateCost = 0.5
     ret.steerMaxBP = [0.]
     ret.steerMaxV = [1.5]
+    ret.steerRatio = 14.44
 
    #Longitudinal Tune and logic for car tune
     if candidate is not CAR.GENESIS_G70 or CAR.STINGER or CAR.GENESIS or CAR.GENESIS_G80 or CAR.KONA or CAR.KONA_EV or CAR.GENESIS_EQ900 or CAR.GENESIS_G90: #Tune for untuned cars
@@ -388,6 +389,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1825.0 + STD_CARGO_KG
       ret.wheelbase = 2.906
       ret.centerToFront = ret.wheelbase * 0.4
+      ret.steerRatio = 14.44
       if not UseLQR:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [0.]
