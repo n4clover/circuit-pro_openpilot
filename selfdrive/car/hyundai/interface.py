@@ -104,13 +104,14 @@ class CarInterface(CarInterfaceBase):
     # genesis
     if candidate == CAR.GENESIS:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
-      ret.mass = 1900. + STD_CARGO_KG
+      ret.lateralTuning.pid.kf = 0.00005
+      ret.mass = 2060. + STD_CARGO_KG
       ret.wheelbase = 3.01
-      ret.centerToFront = ret.wheelbase * 0.4
-      ret.minSteerSpeed = 37 * CV.MPH_TO_MS
       ret.steerRatio = 16.5
-      tire_stiffness_factor = 0.85
-      ret.maxSteeringAngleDeg = 90.
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.16], [0.01]]
+      ret.minSteerSpeed = 37 * CV.MPH_TO_MS
+
     elif candidate == CAR.GENESIS_G70:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
       if not UseLQR:
