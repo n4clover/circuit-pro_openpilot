@@ -4,10 +4,6 @@ from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, CAR, HY
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from opendbc.can.parser import CANParser
-from selfdrive.car.hyundai.values import (CAR, DBC, EV_CAR, FEATURES,
-                                          HYBRID_CAR, STEER_THRESHOLD)
-from selfdrive.car.interfaces import CarStateBase
 from selfdrive.config import Conversions as CV
 
 GearShifter = car.CarState.GearShifter
