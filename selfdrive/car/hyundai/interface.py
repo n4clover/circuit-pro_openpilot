@@ -46,13 +46,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.communityFeature = True
 
-    eps_modified = False
-    for fw in car_fw:
-      if fw.ecu == "eps" and b"," in fw.fwVersion:
-        eps_modified = True
-
-    ret.maxSteeringAngleDeg = 90.
-    UseLQR = Params().get_bool('UseLQR')
+    tire_stiffness_factor = 1.
+    ret.maxSteeringAngleDeg = 1000.
 
     # lateral LQR global hyundai
     if UseLQR:
@@ -69,13 +64,10 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.lqr.l = [0.33, 0.318]
 
     ret.steerActuatorDelay = 0.1
-
-    tire_stiffness_factor = 1.
     ret.steerLimitTimer = 2.5
-    ret.steerRateCost = 0.5
+    ret.steerRateCost = 0.4
     ret.steerMaxBP = [0.]
     ret.steerMaxV = [1.5]
-    ret.steerRatio = 14.44
 
    #Longitudinal Tune and logic for car tune
     if candidate is not CAR.GENESIS_G70 or CAR.STINGER or CAR.GENESIS or CAR.GENESIS_G80 or CAR.KONA or CAR.KONA_EV or CAR.GENESIS_EQ900 or CAR.GENESIS_G90: #Tune for untuned cars
@@ -106,7 +98,7 @@ class CarInterface(CarInterfaceBase):
     ret.stopAccel = -2.0
     ret.startingAccelRate = 5.0  # brake_travel/s while releasing on restart
     ret.stoppingDecelRate = 0.5  # brake_travel/s while trying to stop
-    ret.vEgoStopping = 0.1
+    ret.vEgoStopping = 0.6
     ret.vEgoStarting = 0.5
 
     # genesis
@@ -118,7 +110,7 @@ class CarInterface(CarInterfaceBase):
       ret.minSteerSpeed = 37 * CV.MPH_TO_MS
       ret.steerRatio = 16.5
       tire_stiffness_factor = 0.85
-
+      ret.maxSteeringAngleDeg = 90.
     elif candidate == CAR.GENESIS_G70:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
       if not UseLQR:
