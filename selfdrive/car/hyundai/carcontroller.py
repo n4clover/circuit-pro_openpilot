@@ -320,7 +320,7 @@ class CarController():
           can_sends.append(create_scc13(self.packer, CS.scc13))
           
         if CS.has_scc14:
-          acc_standstill = stopping if CS.out.vEgo < 1. else False
+          acc_standstill = stopping if CS.out.vEgo < 2. else False
 
           lead = self.scc_smoother.get_lead(controls.sm)
 
