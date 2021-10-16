@@ -68,10 +68,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.lqr.k = [-110., 451.]
       ret.lateralTuning.lqr.l = [0.33, 0.318]
 
-    if not Params().get_bool('UseLQR'):
-      ret.steerActuatorDelay = 0.2
-    else:
-      ret.steerActuatorDelay = 0.1
+    ret.steerActuatorDelay = 0.1
 
     tire_stiffness_factor = 1.
     ret.steerLimitTimer = 2.5
@@ -106,8 +103,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.startAccel = -0.4
     ret.stopAccel = -2.0
-    ret.startingAccelRate = 4.0  # brake_travel/s while releasing on restart
-    ret.stoppingDecelRate = 1.0  # brake_travel/s while trying to stop
+    ret.startingAccelRate = 5.0  # brake_travel/s while releasing on restart
+    ret.stoppingDecelRate = 0.5  # brake_travel/s while trying to stop
     ret.vEgoStopping = 0.6
     ret.vEgoStarting = 0.5
 
@@ -387,11 +384,9 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 2.85
       tire_stiffness_factor = 0.7
     elif candidate == CAR.STINGER:
-      os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Stinger.png img_spinner_comma.png")
-      tire_stiffness_factor = 1.0
-      ret.mass = 1640.0 + STD_CARGO_KG
-      ret.wheelbase = 2.84
-      ret.steerRatio = 14.44
+      tire_stiffness_factor = 1.125 # LiveParameters (Tunder's 2020)
+      ret.mass = 1825.0 + STD_CARGO_KG
+      ret.wheelbase = 2.906
       ret.centerToFront = ret.wheelbase * 0.4
       if not UseLQR:
         ret.lateralTuning.init('indi')
