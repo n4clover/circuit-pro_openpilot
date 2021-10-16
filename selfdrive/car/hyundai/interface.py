@@ -48,7 +48,7 @@ class CarInterface(CarInterfaceBase):
 
     tire_stiffness_factor = 1.
     ret.maxSteeringAngleDeg = 1000.
-
+    UseLQR = Params().get_bool('UseLQR')
     # lateral LQR global hyundai
     if UseLQR:
       ret.lateralTuning.init('lqr')
