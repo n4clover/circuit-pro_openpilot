@@ -504,9 +504,10 @@ class Controls:
     # State specific actions
 
     if not self.active or CS.mdps11Stat == 5:
-      print("Lac Reset!")
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
+      if Params().get_bool('SPASDebug'):
+        print("Lac Reset!")
 
     if not CS.cruiseState.enabledAcc:
       self.LoC.reset(v_pid=CS.vEgo)
