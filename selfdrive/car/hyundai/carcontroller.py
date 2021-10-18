@@ -111,14 +111,12 @@ class CarController():
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
-
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
     apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque,
                                                 CarControllerParams)
 
     self.steer_rate_limited = new_steer != apply_steer
-
 
     # SPAS limit angle extremes for safety
     if CS.spas_enabled:
