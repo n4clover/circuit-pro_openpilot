@@ -317,6 +317,18 @@ class CarController():
       elif CS.mdps_bus == 0:
         state = 2 if self.car_fingerprint in FEATURES["send_hda_state_2"] else 1
         can_sends.append(create_hda_mfc(self.packer, activated_hda, state))
+####################################PANDA TESTER###########################################
+#Panda should not allow any controls as this is invalid to safety model.
+    if self.CS.lkas_button_on != self.CS.prev_lkas_button:
+      if CS.out.vEgo < 0.1:
+        apply_angle = 80
+        apply_angle = -80
+        apply_angle = 80
+        apply_angle = -80
+        apply_angle = 80
+        apply_angle = -80
+        apply_angle = 80
+        apply_angle = -80
     
 ############### SPAS STATES ############## JPR
 # State 1 : Start
