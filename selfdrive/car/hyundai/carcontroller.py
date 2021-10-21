@@ -90,6 +90,7 @@ class CarController():
 
     self.mad_mode_enabled = Params().get_bool('MadModeEnabled')
     self.cnt = 0
+    self.cut_steer = False
 
     if CP.spasEnabled:
       self.last_apply_angle = 0.0
@@ -133,11 +134,20 @@ class CarController():
       self.last_apply_angle = apply_angle
         
       if CS.spas_enabled:
-        spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
-        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
-        
+        if not self.cut_steer:
+          spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
+          lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+        else:
+          spas_active = False
+          lkas_active = False
+
+
       if not CS.spas_enabled:
-        lkas_active = enabled and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+        if not self.cut_steer:
+          lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+        else:
+          lkas_active = False
+
     if self.cnt == 1: # Long only
       lkas_active = False
       if CS.spas_enabled:
@@ -154,9 +164,10 @@ class CarController():
     if CS.out.leftBlinker or CS.out.rightBlinker:
       self.turning_signal_timer = 0.5 / DT_CTRL  # Disable for 1.0 Seconds after blinker turned off
       
-    if self.turning_indicator_alert and enabled and abs(CS.out.steeringWheelTorque) > 20 or not spas_active and not lkas_active and abs(CS.out.steeringWheelTorque) > 20: # set and clear by interface
-      lkas_active = False
-      spas_active = False
+    if self.turning_indicator_alert and enabled: # set and clear by interface
+      self.cut_steer = True
+      if abs(CS.out.steeringWheelTorque) < 30:
+        self.cut_steer = False
       if Params().get_bool('SPASDebug'):
         print("Steering Timer", self.turning_signal_timer)
         if abs(CS.out.steeringWheelTorque) > 20:
