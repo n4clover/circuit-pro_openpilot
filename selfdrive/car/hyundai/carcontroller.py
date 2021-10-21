@@ -165,7 +165,8 @@ class CarController():
       
     if self.turning_indicator_alert and enabled: # set and clear by interface
       self.cut_steer = True
-      if abs(CS.out.steeringWheelTorque) < 30:
+      
+    if abs(CS.out.steeringWheelTorque) < 30:
         self.cut_steer = False
 
     if not lkas_active:
