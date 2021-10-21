@@ -157,6 +157,10 @@ class CarController():
     if self.turning_indicator_alert and enabled and abs(CS.out.steeringWheelTorque) > 20 or not spas_active and not lkas_active and abs(CS.out.steeringWheelTorque) > 20: # set and clear by interface
       lkas_active = False
       spas_active = False
+      if Params().get_bool('SPASDebug'):
+        print("Steering Timer", self.turning_signal_timer)
+        if abs(CS.out.steeringWheelTorque) > 20:
+          print("Still holding wheel")
 
     if not lkas_active:
       apply_steer = 0
