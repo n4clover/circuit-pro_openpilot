@@ -141,7 +141,6 @@ class CarController():
           spas_active = False
           lkas_active = False
 
-
       if not CS.spas_enabled:
         if not self.cut_steer:
           lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
@@ -168,10 +167,6 @@ class CarController():
       self.cut_steer = True
       if abs(CS.out.steeringWheelTorque) < 30:
         self.cut_steer = False
-      if Params().get_bool('SPASDebug'):
-        print("Steering Timer", self.turning_signal_timer)
-        if abs(CS.out.steeringWheelTorque) > 20:
-          print("Still holding wheel")
 
     if not lkas_active:
       apply_steer = 0
