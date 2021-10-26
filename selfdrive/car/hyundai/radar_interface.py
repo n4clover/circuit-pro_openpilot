@@ -96,7 +96,10 @@ class RadarInterface(RadarInterfaceBase):
         if valid:
           azimuth = math.radians(msg['AZIMUTH'])
           self.pts[addr].measured = True
-          self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST'] - STOPPING_BUFFER
+          if math.cos(azimuth) * msg['LONG_DIST'] >= 0:
+            self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST'] - STOPPING_BUFFER
+          else:
+            self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST']
           self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
           self.pts[addr].vRel = msg['REL_SPEED']
           self.pts[addr].aRel = msg['REL_ACCEL']
@@ -119,8 +122,10 @@ class RadarInterface(RadarInterfaceBase):
             self.pts[ii] = car.RadarData.RadarPoint.new_message()
             self.pts[ii].trackId = self.track_id
             self.track_id += 1
-
-          self.pts[ii].dRel = cpt["SCC11"]['ACC_ObjDist'] - STOPPING_BUFFER  # from front of car
+          if cpt["SCC11"]['ACC_ObjDist'] >= 0:
+            self.pts[ii].dRel = cpt["SCC11"]['ACC_ObjDist'] - STOPPING_BUFFER  # from front of car
+          else:
+            self.pts[ii].dRel = cpt["SCC11"]['ACC_ObjDist']
           self.pts[ii].yRel = -cpt["SCC11"]['ACC_ObjLatPos']  # in car frame's y axis, left is negative
           self.pts[ii].vRel = cpt["SCC11"]['ACC_ObjRelSpd']
           self.pts[ii].aRel = float('nan')
