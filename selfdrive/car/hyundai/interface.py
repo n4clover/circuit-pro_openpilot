@@ -225,11 +225,13 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1694 + STD_CARGO_KG
       ret.wheelbase = 2.766
       ret.steerRatio = 13.27 * 1.15   # 15% higher at the center seems reasonable
+      tire_stiffness_factor = 0.65
       ret.centerToFront = ret.wheelbase * 0.4
     elif candidate in [CAR.SANTA_FE_2022]:
       ret.mass = 1750 + STD_CARGO_KG
       ret.wheelbase = 2.766
       ret.centerToFront = ret.wheelbase * 0.4
+      tire_stiffness_factor = 0.65
     elif candidate in [CAR.SONATA, CAR.SONATA_HEV, CAR.SONATA21_HEV]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       ret.mass = 1513. + STD_CARGO_KG
