@@ -9,6 +9,7 @@ from common.params import Params
 
 RADAR_START_ADDR = 0x500
 RADAR_MSG_COUNT = 32
+BUFFER = 2.5 #Buffer for more comfortable stopping distance
 
 def get_radar_can_parser(CP):
 
@@ -95,7 +96,7 @@ class RadarInterface(RadarInterfaceBase):
         if valid:
           azimuth = math.radians(msg['AZIMUTH'])
           self.pts[addr].measured = True
-          self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST'] - 2.5
+          self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST'] - BUFFER
           self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
           self.pts[addr].vRel = msg['REL_SPEED']
           self.pts[addr].aRel = msg['REL_ACCEL']
@@ -119,7 +120,7 @@ class RadarInterface(RadarInterfaceBase):
             self.pts[ii].trackId = self.track_id
             self.track_id += 1
 
-          self.pts[ii].dRel = cpt["SCC11"]['ACC_ObjDist'] - 2.5  # from front of car
+          self.pts[ii].dRel = cpt["SCC11"]['ACC_ObjDist'] - BUFFER  # from front of car
           self.pts[ii].yRel = -cpt["SCC11"]['ACC_ObjLatPos']  # in car frame's y axis, left is negative
           self.pts[ii].vRel = cpt["SCC11"]['ACC_ObjRelSpd']
           self.pts[ii].aRel = float('nan')
