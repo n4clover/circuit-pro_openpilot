@@ -225,7 +225,7 @@ class LongitudinalMpc():
       self.set_weights_for_lead_policy()
 
   def set_weights_for_lead_policy(self):
-    W = np.diag([0., 10., 1., 10., 1.])
+    W = np.diag([0., .01, .0, 10., 1.])
     Ws = np.tile(W[None], reps=(N,1,1))
     self.solver.cost_set_slice(0, N, 'W', Ws, api='old')
     # Setting the slice without the copy make the array not contiguous,
@@ -238,7 +238,7 @@ class LongitudinalMpc():
     self.solver.cost_set_slice(0, N+1, 'Zl', Zls, api='old')
 
   def set_weights_for_xva_policy(self):
-    W = np.diag([0., 10., 1., 10., 1.])
+    W = np.diag([0., 0., .0, 1., 1.])
     Ws = np.tile(W[None], reps=(N,1,1))
     self.solver.cost_set_slice(0, N, 'W', Ws, api='old')
     # Setting the slice without the copy make the array not contiguous,
@@ -295,7 +295,7 @@ class LongitudinalMpc():
     self.cruise_max_a = max_a
 
   def update(self, carstate, radarstate, v_cruise, x, v, a):
-    v_ego = self.x0[1]
+    #v_ego = self.x0[1]
     self.yref[:,1] = x
     self.yref[:,2] = v
     self.yref[:,3] = a
