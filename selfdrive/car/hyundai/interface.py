@@ -307,10 +307,9 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate in [CAR.KONA_HEV, CAR.KONA_EV]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
-      ret.mass = 1685. + STD_CARGO_KG
-      ret.wheelbase = 2.7
-      ret.steerRatio = 13.73  # Spec
-      tire_stiffness_factor = 0.385
+      ret.mass = 1395. + STD_CARGO_KG
+      ret.wheelbase = 2.6
+      tire_stiffness_factor = 0.7
       ret.centerToFront = ret.wheelbase * 0.4
       if not UseLQR:
         ret.lateralTuning.init('indi')
