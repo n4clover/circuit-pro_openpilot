@@ -18,7 +18,7 @@ from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.road_speed_limiter import road_speed_limiter_get_active
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-
+min_set_speed = 30 * CV.KPH_TO_MS
 ###### SPAS ######
 STEER_ANG_MAX = 350         # SPAS Max Angle
 #MAX DELTA V limits values
@@ -178,27 +178,6 @@ class CarController():
 
     if self.turning_signal_timer > 0:
       self.turning_signal_timer -= 1  
-
-    UseSMDPS = Params().get_bool('UseSMDPSHarness')
-    if Params().get_bool('LongControlEnabled'):
-      min_set_speed = 0 * CV.KPH_TO_MS
-    else:
-      min_set_speed = 30 * CV.KPH_TO_MS
-    # fix for Genesis hard fault at low speed
-	  # Use SMDPS and Min Steer Speed limits - JPR
-    if UseSMDPS == True:
-      min_set_speed = 0 * CV.KPH_TO_MS
-    else:
-      if CS.out.vEgo < 55 * CV.KPH_TO_MS and self.car_fingerprint == CAR.GENESIS and not CS.mdps_bus:
-        lkas_active = False
-        min_set_speed = 55 * CV.KPH_TO_MS
-      if CS.out.vEgo < 16.09 * CV.KPH_TO_MS and self.car_fingerprint == CAR.NIRO_HEV and not CS.mdps_bus:
-        lkas_active = False
-        min_set_speed = 16.09 * CV.KPH_TO_MS
-      if CS.out.vEgo < 30 * CV.KPH_TO_MS and self.car_fingerprint == CAR.ELANTRA and not CS.mdps_bus:
-        lkas_active = False
-        min_set_speed = 30 * CV.KPH_TO_MS
-
 
     self.apply_steer_last = apply_steer
 
