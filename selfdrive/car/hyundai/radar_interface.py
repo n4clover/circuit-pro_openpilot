@@ -9,7 +9,7 @@ from common.params import Params
 
 RADAR_START_ADDR = 0x500
 RADAR_MSG_COUNT = 32
-STOPPING_BUFFER = 0.65 #Buffer for more comfortable stopping distance - JPR
+STOPPING_BUFFER = 1 #Buffer for more comfortable stopping distance - JPR
 
 def get_radar_can_parser(CP):
 
