@@ -18,7 +18,7 @@ EventName = car.CarEvent.EventName
 #          model predictions above this speed can be unpredictable
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS  # 135 + 4 = 86 mph
 ACCEL_MAX = 2.0
-ACCEL_MIN = -3.5
+ACCEL_MIN = -4.5
 
 
 # generic car and radar interfaces
