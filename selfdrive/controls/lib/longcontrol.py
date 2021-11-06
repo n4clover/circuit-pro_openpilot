@@ -141,6 +141,7 @@ class LongControl():
       output_accel = clip(output_accel, accel_limits[0], accel_limits[1])
       if Params().get_bool("CreepDebug"):
         print("Long State : Stopping")
+        print("output Accel = ", output_accel)
 
       self.reset(CS.vEgo)
 
@@ -151,6 +152,7 @@ class LongControl():
       self.reset(CS.vEgo)
       if Params().get_bool("CreepDebug"):
         print("Long State : Starting")
+        print("Output Accel = ", output_accel)
 
     self.last_output_accel = output_accel
     final_accel = clip(output_accel, accel_limits[0], accel_limits[1])
