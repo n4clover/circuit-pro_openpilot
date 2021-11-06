@@ -171,6 +171,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 16.5
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.85
+      ret.maxSteeringAngleDeg = 90.
       if not UseLQR:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [0.]
@@ -193,6 +194,7 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 3.45
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.85
+      ret.maxSteeringAngleDeg = 90.
 
     elif candidate == CAR.GENESIS_G90:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
@@ -201,6 +203,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 16.5
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.85
+      ret.maxSteeringAngleDeg = 90.
 
       if not UseLQR:
         ret.lateralTuning.init('indi')
