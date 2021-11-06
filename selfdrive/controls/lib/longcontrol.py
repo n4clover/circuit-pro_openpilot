@@ -113,6 +113,8 @@ class LongControl():
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.reset(v_ego_pid)
       output_accel = 0.
+      if Params().get_bool("CreepDebug"):
+        print("Long State : OFF")
 
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid:
@@ -128,6 +130,8 @@ class LongControl():
 
       if prevent_overshoot:
         output_accel = min(output_accel, 0.0)
+      if Params().get_bool("CreepDebug"):
+        print("Long State : PID")
 
     # Intention is to stop, switch to a different brake control until we stop
     elif self.long_control_state == LongCtrlState.stopping:
@@ -135,6 +139,8 @@ class LongControl():
       if not CS.standstill or output_accel > CP.stopAccel:
         output_accel -= CP.stoppingDecelRate * DT_CTRL
       output_accel = clip(output_accel, accel_limits[0], accel_limits[1])
+      if Params().get_bool("CreepDebug"):
+        print("Long State : Stopping")
 
       self.reset(CS.vEgo)
 
@@ -143,11 +149,10 @@ class LongControl():
       if output_accel < CP.startAccel:
         output_accel += CP.startingAccelRate * DT_CTRL
       self.reset(CS.vEgo)
+      if Params().get_bool("CreepDebug"):
+        print("Long State : Starting")
 
     self.last_output_accel = output_accel
     final_accel = clip(output_accel, accel_limits[0], accel_limits[1])
-
-    if Params().get_bool("CreepDebug"):
-      print("Long State : ", self.long_control_state)
 
     return final_accel
