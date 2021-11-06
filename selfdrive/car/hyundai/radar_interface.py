@@ -101,6 +101,8 @@ class RadarInterface(RadarInterfaceBase):
           self.pts[addr].vRel = msg['REL_SPEED']
           self.pts[addr].aRel = msg['REL_ACCEL']
           self.pts[addr].yvRel = float('nan')
+          if Params().get_bool("CreepDebug"):
+            print("Rel Dist : ", self.pts[addr].dRel)
 
         else:
           del self.pts[addr]
@@ -126,6 +128,8 @@ class RadarInterface(RadarInterfaceBase):
           self.pts[ii].aRel = float('nan')
           self.pts[ii].yvRel = float('nan')
           self.pts[ii].measured = True
+          if Params().get_bool("CreepDebug"):
+            print("Rel Dist : ", self.pts[ii].dRel)
 
         else:
           if ii in self.pts:

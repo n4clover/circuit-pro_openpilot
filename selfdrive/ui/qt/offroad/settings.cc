@@ -633,6 +633,11 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "This outputs OP SPAS State: (The state that op is calling MDPS to) and MDPS SPAS State: (The state MDPS is actually in)",
                                             "../assets/offroad/icon_road.png",
                                             this));
+  toggles.append(new ParamControl("CreepDebug",
+                                            "Enable Creep / Stopping State Debugging.",
+                                            "This outputs relevent information.",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
   for(ParamControl *toggle : toggles) {
     if(main_layout->count() != 0) {
       toggleLayout->addWidget(horizontal_line());

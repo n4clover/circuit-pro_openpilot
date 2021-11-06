@@ -5,6 +5,8 @@ from selfdrive.controls.lib.pid import PIController
 from selfdrive.controls.lib.drive_helpers import CONTROL_N
 from selfdrive.modeld.constants import T_IDXS
 from selfdrive.ntune import ntune_scc_get
+from common.params import Params
+
 
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
@@ -144,5 +146,8 @@ class LongControl():
 
     self.last_output_accel = output_accel
     final_accel = clip(output_accel, accel_limits[0], accel_limits[1])
+
+    if Params().get_bool("CreepDebug"):
+      print("Long State : ", self.long_control_state)
 
     return final_accel
