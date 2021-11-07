@@ -25,7 +25,7 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target, v_
                        (v_ego < CP.vEgoStopping and
                         ((v_pid < stopping_target_speed and v_target < stopping_target_speed) or
                          brake_pressed))
-  print("V Target : ", v_target, "Stopping Target Speed : ", stopping_target_speed)
+  #print("V Target : ", v_target, "Stopping Target Speed : ", stopping_target_speed) #JPR Debug
   starting_condition = v_target > CP.vEgoStarting and not cruise_standstill
   
   # neokii
@@ -139,7 +139,7 @@ class LongControl():
       if not CS.standstill or output_accel > CP.stopAccel:
         output_accel -= CP.stoppingDecelRate * DT_CTRL
       output_accel = clip(output_accel, accel_limits[0], accel_limits[1])
-      if Params().get_bool("CreepDebug"):
+      if Params().get_bool("CreepDebug"): #JPR DEBUG
         print("Long State : Stopping")
         print("output Accel = ", output_accel)
 
@@ -150,7 +150,7 @@ class LongControl():
       if output_accel < CP.startAccel:
         output_accel += CP.startingAccelRate * DT_CTRL
       self.reset(CS.vEgo)
-      if Params().get_bool("CreepDebug"):
+      if Params().get_bool("CreepDebug"):# JPR DEBUG
         print("Long State : Starting")
         print("Output Accel = ", output_accel)
 
