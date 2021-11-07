@@ -15,7 +15,7 @@ tester_present = b"\x3E\x00"
 blink_left_on = b"\x2F\xBC\x15\x03"
 blink_left_off = b"\x2F\xBC\x15\x00"
 blink_right_on = b"\x2F\xBC\x16\x03"
-blink_right_off = b"\x2F\xBC\x16\x00
+blink_right_off = b"\x2F\xBC\x16\x00"
 
 
 addr = 0x770
