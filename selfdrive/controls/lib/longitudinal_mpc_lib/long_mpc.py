@@ -42,7 +42,7 @@ T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N+1) for idx in range(N
 
 T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
-MIN_ACCEL = -3.5
+MIN_ACCEL = -4.5
 T_REACT = 1.8
 MAX_BRAKE = 9.81
 
@@ -225,7 +225,7 @@ class LongitudinalMpc():
       self.set_weights_for_lead_policy()
 
   def set_weights_for_lead_policy(self):
-    W = np.diag([0., .03, .0, 10., 1.])
+    W = np.diag([0., .025, .0, 10., 1.])
     Ws = np.tile(W[None], reps=(N,1,1))
     self.solver.cost_set_slice(0, N, 'W', Ws, api='old')
     # Setting the slice without the copy make the array not contiguous,
