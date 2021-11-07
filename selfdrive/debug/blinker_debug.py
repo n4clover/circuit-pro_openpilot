@@ -43,6 +43,8 @@ time.sleep(1)
 isotp_send(panda, blink_right_off, addr, bus=BUS)
 hexdump(isotp_recv(panda, addr + 8, bus=BUS))
 
+time.sleep(1)
+
 for i in range(20):
   isotp_send(panda, tester_present, addr, bus=BUS)
   hexdump(isotp_recv(panda, addr + 8, bus=BUS))
