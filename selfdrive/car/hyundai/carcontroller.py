@@ -251,9 +251,10 @@ class CarController():
       elif abs(CS.lead_distance - self.last_lead_distance) > 0.1:
         can_sends.append(create_clu11(self.packer, self.resume_cnt, CS.scc_bus, CS.clu11, Buttons.RES_ACCEL, clu11_speed))
         self.resume_cnt += 1
-        if self.resume_cnt >= 8:
+
+        if self.resume_cnt >= randint(6, 8):
           self.resume_cnt = 0
-          self.resume_wait_timer = SccSmoother.get_wait_count() * 2
+          self.resume_wait_timer = randint(30, 36)
 
     # reset lead distnce after the car starts moving
     elif self.last_lead_distance != 0:

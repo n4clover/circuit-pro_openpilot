@@ -106,6 +106,7 @@ class CarInterface(CarInterfaceBase):
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
       ret.mass = 2060. + STD_CARGO_KG
       ret.wheelbase = 3.01
+      ret.centerToFront = ret.wheelbase * 0.4
       ret.steerRatio = 16.5
       ret.minSteerSpeed = 37 * CV.MPH_TO_MS
       ret.maxSteeringAngleDeg = 90.
@@ -173,9 +174,8 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.GENESIS_EQ900:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
-      ret.mass = 2060. + STD_CARGO_KG
-      ret.wheelbase = 3.01
-      ret.steerRatio = 16.5
+      ret.mass = 2200
+      ret.wheelbase = 3.15
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.85
       ret.maxSteeringAngleDeg = 90.
@@ -218,9 +218,8 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.GENESIS_G90:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
-      ret.mass = 2060. + STD_CARGO_KG
-      ret.wheelbase = 3.01
-      ret.steerRatio = 16.5
+      ret.mass = 2150
+      ret.wheelbase = 3.16
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.85
       ret.maxSteeringAngleDeg = 90.
@@ -565,7 +564,7 @@ class CarInterface(CarInterfaceBase):
       ret.cruiseState.enabled = ret.cruiseState.available
 
     # turning indicator alert logic
-    if (ret.leftBlinker or ret.rightBlinker or self.CC.turning_signal_timer) and ret.vEgo < LANE_CHANGE_SPEED_MIN - 0.5:
+    if (ret.leftBlinker or ret.rightBlinker or self.CC.turning_signal_timer) and ret.vEgo < LANE_CHANGE_SPEED_MIN - 1.2:
       self.CC.turning_indicator_alert = True
     else:
       self.CC.turning_indicator_alert = False
