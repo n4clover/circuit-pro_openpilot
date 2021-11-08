@@ -231,16 +231,8 @@ class CarController():
 # TEST BLINKER
     can_sends.append(make_can_msg(D_ADDR, EXT_DIAG_REQUEST, D_BUS))
     can_sends.append(make_can_msg(D_ADDR, TESTER_PRESENT, D_BUS))
-    if self.bcnt < 5:
-      can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_ON, D_BUS))
-      print("blink on")
-      self.bcnt += 1
-    elif self.bcnt > 5:
-      can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_OFF, D_BUS))
-      print("blink off")
-      self.bcnt += 1
-      if self.bcnt == 10:
-        self.bcnt = 0
+    can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_ON, D_BUS))\
+    
     for i in range(20):
       can_sends.append(make_can_msg(D_ADDR, TESTER_PRESENT, D_BUS))
 
