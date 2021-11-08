@@ -233,13 +233,16 @@ class CarController():
     can_sends.append(make_can_msg(D_ADDR, TESTER_PRESENT, D_BUS))
     if self.bcnt < 5:
       can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_ON, D_BUS))
+      print("blink on")
       self.bcnt += 1
     elif self.bcnt > 5:
       can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_OFF, D_BUS))
+      print("blink off")
       self.bcnt += 1
       if self.bcnt == 10:
         self.bcnt = 0
-    
+    for i in range(20):
+      can_sends.append(make_can_msg(D_ADDR, TESTER_PRESENT, D_BUS))
 
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
