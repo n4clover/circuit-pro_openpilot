@@ -10,10 +10,10 @@ from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams, FEATURES
+from selfdrive.car import make_can_msg
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
 from common.params import Params
-
 from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.road_speed_limiter import road_speed_limiter_get_active
 
@@ -28,6 +28,16 @@ ANGLE_DELTA_VU = [1.3, 0.9, 0.3]   # unwind limit
 TQ = 285 # = 1 NM * 100 is unit of measure for wheel.
 SPAS_SWITCH = 38 * CV.MPH_TO_MS #MPH
 ###### SPAS #######
+###### Blinker Diagnostics ######
+D_BUS = 0
+D_ADDR = 1904
+EXT_DIAG_REQUEST = b"\x10\x03"
+TESTER_PRESENT = b"\x3E\x00"
+BLINK_LEFT_ON = b"\x2F\xBC\x15\x03"
+BLINK_LEFT_OFF = b"\x2F\xBC\x15\x00"
+BLINK_RIGHT_ON = b"\x2F\xBC\x16\x03"
+BLINK_RIGHT_OFF = b"\x2F\xBC\x16\x00"
+###### Blinker Diagnostics ######
 
 EventName = car.CarEvent.EventName
 
@@ -90,6 +100,7 @@ class CarController():
 
     self.mad_mode_enabled = Params().get_bool('MadModeEnabled')
     self.cnt = 0
+    self.bcnt = 0
     self.cut_steer = False
 
     if CP.spasEnabled:
@@ -216,6 +227,20 @@ class CarController():
     self.lkas11_cnt = (self.lkas11_cnt + 1) % 0x10
 
     can_sends = []
+
+# TEST BLINKER
+    can_sends.append(make_can_msg(D_ADDR, EXT_DIAG_REQUEST, D_BUS))
+    can_sends.append(make_can_msg(D_ADDR, TESTER_PRESENT, D_BUS))
+    if self.bcnt < 5:
+      can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_ON, D_BUS))
+      self.bcnt += 1
+    elif self.bcnt > 5:
+      can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_OFF, D_BUS))
+      self.bcnt += 1
+      if self.bcnt == 10:
+        self.bcnt = 0
+    
+
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 0, self.ldws_opt))
