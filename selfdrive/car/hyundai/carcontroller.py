@@ -29,7 +29,7 @@ TQ = 285 # = 1 NM * 100 is unit of measure for wheel.
 SPAS_SWITCH = 38 * CV.MPH_TO_MS #MPH
 ###### SPAS #######
 ###### Blinker Diagnostics ######
-D_BUS = 0
+D_BUS = 3
 D_ADDR = 1904
 EXT_DIAG_REQUEST = b"\x10\x03"
 TESTER_PRESENT = b"\x3E\x00"
