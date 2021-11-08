@@ -30,7 +30,7 @@ SPAS_SWITCH = 38 * CV.MPH_TO_MS #MPH
 ###### SPAS #######
 ###### Blinker Diagnostics ######
 D_BUS = 0
-D_ADDR = 1345
+D_ADDR = 1904
 EXT_DIAG_REQUEST = b"\x10\x03"
 TESTER_PRESENT = b"\x3E\x00"
 BLINK_LEFT_ON = b"\x2F\xBC\x15\x03"
@@ -231,7 +231,8 @@ class CarController():
 # TEST BLINKER
     can_sends.append(make_can_msg(D_ADDR, EXT_DIAG_REQUEST, D_BUS))
     can_sends.append(make_can_msg(D_ADDR, TESTER_PRESENT, D_BUS))
-    can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_ON, D_BUS))\
+    can_sends.append(make_can_msg(D_ADDR, BLINK_LEFT_ON, D_BUS))
+    can_sends.append(make_can_msg(D_ADDR, BLINK_RIGHT_ON, D_BUS))
     
     for i in range(20):
       can_sends.append(make_can_msg(D_ADDR, TESTER_PRESENT, D_BUS))
