@@ -25,7 +25,7 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target, v_
                        (v_ego < CP.vEgoStopping and
                         ((v_pid < stopping_target_speed and v_target < stopping_target_speed) or
                          brake_pressed))
-  stopping_condition = stopping_condition or v_target < 2 or (v_ego < 2.46 and v_target < 4.) #Cleaner method discoverd to accomplish fix on older version of neokii - JPR
+  stopping_condition = stopping_condition or v_target < 2 or (v_ego < 2.46 and v_target < 3.) #Cleaner method discoverd to accomplish fix on older version of neokii - JPR
   #print("V Target : ", v_target, "Stopping Target Speed : ", stopping_target_speed) #JPR Debug
   starting_condition = v_target > CP.vEgoStarting and not cruise_standstill
   
