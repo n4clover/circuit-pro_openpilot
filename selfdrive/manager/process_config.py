@@ -9,7 +9,7 @@ if Params().get_bool('LoggerEnabled'):
   procs = [
     DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
   # due to qualcomm kernel bugs SIGKILLing camerad sometimes causes page table corruption
-    NativeProcess("soundd", "selfdrive/ui", ["./soundd"]),
+    #NativeProcess("soundd", "selfdrive/ui", ["./soundd"]),
     NativeProcess("camerad", "selfdrive/camerad", ["./camerad"], unkillable=True, driverview=True),
     NativeProcess("clocksd", "selfdrive/clocksd", ["./clocksd"]),
     NativeProcess("dmonitoringmodeld", "selfdrive/modeld", ["./dmonitoringmodeld"], enabled=(not PC or WEBCAM), driverview=True),
