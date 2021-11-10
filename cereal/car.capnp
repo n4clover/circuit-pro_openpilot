@@ -155,6 +155,7 @@ struct CarState {
   # brake pedal, 0.0-1.0
   brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
+  brakeHoldActive @38 :Bool;
 
   # steering wheel
   steeringAngleDeg @7 :Float32;
@@ -198,12 +199,11 @@ struct CarState {
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
 
-  cluSpeedMs @38 :Float32;
-  cruiseGap @39 : Int32;
-  autoHold @40 : Int32;
-  tpms @41 : Tpms;
-  mdps11Stat @42 : Int32;
-
+  cluSpeedMs @39 :Float32;
+  cruiseGap @40 : Int32;
+  autoHold @41 : Int32;
+  tpms @42 : Tpms;
+  mdps11Stat @43 : Int32;
   struct Tpms {
     fl @0 :Float32;
     fr @1 :Float32;
@@ -387,11 +387,11 @@ struct CarControl {
       chimeEngage @1;
       chimeDisengage @2;
       chimeError @3;
-      chimeWarning1 @4;
-      chimeWarning2 @5;
-      chimeWarningRepeat @6;
+      chimeWarning1 @4; # unused
+      chimeWarningRepeat @5;
+      chimeWarningRepeatInfinite @6;
       chimePrompt @7;
-      chimeWarning2Repeat @8;
+      chimeWarning2RepeatInfinite @8;
       chimeSlowingDownSpeed @9;
     }
   }
