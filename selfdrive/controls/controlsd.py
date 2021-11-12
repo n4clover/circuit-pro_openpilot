@@ -182,8 +182,6 @@ class Controls:
 
     self.startup_event = get_startup_event(car_recognized, controller_available, len(self.CP.carFw) > 0)
 
-    if Params().get_bool('spasEnabled'):
-      self.events.add(EventName.spasEnabled, static=False)
     if not sounds_available:
       self.events.add(EventName.soundsUnavailable, static=True)
     if community_feature_disallowed and car_recognized and not self.CP.dashcamOnly:
@@ -209,7 +207,10 @@ class Controls:
 
     # Handle startup event
     if self.startup_event is not None:
-      self.events.add(self.startup_event)
+      if Params().get_bool('spasEnabled'):
+        self.events.add(EventName.spasEnabled)
+      else:
+        self.events.add(self.startup_event)
       self.startup_event = None
 
     # Don't add any more events if not initialized
