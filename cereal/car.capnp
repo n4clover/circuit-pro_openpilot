@@ -131,6 +131,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     autoLaneChange @107;
     slowingDownSpeed @108;
     slowingDownSpeedSound @109;
+    spasEnabled @110;
   }
 }
 

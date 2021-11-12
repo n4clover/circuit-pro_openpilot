@@ -262,10 +262,16 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.controlsInitializing: {
     ET.NO_ENTRY: NoEntryAlert("Controls Initializing"),
   },
-
   EventName.startup: {
     ET.PERMANENT: Alert(
       "Be ready to take over at any time",
+      "Always keep hands on wheel and eyes on road",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+  },
+  EventName.spasEnabled: {
+    ET.PERMANENT: Alert(
+      "Warning you are using SPAS! Please be aware of all its safety implications. You are liable for what car does. Be ready to take over at any time",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
