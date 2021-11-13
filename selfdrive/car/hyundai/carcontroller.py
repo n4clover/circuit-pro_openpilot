@@ -10,7 +10,7 @@ from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_scc11, create_scc12, create_scc13, create_scc14, \
   create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
-from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams, FEATURES
+from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
 from common.params import Params
@@ -29,20 +29,6 @@ ANGLE_DELTA_VU = [1.3, 0.9, 0.3]   # unwind limit
 TQ = 285 # = 1 NM * 100 is unit of measure for wheel.
 SPAS_SWITCH = 38 * CV.MPH_TO_MS #MPH
 ###### SPAS #######
-
-EventName = car.CarEvent.EventName
-
-
-def accel_hysteresis(accel, accel_steady):
-  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
-  if accel > accel_steady + CarControllerParams.ACCEL_HYST_GAP:
-    accel_steady = accel - CarControllerParams.ACCEL_HYST_GAP
-  elif accel < accel_steady - CarControllerParams.ACCEL_HYST_GAP:
-    accel_steady = accel + CarControllerParams.ACCEL_HYST_GAP
-  accel = accel_steady
-
-  return accel, accel_steady
-
 
 SP_CARS = [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
            CAR.GENESIS_EQ900, CAR.GENESIS_EQ900_L, CAR.K9, CAR.GENESIS_G90]
@@ -121,44 +107,30 @@ class CarController():
     self.steer_rate_limited = new_steer != apply_steer
 
     # SPAS limit angle extremes for safety
-    if CS.spas_enabled:
-      apply_angle = actuators.steeringAngleDeg
-      if abs(apply_angle - CS.out.steeringAngleDeg) > 8: # Rate limit for when steering angle is far from apply_angle - JPR
-        rate_limit = 8
-        apply_angle = clip(actuators.steeringAngleDeg, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
+    apply_angle = actuators.steeringAngleDeg
+    if abs(apply_angle - CS.out.steeringAngleDeg) > 8: # Rate limit for when steering angle is far from apply_angle - JPR
+      rate_limit = 8
+      apply_angle = clip(actuators.steeringAngleDeg, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
+    else:
+      if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
+        rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
       else:
-        if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
-          rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
-        else:
-          rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
-        apply_angle = clip(actuators.steeringAngleDeg, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)    
+        rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
+      apply_angle = clip(actuators.steeringAngleDeg, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)    
       self.last_apply_angle = apply_angle
         
-      if CS.spas_enabled:
-        if not self.cut_steer:
-          spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
-          lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
-        else:
-          spas_active = False
-          lkas_active = False
-
-      if not CS.spas_enabled:
-        if not self.cut_steer:
-          lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
-        else:
-          lkas_active = False
-
-    if self.cnt == 1: # Long only
-      lkas_active = False
-      if CS.spas_enabled:
-        spas_active = False
-
-    if CS.spas_enabled: 
-      if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
-        self.override = True
-        print("OVERRIDE")
+      if not self.cut_steer:
+        spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
+        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
       else:
-        self.override = False
+        spas_active = False
+        lkas_active = False
+
+    if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
+      self.override = True
+      print("OVERRIDE")
+    else:
+      self.override = False
 
     # Disable steering while turning blinker on and speed below 60 kph
     if CS.out.leftBlinker or CS.out.rightBlinker:
@@ -174,8 +146,7 @@ class CarController():
       apply_steer = 0
 
     self.lkas_active = lkas_active
-    if CS.spas_enabled:
-      self.spas_active = spas_active
+    self.spas_active = spas_active
 
     if self.turning_signal_timer > 0:
       self.turning_signal_timer -= 1  
@@ -344,68 +315,67 @@ class CarController():
 # State 7 : Cancel
 # State 8 : Failed to get ready to Assist (Steer)
 # ---------------------------------------------------
-    if CS.spas_enabled:
-      if CS.mdps_bus:
-        spas_active_stat = False
-        if spas_active: # Spoof Speed on mdps11_stat 4 and 5 JPR
-          if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3: 
-            spas_active_stat = True
-          else:
-            spas_active_stat = False
-        if self.car_fingerprint == CAR.GENESIS or self.car_fingerprint == CAR.GENESIS_G80 or self.car_fingerprint == CAR.GENESIS_G70 or self.car_fingerprint == CAR.KONA or self.car_fingerprint == CAR.STINGER:
-          can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
-          if Params().get_bool('SPASDebug'):
-            print("EMS_366")
-        elif self.car_fingerprint == CAR.KONA_EV or self.car_fingerprint == CAR.KONA_HEV or self.car_fingerprint == CAR.KIA_NIRO_HEV or self.car_fingerprint == CAR.IONIQ_HEV or self.car_fingerprint == CAR.SONATA21_HEV or self.car_fingerprint == CAR.IONIQ_EV_LTD or self.car_fingerprint == CAR.ELANTRA_HEV_2021:
-          can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
-          if Params().get_bool('SPASDebug'):
-            print("E_EMS11")
+    if CS.mdps_bus:
+      spas_active_stat = False
+      if spas_active: # Spoof Speed on mdps11_stat 4 and 5 JPR
+        if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3: 
+          spas_active_stat = True
         else:
-          can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
-          if Params().get_bool('SPASDebug'):
-            print("EMS_11")
-
-      if (frame % 2) == 0:
-        if CS.mdps11_stat == 7:
-          self.en_spas = 7
-
-        if CS.mdps11_stat == 7 and self.mdps11_stat_last == 7:
-          self.en_spas = 3
-          if CS.mdps11_stat == 3:
-            self.en_spas = 2
-          
-        if CS.mdps11_stat == 2 and spas_active:
-          self.en_spas = 3 # Switch to State 3, and get Ready to Assist(Steer). JPR
-
-        if CS.mdps11_stat == 3 and spas_active:
-          self.en_spas = 4
-          
-        if CS.mdps11_stat == 4 and spas_active:
-          self.en_spas = 5
-
-        if CS.mdps11_stat == 5 and not spas_active:
-          self.en_spas = 7
-
-        if CS.mdps11_stat == 6: # Failed to Assist and Steer, Set state back to 2 for a new request. JPR
-          self.en_spas = 2    
-
-        if CS.mdps11_stat == 8: #MDPS ECU Fails to get into state 3 and ready for state 5. JPR
-          self.en_spas = 2    
-
-        if not spas_active:
-          apply_angle = CS.mdps11_strang
-
-        self.mdps11_stat_last = CS.mdps11_stat
-        can_sends.append(create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
+          spas_active_stat = False
+      if self.car_fingerprint == CAR.GENESIS or self.car_fingerprint == CAR.GENESIS_G80 or self.car_fingerprint == CAR.GENESIS_G70 or self.car_fingerprint == CAR.KONA or self.car_fingerprint == CAR.STINGER:
+        can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
         if Params().get_bool('SPASDebug'):
-          print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
-          print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
-          print("spas_active:", spas_active)
-          print("lkas_active:", lkas_active)
-          print("driver torque:", CS.out.steeringWheelTorque)
-      # SPAS12 20Hz
-      if (frame % 5) == 0:
-        can_sends.append(create_spas12(CS.mdps_bus))
+          print("EMS_366")
+      elif self.car_fingerprint == CAR.KONA_EV or self.car_fingerprint == CAR.KONA_HEV or self.car_fingerprint == CAR.KIA_NIRO_HEV or self.car_fingerprint == CAR.IONIQ_HEV or self.car_fingerprint == CAR.SONATA21_HEV or self.car_fingerprint == CAR.IONIQ_EV_LTD or self.car_fingerprint == CAR.ELANTRA_HEV_2021:
+        can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("E_EMS11")
+      else:
+        can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("EMS_11")
 
-      self.spas_active_last = spas_active
+    if (frame % 2) == 0:
+      if CS.mdps11_stat == 7:
+          self.en_spas = 7
+
+      if CS.mdps11_stat == 7 and self.mdps11_stat_last == 7:
+        self.en_spas = 3
+        if CS.mdps11_stat == 3:
+          self.en_spas = 2
+          
+      if CS.mdps11_stat == 2 and spas_active:
+        self.en_spas = 3 # Switch to State 3, and get Ready to Assist(Steer). JPR
+
+      if CS.mdps11_stat == 3 and spas_active:
+        self.en_spas = 4
+          
+      if CS.mdps11_stat == 4 and spas_active:
+        self.en_spas = 5
+
+      if CS.mdps11_stat == 5 and not spas_active:
+        self.en_spas = 7
+
+      if CS.mdps11_stat == 6: # Failed to Assist and Steer, Set state back to 2 for a new request. JPR
+        self.en_spas = 2    
+
+      if CS.mdps11_stat == 8: #MDPS ECU Fails to get into state 3 and ready for state 5. JPR
+        self.en_spas = 2    
+
+      if not spas_active:
+        apply_angle = CS.mdps11_strang
+
+      self.mdps11_stat_last = CS.mdps11_stat
+      can_sends.append(create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
+      if Params().get_bool('SPASDebug'):
+        print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
+        print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
+        print("spas_active:", spas_active)
+        print("lkas_active:", lkas_active)
+        print("driver torque:", CS.out.steeringWheelTorque)
+      # SPAS12 20Hz
+    if (frame % 5) == 0:
+      can_sends.append(create_spas12(CS.mdps_bus))
+
+    self.spas_active_last = spas_active
     return can_sends
