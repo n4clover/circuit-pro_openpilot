@@ -490,6 +490,7 @@ struct CarParams {
   hasScc14 @68 :Bool;
   hasEms @69 :Bool;
   spasEnabled @70: Bool;
+  emsType @71: Int8;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);

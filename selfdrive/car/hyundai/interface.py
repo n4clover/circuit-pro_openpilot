@@ -69,7 +69,6 @@ class CarInterface(CarInterfaceBase):
     ret.steerRateCost = 0.4
     ret.steerMaxBP = [0.]
     ret.steerMaxV = [1.5]
-
     ret.emsType = 0
 
    #Longitudinal Tune and logic for car tune
