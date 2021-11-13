@@ -315,25 +315,26 @@ class CarController():
 # State 7 : Cancel
 # State 8 : Failed to get ready to Assist (Steer)
 # ---------------------------------------------------
-    if CS.mdps_bus:
-      spas_active_stat = False
-      if spas_active: # Spoof Speed on mdps11_stat 4 and 5 JPR
-        if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3: 
-          spas_active_stat = True
+    if CS.spasEnabled:
+      if CS.mdps_bus:
+        spas_active_stat = False
+        if spas_active: # Spoof Speed on mdps11_stat 4 and 5 JPR
+          if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3: 
+            spas_active_stat = True
+          else:
+            spas_active_stat = False
+        if self.car_fingerprint == CAR.GENESIS or self.car_fingerprint == CAR.GENESIS_G80 or self.car_fingerprint == CAR.GENESIS_G70 or self.car_fingerprint == CAR.KONA or self.car_fingerprint == CAR.STINGER:
+          can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
+          if Params().get_bool('SPASDebug'):
+            print("EMS_366")
+        elif self.car_fingerprint == CAR.KONA_EV or self.car_fingerprint == CAR.KONA_HEV or self.car_fingerprint == CAR.KIA_NIRO_HEV or self.car_fingerprint == CAR.IONIQ_HEV or self.car_fingerprint == CAR.SONATA21_HEV or self.car_fingerprint == CAR.IONIQ_EV_LTD or self.car_fingerprint == CAR.ELANTRA_HEV_2021:
+          can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
+          if Params().get_bool('SPASDebug'):
+            print("E_EMS11")
         else:
-          spas_active_stat = False
-      if self.car_fingerprint == CAR.GENESIS or self.car_fingerprint == CAR.GENESIS_G80 or self.car_fingerprint == CAR.GENESIS_G70 or self.car_fingerprint == CAR.KONA or self.car_fingerprint == CAR.STINGER:
-        can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
-        if Params().get_bool('SPASDebug'):
-          print("EMS_366")
-      elif self.car_fingerprint == CAR.KONA_EV or self.car_fingerprint == CAR.KONA_HEV or self.car_fingerprint == CAR.KIA_NIRO_HEV or self.car_fingerprint == CAR.IONIQ_HEV or self.car_fingerprint == CAR.SONATA21_HEV or self.car_fingerprint == CAR.IONIQ_EV_LTD or self.car_fingerprint == CAR.ELANTRA_HEV_2021:
-        can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
-        if Params().get_bool('SPASDebug'):
-          print("E_EMS11")
-      else:
-        can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
-        if Params().get_bool('SPASDebug'):
-          print("EMS_11")
+          can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
+          if Params().get_bool('SPASDebug'):
+            print("EMS_11")
 
     if (frame % 2) == 0:
       if CS.mdps11_stat == 7:
