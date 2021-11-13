@@ -79,6 +79,7 @@ class CarController():
     self.mad_mode_enabled = Params().get_bool('MadModeEnabled')
     self.cnt = 0
     self.cut_steer = False
+    self.emsType = CP.emsType
 
     if CP.spasEnabled:
       self.last_apply_angle = 0.0
