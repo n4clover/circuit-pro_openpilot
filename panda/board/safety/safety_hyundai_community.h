@@ -6,6 +6,17 @@ int car_SCC_live = 0;
 int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
+
+const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
+    {0., 7., 17.},
+    {1.1, .8, .4}};
+
+const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value from car controller to leave a bit of margin.
+    {0., 7., 17.},
+    {1.5, 1.0, 0.4}};
+
+const int HYUNDAI_DEG_TO_CAN = 10;
+
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4}, // CLU11 Bus 0, 1, 2
@@ -182,7 +193,28 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
         ts_last = ts;
       }
     }
-
+    if(addr == 897) { // SPAS Steering Rate Limit Check
+    // Steering control: (0.1 * val) - 1000 in deg.
+    // We use 1/10 deg as a unit here
+    int raw_angle_can = (((GET_BYTE(to_send, 2) & 0x7F) << 8) | GET_BYTE(to_send, 3)); // TODO Figure out bitshift
+    int desired_angle = raw_angle_can - 10000;
+    bool steer_enabled = (GET_BYTE(to_send, 2) >> 7);
+    // Rate limit check
+    if (controls_allowed && steer_enabled) {
+      float delta_angle_float;
+      delta_angle_float = (interpolate(HYUNDAI_LOOKUP_ANGLE_RATE_UP, vehicle_speed) * HYUNDAI_DEG_TO_CAN);
+      int delta_angle_up = (int)(delta_angle_float) + 1;
+      delta_angle_float =  (interpolate(HYUNDAI_LOOKUP_ANGLE_RATE_DOWN, vehicle_speed) * HYUNDAI_DEG_TO_CAN);
+      int delta_angle_down = (int)(delta_angle_float) + 1;
+      int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
+      int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
+      violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+    }
+    desired_angle_last = desired_angle;
+    if(!controls_allowed && steer_enabled) {
+      violation = true;
+    }
+  }
     // no torque if controls is not allowed
     if (!controls_allowed && (desired_torque != 0)) {
       violation = 1;
