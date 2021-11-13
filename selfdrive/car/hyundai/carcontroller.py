@@ -119,12 +119,12 @@ class CarController():
       apply_angle = clip(actuators.steeringAngleDeg, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)    
       self.last_apply_angle = apply_angle
         
-      if not self.cut_steer:
-        spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
-        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
-      else:
-        spas_active = False
-        lkas_active = False
+    if not self.cut_steer:
+      spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
+      lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+    else:
+      spas_active = False
+      lkas_active = False
 
     if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
       self.override = True
