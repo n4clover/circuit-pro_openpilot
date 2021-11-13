@@ -336,47 +336,46 @@ class CarController():
           if Params().get_bool('SPASDebug'):
             print("EMS_11")
 
-    if (frame % 2) == 0:
-      if CS.mdps11_stat == 7:
+      if (frame % 2) == 0:
+        if CS.mdps11_stat == 7:
+            self.en_spas = 7
+
+        if CS.mdps11_stat == 7 and self.mdps11_stat_last == 7:
+          self.en_spas = 3
+          if CS.mdps11_stat == 3:
+            self.en_spas = 2
+          
+        if CS.mdps11_stat == 2 and spas_active:
+          self.en_spas = 3 # Switch to State 3, and get Ready to Assist(Steer). JPR
+
+        if CS.mdps11_stat == 3 and spas_active:
+          self.en_spas = 4
+          
+        if CS.mdps11_stat == 4 and spas_active:
+          self.en_spas = 5
+
+        if CS.mdps11_stat == 5 and not spas_active:
           self.en_spas = 7
 
-      if CS.mdps11_stat == 7 and self.mdps11_stat_last == 7:
-        self.en_spas = 3
-        if CS.mdps11_stat == 3:
-          self.en_spas = 2
-          
-      if CS.mdps11_stat == 2 and spas_active:
-        self.en_spas = 3 # Switch to State 3, and get Ready to Assist(Steer). JPR
+        if CS.mdps11_stat == 6: # Failed to Assist and Steer, Set state back to 2 for a new request. JPR
+          self.en_spas = 2    
 
-      if CS.mdps11_stat == 3 and spas_active:
-        self.en_spas = 4
-          
-      if CS.mdps11_stat == 4 and spas_active:
-        self.en_spas = 5
+        if CS.mdps11_stat == 8: #MDPS ECU Fails to get into state 3 and ready for state 5. JPR
+          self.en_spas = 2    
 
-      if CS.mdps11_stat == 5 and not spas_active:
-        self.en_spas = 7
+        if not spas_active:
+          apply_angle = CS.mdps11_strang
 
-      if CS.mdps11_stat == 6: # Failed to Assist and Steer, Set state back to 2 for a new request. JPR
-        self.en_spas = 2    
-
-      if CS.mdps11_stat == 8: #MDPS ECU Fails to get into state 3 and ready for state 5. JPR
-        self.en_spas = 2    
-
-      if not spas_active:
-        apply_angle = CS.mdps11_strang
-
-      self.mdps11_stat_last = CS.mdps11_stat
-      can_sends.append(create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
-      if Params().get_bool('SPASDebug'):
-        print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
-        print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
-        print("spas_active:", spas_active)
-        print("lkas_active:", lkas_active)
-        print("driver torque:", CS.out.steeringWheelTorque)
+        self.mdps11_stat_last = CS.mdps11_stat
+        can_sends.append(create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
+        if Params().get_bool('SPASDebug'):
+          print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
+          print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
+          print("spas_active:", spas_active)
+          print("lkas_active:", lkas_active)
+          print("driver torque:", CS.out.steeringWheelTorque)
       # SPAS12 20Hz
-    if (frame % 5) == 0:
-      can_sends.append(create_spas12(CS.mdps_bus))
-
-    self.spas_active_last = spas_active
+      if (frame % 5) == 0:
+        can_sends.append(create_spas12(CS.mdps_bus))
+      self.spas_active_last = spas_active
     return can_sends

@@ -511,7 +511,6 @@ class CarState(CarStateBase):
       signals += [
         ("SpeedLim_Nav_Clu", "Navi_HU", 0),
       ]
-
       checks += [
         ("Navi_HU", 5)
       ]
