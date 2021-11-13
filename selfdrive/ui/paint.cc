@@ -666,7 +666,7 @@ static void ui_draw_vision_header(UIState *s) {
   ui_draw_vision_maxspeed(s);
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
-  //bb_ui_draw_UI(s);
+  bb_ui_draw_UI(s);
   ui_draw_extras(s);
 }
 
@@ -764,11 +764,11 @@ void ui_nvg_init(UIState *s) {
     {"gps", "../assets/img_gps.png"},
     {"autohold_warning", "../assets/img_autohold_warning.png"},
     {"autohold_active", "../assets/img_autohold_active.png"},
-    {"tire_pressure", "../assets/img_tire_pressure.png"},
     {"img_nda", "../assets/img_nda.png"},
     {"img_hda", "../assets/img_hda.png"},
     {"custom_lead_vision", "../assets/images/custom_lead_vision.png"},
     {"custom_lead_radar", "../assets/images/custom_lead_radar.png"},
+    {"tire_pressure", "../assets/images/img_tire_pressure.png"},
   };
   for (auto [name, file] : images) {
     s->images[name] = nvgCreateImage(s->vg, file, 1);
