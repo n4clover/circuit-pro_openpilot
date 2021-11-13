@@ -315,7 +315,7 @@ class CarController():
 # State 7 : Cancel
 # State 8 : Failed to get ready to Assist (Steer)
 # ---------------------------------------------------
-    if CS.spasEnabled:
+    if CS.spas_enabled:
       if CS.mdps_bus:
         spas_active_stat = False
         if spas_active: # Spoof Speed on mdps11_stat 4 and 5 JPR
