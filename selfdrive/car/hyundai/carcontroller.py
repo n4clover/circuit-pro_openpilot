@@ -386,6 +386,7 @@ class CarController():
           print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
           print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
           print("spas_active:", spas_active)
+          print("Apply angle:", apply_angle)
           print("lkas_active:", lkas_active)
           print("driver torque:", CS.out.steeringWheelTorque)
           if self.emsType == 0:
