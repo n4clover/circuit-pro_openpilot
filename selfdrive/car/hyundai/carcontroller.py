@@ -158,6 +158,8 @@ class CarController():
     if self.turning_signal_timer > 0:
       self.turning_signal_timer -= 1  
 
+    self.apply_steer_last = apply_steer
+
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
@@ -201,7 +203,7 @@ class CarController():
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                      CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                      left_lane_warning, right_lane_warning, 1, self.ldws_opt))
-    print("lkas active", lkas_active, "apply steer", apply_steer)
+
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
