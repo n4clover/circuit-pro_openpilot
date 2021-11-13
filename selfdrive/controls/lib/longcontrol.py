@@ -5,8 +5,6 @@ from selfdrive.controls.lib.pid import PIController
 from selfdrive.controls.lib.drive_helpers import CONTROL_N
 from selfdrive.modeld.constants import T_IDXS
 from selfdrive.ntune import ntune_scc_get
-from common.params import Params
-
 
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
@@ -25,8 +23,7 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target, v_
                        (v_ego < CP.vEgoStopping and
                         ((v_pid < stopping_target_speed and v_target < stopping_target_speed) or
                          brake_pressed))
-  stopping_condition = stopping_condition or v_ego < 3.5 and v_target < 3.0 #Cleaner method discoverd to accomplish fix on older version of neokii - JPR
-  #print("V Target : ", v_target, "Stopping Target Speed : ", stopping_target_speed) #JPR Debug
+
   starting_condition = v_target > CP.vEgoStarting and not cruise_standstill
   
   # neokii
@@ -115,8 +112,6 @@ class LongControl():
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.reset(v_ego_pid)
       output_accel = 0.
-      if Params().get_bool("CreepDebug"):
-        print("Long State : OFF")
 
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid:
@@ -132,8 +127,6 @@ class LongControl():
 
       if prevent_overshoot:
         output_accel = min(output_accel, 0.0)
-      if Params().get_bool("CreepDebug"):
-        print("Long State : PID")
 
     # Intention is to stop, switch to a different brake control until we stop
     elif self.long_control_state == LongCtrlState.stopping:
@@ -141,9 +134,6 @@ class LongControl():
       if not CS.standstill or output_accel > CP.stopAccel:
         output_accel -= CP.stoppingDecelRate * DT_CTRL * interp(output_accel, [CP.stopAccel, 0], [1., 0.7])
       output_accel = clip(output_accel, accel_limits[0], accel_limits[1])
-      if Params().get_bool("CreepDebug"): #JPR DEBUG
-        print("Long State : Stopping")
-        print("output Accel = ", output_accel)
 
       self.reset(CS.vEgo)
 
@@ -152,9 +142,6 @@ class LongControl():
       if output_accel < CP.startAccel:
         output_accel += CP.startingAccelRate * DT_CTRL
       self.reset(CS.vEgo)
-      if Params().get_bool("CreepDebug"):# JPR DEBUG
-        print("Long State : Starting")
-        print("Output Accel = ", output_accel)
 
     self.last_output_accel = output_accel
     final_accel = clip(output_accel, accel_limits[0], accel_limits[1])
