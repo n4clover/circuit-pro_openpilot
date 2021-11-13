@@ -109,7 +109,8 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1900. + STD_CARGO_KG
       ret.wheelbase = 3.01
       ret.centerToFront = ret.wheelbase * 0.4
-      ret.minSteerSpeed = 60 * CV.KPH_TO_MS
+      if not Params().get_bool('UseSMDPSHarness'):
+        ret.minSteerSpeed = 60 * CV.KPH_TO_MS
       ret.steerRatio = 16.5
       tire_stiffness_factor = 0.85
       ret.maxSteeringAngleDeg = 90.
@@ -308,7 +309,8 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.7
       ret.steerRatio = 15.4            # 14 is Stock | Settled Params Learner values are steerRatio: 15.401566348670535
       ret.centerToFront = ret.wheelbase * 0.4
-      ret.minSteerSpeed = 32 * CV.MPH_TO_MS
+      if not Params().get_bool('UseSMDPSHarness'):
+        ret.minSteerSpeed = 32 * CV.MPH_TO_MS
     elif candidate == CAR.ELANTRA_2021:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       ret.mass = (2800. * CV.LB_TO_KG) + STD_CARGO_KG
@@ -382,11 +384,10 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.73  # Spec
       ret.wheelbase = 2.7
       tire_stiffness_factor = 0.385
-      if candidate not in [CAR.IONIQ_EV_2020, CAR.IONIQ_PHEV]:
+      if candidate not in [CAR.IONIQ_EV_2020, CAR.IONIQ_PHEV] and not Params().get_bool('UseSMDPSHarness'):
         ret.minSteerSpeed = 32 * CV.MPH_TO_MS
       ret.centerToFront = ret.wheelbase * 0.4
-      if candidate not in [CAR.IONIQ_EV_2020, CAR.IONIQ_PHEV]:
-        ret.minSteerSpeed = 32 * CV.MPH_TO_MS
+
     elif candidate in [CAR.GRANDEUR_IG, CAR.GRANDEUR_IG_HEV]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       tire_stiffness_factor = 0.8
