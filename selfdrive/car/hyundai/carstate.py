@@ -502,6 +502,7 @@ class CarState(CarStateBase):
           ("VS", "EMS_366", 0),
           ("SWI_IGK", "EMS_366", 0),
         ]
+        checks += [("EMS_366", 100)]
       elif CP.mdpsBus == 0:
         signals += [
           ("CR_Mdps_StrAng", "MDPS11", 0),
