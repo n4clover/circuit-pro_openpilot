@@ -518,10 +518,11 @@ class Controls:
     if not self.active:
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
-    elif CS.mdps11Stat == 5:
-      self.LaC.reset()
-      if Params().get_bool('SPASDebug'):
-        print("Lac Reset!")
+    if Params().get_bool('spasEnabled'):
+      if CS.mdps11Stat == 5:
+        self.LaC.reset()
+        if Params().get_bool('SPASDebug'):
+          print("Lac Reset!")
 
     if not CS.cruiseState.enabledAcc:
       self.LoC.reset(v_pid=CS.vEgo)
