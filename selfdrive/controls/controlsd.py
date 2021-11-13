@@ -233,9 +233,9 @@ class Controls:
       self.events.add(EventName.lowMemory)
 
     # TODO: enable this once loggerd CPU usage is more reasonable
-    cpus = list(self.sm['deviceState'].cpuUsagePercent)[:(-1 if EON else None)]
-    if max(cpus, default=0) > 95 and not SIMULATION:
-      self.events.add(EventName.highCpuUsage)
+    #cpus = list(self.sm['deviceState'].cpuUsagePercent)[:(-1 if EON else None)]
+    #if max(cpus, default=0) > 95 and not SIMULATION:
+    #  self.events.add(EventName.highCpuUsage)
 
     # Alert if fan isn't spinning for 5 seconds
     if self.sm['peripheralState'].pandaType in [PandaType.uno, PandaType.dos]:
@@ -343,10 +343,10 @@ class Controls:
 
     # TODO: fix simulator
     if not SIMULATION:
-      #if not NOSENSOR:
-      #  if not self.sm['liveLocationKalman'].gpsOK and (self.distance_traveled > 1000):
-      #    # Not show in first 1 km to allow for driving out of garage. This event shows after 5 minutes
-      #    self.events.add(EventName.noGps)
+      if not NOSENSOR:
+        if not self.sm['liveLocationKalman'].gpsOK and (self.distance_traveled > 1000):
+          # Not show in first 1 km to allow for driving out of garage. This event shows after 5 minutes
+          self.events.add(EventName.noGps)
       if not self.sm.all_alive(self.camera_packets):
         self.events.add(EventName.cameraMalfunction)
       if self.sm['modelV2'].frameDropPerc > 20:
@@ -365,9 +365,9 @@ class Controls:
       v_future = speeds[-1]
     else:
       v_future = 100.0
-    #if CS.brakePressed and v_future >= self.CP.vEgoStarting \
-    #  and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
-    #  self.events.add(EventName.noTarget)
+    if CS.brakePressed and v_future >= self.CP.vEgoStarting \
+      and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
+      self.events.add(EventName.noTarget)
 
   def data_sample(self):
     """Receive data from sockets and update carState"""
