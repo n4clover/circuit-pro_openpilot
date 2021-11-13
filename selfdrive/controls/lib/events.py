@@ -150,14 +150,12 @@ class NoEntryAlert(Alert):
                      AlertSize.mid, Priority.LOW, visual_alert,
                      audible_alert, .4, duration_hud_alert, 3.)
 
-
 class SoftDisableAlert(Alert):
   def __init__(self, alert_text_2):
     super().__init__("TAKE CONTROL IMMEDIATELY", alert_text_2,
                      AlertStatus.userPrompt, AlertSize.full,
                      Priority.MID, VisualAlert.steerRequired,
                      AudibleAlert.chimeError, .1, 2., 2.),
-
 
 class ImmediateDisableAlert(Alert):
   def __init__(self, alert_text_2, alert_text_1="TAKE CONTROL IMMEDIATELY"):
@@ -166,14 +164,12 @@ class ImmediateDisableAlert(Alert):
                      Priority.HIGHEST, VisualAlert.steerRequired,
                      AudibleAlert.chimeWarningRepeatInfinite, 2.2, 3., 4.),
 
-
 class EngagementAlert(Alert):
   def __init__(self, audible_alert=True):
     super().__init__("", "",
                      AlertStatus.normal, AlertSize.none,
                      Priority.MID, VisualAlert.none,
                      audible_alert, .2, 0., 0.),
-
 
 class NormalPermanentAlert(Alert):
   def __init__(self, alert_text_1: str, alert_text_2: str, duration_text: float = 0.2):
@@ -240,7 +236,7 @@ def auto_lane_change_alert(CP: car.CarParams, sm: messaging.SubMaster, metric: b
     "Auto Lane Change starts in (%d)" % alc_timer,
     "Monitor Other Vehicles",
     AlertStatus.normal, AlertSize.mid,
-    Priority.LOWER, VisualAlert.steerRequired, AudibleAlert.none, 0., .1, .1, alert_rate=0.75)
+    Priority.LOWER, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 0., .1, .1, alert_rate=0.75)
 
 
 EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, bool], Alert]]]] = {
@@ -271,10 +267,10 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
   EventName.spasEnabled: {
     ET.PERMANENT: Alert(
-      "Warning SPAS Enabled! !Hands On Wheel!",
-      "Understand the safety implications Be ready to take over at any time",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+      "! Warning SPAS Enabled !                 ! Keep hands On Wheel !",
+      "Understand the safety implications! Be ready to take over at any time!",
+      AlertStatus.normal, AlertSize.full,
+      Priority.LOWER, VisualAlert.none, AudibleAlert.chimePrompt, 0., 0., 10.),
   },
 
   EventName.startupMaster: {

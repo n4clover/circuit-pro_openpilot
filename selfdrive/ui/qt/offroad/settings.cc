@@ -638,6 +638,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "This outputs relevent information.",
                                             "../assets/offroad/icon_road.png",
                                             this));
+
+  toggles.append(new ParamControl("ShowDebugUI",
+                                            "Show Debug UI",
+                                            "",
+                                            "../assets/offroad/icon_shell.png",
+                                            this));
+
   for(ParamControl *toggle : toggles) {
     if(main_layout->count() != 0) {
       toggleLayout->addWidget(horizontal_line());
