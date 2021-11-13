@@ -108,15 +108,16 @@ class CarController():
     self.steer_rate_limited = new_steer != apply_steer
 
     # SPAS limit angle extremes for safety
-    apply_angle = actuators.steeringAngleDeg
-    if abs(apply_angle - CS.out.steeringAngleDeg) > 8: # Rate limit for when steering angle is far from apply_angle - JPR
-      rate_limit = 8
-      apply_angle = clip(actuators.steeringAngleDeg, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
-    else:
-      if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
-        rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
+    if CS.spas_enabled:
+      apply_angle = actuators.steeringAngleDeg
+      if abs(apply_angle - CS.out.steeringAngleDeg) > 8: # Rate limit for when steering angle is far from apply_angle - JPR
+        rate_limit = 8
+        apply_angle = clip(actuators.steeringAngleDeg, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
       else:
-        rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
+        if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
+          rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
+        else:
+          rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
       apply_angle = clip(actuators.steeringAngleDeg, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)    
       self.last_apply_angle = apply_angle
         
@@ -126,15 +127,15 @@ class CarController():
     else:
       spas_active = False
       lkas_active = False
-      
+
     if CS.spas_enabled:
       lkas_active = lkas_active and not CS.mdps11_stat == 5
 
-    if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
-      self.override = True
-      print("OVERRIDE")
-    else:
-      self.override = False
+      if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
+        self.override = True
+        print("OVERRIDE")
+      else:
+        self.override = False
 
     # Disable steering while turning blinker on and speed below 60 kph
     if CS.out.leftBlinker or CS.out.rightBlinker:
