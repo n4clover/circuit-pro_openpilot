@@ -207,10 +207,16 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    if pcm_cancel_cmd: #Fix SCC stay active when op disengage - Desta
+    if pcm_cancel_cmd and (self.longcontrol and not self.mad_mode_enabled) or not enabled and self.enabled_cnt >= 1: #Make SCC cancle when op disengage -JPR
       can_sends.append(create_clu11(self.packer, frame % 0x10, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
+      self.enabled_cnt += 1
     else:
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
+
+    if enabled: # Enable count so we don't spam cancel to SCC - JPR
+      self.enabled_cnt = 1
+    if self.enabled_cnt == 3:
+      self.enabled_cnt = 0
 
     # fix auto resume - by neokii
     if CS.out.cruiseState.standstill and not CS.out.gasPressed:
@@ -330,18 +336,18 @@ class CarController():
             spas_active_stat = True
           else:
             spas_active_stat = False
-        if self.car_fingerprint == CAR.GENESIS or self.car_fingerprint == CAR.GENESIS_G80 or self.car_fingerprint == CAR.GENESIS_G70 or self.car_fingerprint == CAR.KONA or self.car_fingerprint == CAR.STINGER:
+        if self.emsType == 1:
           can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
           if Params().get_bool('SPASDebug'):
             print("EMS_366")
-        elif self.car_fingerprint == CAR.KONA_EV or self.car_fingerprint == CAR.KONA_HEV or self.car_fingerprint == CAR.KIA_NIRO_HEV or self.car_fingerprint == CAR.IONIQ_HEV or self.car_fingerprint == CAR.SONATA21_HEV or self.car_fingerprint == CAR.IONIQ_EV_LTD or self.car_fingerprint == CAR.ELANTRA_HEV_2021:
-          can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
-          if Params().get_bool('SPASDebug'):
-            print("E_EMS11")
-        else:
+        elif self.emsType == 2:
           can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
           if Params().get_bool('SPASDebug'):
             print("EMS_11")
+        elif self.emsType == 3:
+          can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
+          if Params().get_bool('SPASDebug'):
+            print("E_EMS11")
 
       if (frame % 2) == 0:
         if CS.mdps11_stat == 7:
@@ -381,6 +387,8 @@ class CarController():
           print("spas_active:", spas_active)
           print("lkas_active:", lkas_active)
           print("driver torque:", CS.out.steeringWheelTorque)
+          if self.emsType == 0:
+            print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
       # SPAS12 20Hz
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))

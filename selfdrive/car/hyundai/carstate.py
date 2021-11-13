@@ -495,20 +495,49 @@ class CarState(CarStateBase):
       checks += [("ESP11", 50)]
     if CP.spasEnabled:
       if CP.mdpsBus == 1:
-        signals += [
-          ("TQI_1", "EMS_366", 0),
-          ("N", "EMS_366", 0),
-          ("TQI_2", "EMS_366", 0),
-          ("VS", "EMS_366", 0),
-          ("SWI_IGK", "EMS_366", 0),
-        ]
-        checks += [("EMS_366", 100)]
-      elif CP.mdpsBus == 0:
-        signals += [
-          ("CR_Mdps_StrAng", "MDPS11", 0),
-          ("CF_Mdps_Stat", "MDPS11", 0),
-        ]
-        checks += [("MDPS11", 100)]
+        if CP.emsType == 1:
+          signals += [
+            ("TQI_1", "EMS_366", 0),
+            ("N", "EMS_366", 0),
+            ("TQI_2", "EMS_366", 0),
+            ("VS", "EMS_366", 0),
+            ("SWI_IGK", "EMS_366", 0),
+          ]
+          checks += [("EMS_366", 100)]
+        elif CP.emsType == 2:
+          signals += [
+            ("SWI_IGK", "EMS11", 0),
+            ("F_N_ENG", "EMS11", 0),
+            ("ACK_TCS", "EMS11", 0),
+            ("PUC_STAT", "EMS11", 0),
+            ("TQ_COR_STAT", "EMS11", 0),
+            ("RLY_AC", "EMS11", 0),
+            ("F_SUB_TQI", "EMS11", 0),
+            ("TQI_ACOR", "EMS11", 0),
+            ("N", "EMS11", 0),
+            ("TQI", "EMS11", 0),
+            ("TQFR", "EMS11", 0),
+            ("VS", "EMS11", 0),
+            ("RATIO_TQI_BAS_MAX_STND", "EMS11", 0),
+          ]
+          checks += [("EMS11", 100)]
+        elif CP.emsType == 3:
+          signals += [
+            ("Brake_Pedal_Pos", "E_EMS11", 0),
+            ("IG_Reactive_Stat", "E_EMS11", 0),
+            ("Gear_Change", "E_EMS11", 0),
+            ("Cruise_Limit_Status", "E_EMS11", 0),
+            ("Cruise_Limit_Target", "E_EMS11", 0),
+            ("Accel_Pedal_Pos", "E_EMS11", 0),
+            ("CR_Vcu_AccPedDep_Pos", "E_EMS11", 0),
+          ]
+          checks += [("E_EMS11", 100)]
+        elif CP.mdpsBus == 0:
+          signals += [
+            ("CR_Mdps_StrAng", "MDPS11", 0),
+            ("CF_Mdps_Stat", "MDPS11", 0),
+          ]
+          checks += [("MDPS11", 100)]
     if Params().get_bool("HyundaiNaviSL"):
       signals += [
         ("SpeedLim_Nav_Clu", "Navi_HU", 0),
