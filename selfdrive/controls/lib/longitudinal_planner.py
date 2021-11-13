@@ -96,27 +96,17 @@ class Planner():
     # clip limits, cannot init MPC outside of bounds
     accel_limits_turns[0] = min(accel_limits_turns[0], self.a_desired + 0.05)
     accel_limits_turns[1] = max(accel_limits_turns[1], self.a_desired - 0.05)
-    self.mpc.set_accel_limits(-3.5, 2.)
+    self.mpc.set_accel_limits(accel_limits_turns[0], accel_limits_turns[1])
     self.mpc.set_cur_state(self.v_desired, self.a_desired)
-    if (len(sm['modelV2'].position.x) == 33 and
-         len(sm['modelV2'].velocity.x) == 33 and
-          len(sm['modelV2'].acceleration.x) == 33):
-      x = np.interp(T_IDXS_MPC, T_IDXS, sm['modelV2'].position.x)
-      v = np.interp(T_IDXS_MPC, T_IDXS, sm['modelV2'].velocity.x)
-      a = np.interp(T_IDXS_MPC, T_IDXS, sm['modelV2'].acceleration.x)
-    else:
-      x = np.zeros(len(T_IDXS_MPC))
-      v = np.zeros(len(T_IDXS_MPC))
-      a = np.zeros(len(T_IDXS_MPC))
-    self.mpc.update(sm['carState'], sm['radarState'], v_cruise, x, v, a)
+    self.mpc.update(sm['carState'], sm['radarState'], v_cruise)
     self.v_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.v_solution)
     self.a_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC, self.mpc.a_solution)
     self.j_desired_trajectory = np.interp(T_IDXS[:CONTROL_N], T_IDXS_MPC[:-1], self.mpc.j_solution)
 
     #TODO counter is only needed because radar is glitchy, remove once radar is gone
-    self.fcw = False #self.mpc.crash_cnt > 5
-    #if self.fcw:
-    #  cloudlog.info("FCW triggered")
+    self.fcw = self.mpc.crash_cnt > 5
+    if self.fcw:
+      cloudlog.info("FCW triggered")
 
     # Interpolate 0.05 seconds and save as starting point for next iteration
     a_prev = self.a_desired
@@ -137,7 +127,7 @@ class Planner():
     longitudinalPlan.jerks = [float(x) for x in self.j_desired_trajectory]
 
     longitudinalPlan.hasLead = sm['radarState'].leadOne.status
-    #longitudinalPlan.longitudinalPlanSource = self.mpc.source
+    longitudinalPlan.longitudinalPlanSource = self.mpc.source
     longitudinalPlan.fcw = self.fcw
 
     pm.send('longitudinalPlan', plan_send)
