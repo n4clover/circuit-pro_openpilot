@@ -123,14 +123,16 @@ class CarController():
         
     if not self.cut_steer:
       spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
-      lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      if CS.spas_enabled:
+        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+      else:
+        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
     else:
-      spas_active = False
+      if CS.spas_enabled:
+        spas_active = False
       lkas_active = False
 
     if CS.spas_enabled:
-      lkas_active = lkas_active and not CS.mdps11_stat == 5
-
       if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
         self.override = True
         print("OVERRIDE")
