@@ -205,7 +205,7 @@ class CarController():
     else:
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
 
-    if enabled:
+    if enabled: # Enable count so we don't spam cancel to SCC - JPR
       self.enabled_cnt = 1
 
     # fix auto resume - by neokii
