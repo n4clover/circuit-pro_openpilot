@@ -267,7 +267,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
   EventName.spasEnabled: {
     ET.PERMANENT: Alert(
-      "Warning SPAS Enabled! !Hands On Wheel!",
+      "Warning SPAS Enabled!     ! Keep hands On Wheel !",
       "Understand the safety implications! Be ready to take over at any time!",
       AlertStatus.normal, AlertSize.full,
       Priority.LOWER, VisualAlert.none, AudibleAlert.chimePrompt, 0., 0., 10.),
