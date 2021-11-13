@@ -151,8 +151,6 @@ class CarController():
     if self.turning_signal_timer > 0:
       self.turning_signal_timer -= 1  
 
-    self.apply_steer_last = apply_steer
-
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
