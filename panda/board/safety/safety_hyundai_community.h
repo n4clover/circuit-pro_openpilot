@@ -196,7 +196,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     if(addr == 897) { // SPAS Steering Rate Limit Check
     // Steering control: (0.1 * val) - 1000 in deg.
     // We use 1/10 deg as a unit here
-    int raw_angle_can = (((GET_BYTE(to_send, 2) & 0x7F) << 8) | GET_BYTE(to_send, 3)); // TODO Figure out bitshift
+    int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     int desired_angle = raw_angle_can - 10000;
     bool steer_enabled = (GET_BYTE(to_send, 2) >> 7);
     // Rate limit check
