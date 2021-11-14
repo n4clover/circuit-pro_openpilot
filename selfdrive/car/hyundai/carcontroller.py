@@ -154,7 +154,8 @@ class CarController():
       apply_steer = 0
 
     self.lkas_active = lkas_active
-    self.spas_active = spas_active
+    if CS.spas_enabled:
+      self.spas_active = spas_active
 
     if self.turning_signal_timer > 0:
       self.turning_signal_timer -= 1  
@@ -398,6 +399,7 @@ class CarController():
           print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
           print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
           print("spas_active:", spas_active)
+          print("Apply angle:", apply_angle)
           print("lkas_active:", lkas_active)
           print("driver torque:", CS.out.steeringWheelTorque)
           if self.emsType == 0:
