@@ -321,7 +321,7 @@ class CarController():
         can_sends.append(create_hda_mfc(self.packer, activated_hda, state))
 ####################################PANDA TESTER###########################################
 #Panda should not allow any controls as this is invalid to safety model.
-    if self.CS.lkas_button_on != self.CS.prev_lkas_button:
+    if CS.lkas_button_on != CS.prev_lkas_button:
       if CS.out.vEgo < 0.1:
         apply_angle = 80
         apply_angle = -80
