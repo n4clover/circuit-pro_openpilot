@@ -199,7 +199,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
     int desired_angle = raw_angle_can - 10000;
-    bool steer_enabled = (GET_BYTE(to_send, 2) >> 7);
+    //bool steer_enabled = (GET_BYTE(to_send, 2) >> 7); //
     // Rate limit check
     if (controls_allowed && steer_enabled) {
       float delta_angle_float;
@@ -212,8 +212,9 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
     }
     desired_angle_last = desired_angle;
-    if(!controls_allowed && steer_enabled) {
-      violation = true;
+    if(!controls_allowed) { // && steer_enabled) {
+      violation = 1;
+      puts("  SPAS ANGLE SEND not allowed: controls not allowed!"); puts("\n");
     }
   }
     // no torque if controls is not allowed
