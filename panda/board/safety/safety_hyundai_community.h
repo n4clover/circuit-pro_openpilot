@@ -136,7 +136,8 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       int hyundai_speed = GET_BYTES_04(to_push) & 0x3FFF;  // FL
       hyundai_speed += (GET_BYTES_48(to_push) >> 16) & 0x3FFF;  // RL
       hyundai_speed /= 2;
-      vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;
+      vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;      
+      vehicle_speed = hyundai_speed
     }
     generic_rx_checks((addr == 832 && bus == 0));
   }
