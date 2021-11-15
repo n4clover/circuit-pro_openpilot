@@ -414,15 +414,15 @@ class CarController():
           print("TEST 8 !!---!! FAILED !!---!!")
           fail_count += 1
           failed_test = 8
-        if start_angle != test_results8 or fail_count > 0 or failed_test != 0:
-          print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
-          self.test_count = 0
-        else:
-          print("!TEST THAT FAILED!", failed_test)
-          print("!FAIL COUNT! : ", fail_count)
-          print("!TEST COMPLETE! !---! !NOT SUCCESSFUL! !---!")
-          print("DEVIATION : Test 1 : ", test_results1, " : Test 2 : ", test_results2, " : Test 3 : ", test_results3, " : Test 4 : ", test_results4, " : Test 5 : ", test_results5, " : Test 6 : ", test_results6, " : Test 7 : ", test_results7, " : Test 8 : ", test_results8)
-          self.test_count = 0
+          if start_angle != test_results8 or fail_count == 0 or failed_test == 0:
+            print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
+            self.test_count = 0
+          else:
+            print("!TEST THAT FAILED!", failed_test)
+            print("!FAIL COUNT! : ", fail_count)
+            print("!TEST COMPLETE! !---! !NOT SUCCESSFUL! !---!")
+            print("DEVIATION : Test 1 : ", test_results1, " : Test 2 : ", test_results2, " : Test 3 : ", test_results3, " : Test 4 : ", test_results4, " : Test 5 : ", test_results5, " : Test 6 : ", test_results6, " : Test 7 : ", test_results7, " : Test 8 : ", test_results8)
+            self.test_count = 0
 
 ############### SPAS STATES ############## JPR
 # State 1 : Start
@@ -491,7 +491,7 @@ class CarController():
           print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
           print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
           print("spas_active:", spas_active)
-          print("Apply angle:", apply_angle)
+          print("apply angle:", apply_angle)
           print("lkas_active:", lkas_active)
           print("driver torque:", CS.out.steeringWheelTorque)
           if self.emsType == 0:
