@@ -333,10 +333,9 @@ class CarController():
       self.fail_count = 0
       self.failed_test = 0
       self.test_count = 0
-      self.start_angle = 0
+      self.start_angle = CS.out.steeringAngleDeg
       self.test_count = 1
     if CS.out.vEgo < 1.:
-      self.start_angle = CS.out.steeringAngleDeg
       if self.test_count == 1:
         self.fail_count = 0
         print("TEST 1 ACTIVE")
@@ -420,7 +419,7 @@ class CarController():
           print("TEST 8 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 8
-        if self.start_angle != self.test_results8 or self.fail_count == 0 or self.failed_test == 0:
+        if self.start_angle == self.test_results8 or self.fail_count == 0 or self.failed_test == 0:
           print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
           self.test_count = 0
         else:
