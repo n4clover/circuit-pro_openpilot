@@ -331,55 +331,65 @@ class CarController():
         apply_angle = 90
         apply_angle = -90
         test_results1 = CS.out.steeringAngleDeg
+        failed_test = 0
         if start_angle != test_results1:
           print("TEST 1 !!---!! FAILED !!---!!")
           fail_count += 1
+          failed_test = 1
         apply_angle = 80
         apply_angle = -80
         test_results2 = CS.out.steeringAngleDeg
         if start_angle != test_results2:
           print("TEST 2 !!---!! FAILED !!---!!")
           fail_count += 1
+          failed_test = 2
         apply_angle = 70
         apply_angle = -70
         test_results3 = CS.out.steeringAngleDeg
         if start_angle != test_results3:
           print("TEST 3 !!---!! FAILED !!---!!")
           fail_count += 1
+          failed_test = 3
         apply_angle = 60
         apply_angle = -60
         test_results4 = CS.out.steeringAngleDeg
         if start_angle != test_results4:
           print("TEST 4 !!---!! FAILED !!---!!")
           fail_count += 1
+          failed_test = 4
         apply_angle = 50
         apply_angle = -50
         test_results5 = CS.out.steeringAngleDeg
         if start_angle != test_results5:
           print("TEST 5 !!---!! FAILED !!---!!")
           fail_count += 1
+          failed_test = 5
         apply_angle = 40
         apply_angle = -40
         test_results6 = CS.out.steeringAngleDeg
         if start_angle != test_results6:
           print("TEST 6 !!---!! FAILED !!---!!")
           fail_count += 1
+          failed_test = 6
         apply_angle = 30
         apply_angle = -30
         test_results7 = CS.out.steeringAngleDeg
         if start_angle != test_results7:
           print("TEST 7 !!---!! FAILED !!---!!")
           fail_count += 1
+          failed_test = 7
         apply_angle = 20
         apply_angle = -20
         test_results8 = CS.out.steeringAngleDeg
         if start_angle != test_results8:
           print("TEST 8 !!---!! FAILED !!---!!")
           fail_count += 1
-        final_results = (test_results1 + test_results2 + test_results3 + test_results4 + test_results5 + test_results6 + test_results7 + test_results8) / 8
-        if start_angle != final_results or fail_count > 0:
+          failed_test = 8
+        if start_angle != test_results8 or fail_count > 0 or failed_test != 0:
           print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
         else:
+          print("!TEST THAT FAILED!", failed_test)
+          print("!FAIL COUNT! : ", fail_count)
           print("!TEST COMPLETE! !---! !NOT SUCCESSFUL! !---!")
 ############### SPAS STATES ############## JPR
 # State 1 : Start

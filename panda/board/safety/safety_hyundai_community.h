@@ -197,11 +197,11 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     // Steering control: (0.1 * val) - 1000 in deg.
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
-    //puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
+    puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
     int desired_angle = raw_angle_can - 10000;
-    //bool steer_enabled = (GET_BYTE(to_send, 2) >> 7); //
+    bool steer_enabled = ((((GET_BYTE(to_send, 1) & 0x7) << 1) | GET_BYTE(to_send, 0) >> 7) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
     // Rate limit check
-    if (controls_allowed) { //&& steer_enabled) {
+    if (controls_allowed && steer_enabled) {
       float delta_angle_float;
       delta_angle_float = (interpolate(HYUNDAI_LOOKUP_ANGLE_RATE_UP, vehicle_speed) * HYUNDAI_DEG_TO_CAN);
       int delta_angle_up = (int)(delta_angle_float) + 1;
@@ -212,9 +212,9 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
     }
     desired_angle_last = desired_angle;
-    if(!controls_allowed) { // && steer_enabled) {
+    if(!controls_allowed && steer_enabled) {
       violation = 1;
-      puts("  SPAS ANGLE SEND not allowed: controls not allowed!"); puts("\n");
+      puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
   }
     // no torque if controls is not allowed
