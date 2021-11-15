@@ -328,15 +328,14 @@ class CarController():
       print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! !DO NOT TOUCH OR MOVE WHEEL! !VEHICLE SPEED MUST BE ZERO TO START TEST!")
       fail_count = 0
       if CS.out.vEgo < 1.:
+        start_angle = CS.out.steeringAngleDeg
         if self.test_count == 0:
           fail_count = 0
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
           apply_angle = 90
           self.test_count += 1
         if self.test_count == 1:
           apply_angle = -90
-          
         test_results1 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results1:
@@ -345,101 +344,76 @@ class CarController():
           failed_test = 1
         if self.test_count == 2:
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
           apply_angle = 80
-
         if self.test_count == 3:
           apply_angle = -80
-
         test_results2 = CS.out.steeringAngleDeg
-
         if start_angle != test_results2:
           print("TEST 2 !!---!! FAILED !!---!!")
           fail_count += 1
           failed_test = 2
         if self.test_count == 4:
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
           apply_angle = 70
-
         if self.test_count == 5:
           apply_angle = -70
-
         test_results3 = CS.out.steeringAngleDeg
-
         if start_angle != test_results3:
           print("TEST 3 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 1
+          failed_test = 3
         if self.test_count == 4:
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
           apply_angle = 60
-
         if self.test_count == 5:
           apply_angle = -60
-
         test_results4 = CS.out.steeringAngleDeg
         if start_angle != test_results4:
           print("TEST 4 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 1
+          failed_test = 4
         if self.test_count == 6:
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
-          apply_angle = 80
-
+          apply_angle = 50
         if self.test_count == 7:
-          apply_angle = -80
-
+          apply_angle = -50
         test_results5 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results5:
           print("TEST 5 !!---!! FAILED !!---!!")
-
-          failed_test = 1
+          fail_count += 1
+          failed_test = 5
         if self.test_count == 8:
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
-          apply_angle = 70
-
+          apply_angle = 40
         if self.test_count == 9:
-          apply_angle = -70
-
+          apply_angle = -40
         test_results6 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results6:
           print("TEST 6 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 1
+          failed_test = 6
         if self.test_count == 10:
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
-          apply_angle = 80
-
         if self.test_count == 11:
-          apply_angle = -80
-
+          apply_angle = -30
         test_results7 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results7:
           print("TEST 7 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 1
+          failed_test = 7
         if self.test_count == 12:
           print("TEST ACTIVE")
-          start_angle = CS.out.steeringAngleDeg
-          apply_angle = 70
-
+          apply_angle = 20
         if self.test_count == 13:
-          apply_angle = -70
-
+          apply_angle = -20
         test_results8 = CS.out.steeringAngleDeg
-        failed_test = 0
         if start_angle != test_results8:
           print("TEST 8 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 1
+          failed_test = 8
         if start_angle != test_results8 or fail_count > 0 or failed_test != 0:
           print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
           self.test_count = 0
