@@ -201,7 +201,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     int desired_angle = raw_angle_can - 10000;
     //bool steer_enabled = (GET_BYTE(to_send, 2) >> 7); //
     // Rate limit check
-    if (controls_allowed && steer_enabled) {
+    if (controls_allowed) { //&& steer_enabled) {
       float delta_angle_float;
       delta_angle_float = (interpolate(HYUNDAI_LOOKUP_ANGLE_RATE_UP, vehicle_speed) * HYUNDAI_DEG_TO_CAN);
       int delta_angle_up = (int)(delta_angle_float) + 1;
