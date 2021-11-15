@@ -323,7 +323,7 @@ class CarController():
 ####################################PANDA TESTER###########################################
 #Panda should not allow any controls as this is invalid to safety model.
     if CS.lkas_button_on != CS.prev_lkas_button:
-      print("TESTING PANDA")
+      print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! VEHICLE SPEED MUST BE ZERO TO START TEST!")
       if CS.out.vEgo < 2.:
         print("TEST ACTIVE")
         apply_angle = 80
