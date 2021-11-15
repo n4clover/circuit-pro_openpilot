@@ -340,7 +340,6 @@ class CarController():
         self.fail_count = 0
         print("TEST 1 ACTIVE")
         apply_angle = 90
-        self.test_count += 1
       elif self.test_count == 2:
         apply_angle = -90
         self.test_results1 = CS.out.steeringAngleDeg
