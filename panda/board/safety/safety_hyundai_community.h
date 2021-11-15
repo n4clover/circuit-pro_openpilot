@@ -15,7 +15,7 @@ const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value fr
     {0., 6., 16.},
     {1.22, 1.02, 0.72}};
 
-const int HYUNDAI_DEG_TO_CAN = 10;
+const int HYUNDAI_DEG_TO_CAN = 1;
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
@@ -194,7 +194,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       }
     }
     if(addr == 897) { // SPAS Steering Rate Limit Check
-    // Steering control: (0.1 * val) - 3276.8 in deg.
+    // Steering control: (0.1 * val) - 1000 in deg.
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
