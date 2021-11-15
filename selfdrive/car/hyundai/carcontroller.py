@@ -323,27 +323,39 @@ class CarController():
 ####################################PANDA TESTER###########################################
 #Panda should not allow any controls as this is invalid to safety model.
     if CS.lkas_button_on != CS.prev_lkas_button:
-      print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! VEHICLE SPEED MUST BE ZERO TO START TEST!")
-      if CS.out.vEgo < 2.:
+      print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! !DO NOT TOUCH OR MOVE WHEEL! !VEHICLE SPEED MUST BE ZERO TO START TEST!")
+      if CS.out.vEgo < 1.:
         print("TEST ACTIVE")
+        test_results0 = CS.out.steeringAngleDeg
+        apply_angle = 10
+        apply_angle = -10
+        test_results1 = CS.out.steeringAngleDeg
+        apply_angle = 20
+        apply_angle = -20
+        test_results2 = CS.out.steeringAngleDeg
+        apply_angle = 30
+        apply_angle = -30
+        test_results3 = CS.out.steeringAngleDeg
+        apply_angle = 40
+        apply_angle = -40
+        test_results4 = CS.out.steeringAngleDeg
+        apply_angle = 50
+        apply_angle = -50
+        test_results5 = CS.out.steeringAngleDeg
+        apply_angle = 60
+        apply_angle = -60
+        test_results6 = CS.out.steeringAngleDeg
+        apply_angle = 70
+        apply_angle = -70
+        test_results7 = CS.out.steeringAngleDeg
         apply_angle = 80
-        time.sleep(.1)
         apply_angle = -80
-        time.sleep(.1)
-        apply_angle = 80
-        time.sleep(.1)
-        apply_angle = -80
-        time.sleep(.1)
-        apply_angle = 80
-        time.sleep(.1)
-        apply_angle = -80
-        time.sleep(.1)
-        apply_angle = 80
-        time.sleep(.1)
-        apply_angle = -80
-        time.sleep(.1)
-        print("TEST COMPLETE! STEERING SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
-    
+        test_results8 = CS.out.steeringAngleDeg
+        final_results = (test_results1 + test_results2 + test_results3 + test_results4 + test_results5 + test_results6 + test_results7 + test_results8) / 8
+        if test_results0 != final_results:
+          print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
+        else:
+          print("!TEST COMPLETE! !---! !NOT SUCCESSFUL! !---!")
 ############### SPAS STATES ############## JPR
 # State 1 : Start
 # State 2 : New Request
