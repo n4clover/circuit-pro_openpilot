@@ -336,7 +336,7 @@ class CarController():
           self.test_count += 1
         if self.test_count == 1:
           apply_angle = -90
-          self.test_count += 1
+          
         test_results1 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results1:
@@ -347,26 +347,26 @@ class CarController():
           print("TEST ACTIVE")
           start_angle = CS.out.steeringAngleDeg
           apply_angle = 80
-          self.test_count += 1
+
         if self.test_count == 3:
           apply_angle = -80
-          self.test_count += 1
+
         test_results2 = CS.out.steeringAngleDeg
-        failed_test = 0
+
         if start_angle != test_results2:
           print("TEST 2 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 1
+          failed_test = 2
         if self.test_count == 4:
           print("TEST ACTIVE")
           start_angle = CS.out.steeringAngleDeg
           apply_angle = 70
-          self.test_count += 1
+
         if self.test_count == 5:
           apply_angle = -70
-          self.test_count += 1
+
         test_results3 = CS.out.steeringAngleDeg
-        failed_test = 0
+
         if start_angle != test_results3:
           print("TEST 3 !!---!! FAILED !!---!!")
           fail_count += 1
@@ -375,10 +375,10 @@ class CarController():
           print("TEST ACTIVE")
           start_angle = CS.out.steeringAngleDeg
           apply_angle = 60
-          self.test_count += 1
+
         if self.test_count == 5:
           apply_angle = -60
-          self.test_count += 1
+
         test_results4 = CS.out.steeringAngleDeg
         if start_angle != test_results4:
           print("TEST 4 !!---!! FAILED !!---!!")
@@ -388,24 +388,24 @@ class CarController():
           print("TEST ACTIVE")
           start_angle = CS.out.steeringAngleDeg
           apply_angle = 80
-          self.test_count += 1
+
         if self.test_count == 7:
           apply_angle = -80
-          self.test_count += 1
+
         test_results5 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results5:
           print("TEST 5 !!---!! FAILED !!---!!")
-          fail_count += 1
+
           failed_test = 1
         if self.test_count == 8:
           print("TEST ACTIVE")
           start_angle = CS.out.steeringAngleDeg
           apply_angle = 70
-          self.test_count += 1
+
         if self.test_count == 9:
           apply_angle = -70
-          self.test_count += 1
+
         test_results6 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results6:
@@ -416,10 +416,10 @@ class CarController():
           print("TEST ACTIVE")
           start_angle = CS.out.steeringAngleDeg
           apply_angle = 80
-          self.test_count += 1
+
         if self.test_count == 11:
           apply_angle = -80
-          self.test_count += 1
+
         test_results7 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results7:
@@ -430,10 +430,10 @@ class CarController():
           print("TEST ACTIVE")
           start_angle = CS.out.steeringAngleDeg
           apply_angle = 70
-          self.test_count += 1
+
         if self.test_count == 13:
           apply_angle = -70
-          self.test_count += 1
+
         test_results8 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results8:
@@ -526,4 +526,5 @@ class CarController():
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
       self.spas_active_last = spas_active
+      self.test_count += 1
     return can_sends
