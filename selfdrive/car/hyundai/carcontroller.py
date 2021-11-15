@@ -1,5 +1,6 @@
 from common.numpy_fast import clip, interp
 import numpy as np
+import time
 import os
 from random import randint
 from cereal import car
@@ -326,14 +327,22 @@ class CarController():
       if CS.out.vEgo < 2.:
         print("TEST ACTIVE")
         apply_angle = 80
+        time.sleep(.1)
         apply_angle = -80
+        time.sleep(.1)
         apply_angle = 80
+        time.sleep(.1)
         apply_angle = -80
+        time.sleep(.1)
         apply_angle = 80
+        time.sleep(.1)
         apply_angle = -80
+        time.sleep(.1)
         apply_angle = 80
+        time.sleep(.1)
         apply_angle = -80
-        print("TEST COMPLETE! STEERING SHOULD NOT HAVE JERKED OR MOVEED")
+        time.sleep(.1)
+        print("TEST COMPLETE! STEERING SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
     
 ############### SPAS STATES ############## JPR
 # State 1 : Start
