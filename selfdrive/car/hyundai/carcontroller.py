@@ -218,7 +218,7 @@ class CarController():
 
     if enabled: # Enable count so we don't spam cancel to SCC - JPR
       self.enabled_cnt = 1
-    if self.enabled_cnt == 3:
+    if self.enabled_cnt == 5:
       self.enabled_cnt = 0
 
     # fix auto resume - by neokii
