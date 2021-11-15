@@ -85,6 +85,7 @@ class CarController():
     self.test_results3 = 0
     self.fail_count = 0
     self.failed_test = 0
+    self.start_angle = 0
 
 
     if CP.spasEnabled:
@@ -331,9 +332,11 @@ class CarController():
       print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! !DO NOT TOUCH OR MOVE WHEEL! !VEHICLE SPEED MUST BE ZERO TO START TEST!")
       self.fail_count = 0
       self.failed_test = 0
+      self.test_count = 0
+      self.start_angle = 0
       self.test_count = 1
     if CS.out.vEgo < 1.:
-      start_angle = CS.out.steeringAngleDeg
+      self.start_angle = CS.out.steeringAngleDeg
       if self.test_count == 1:
         self.fail_count = 0
         print("TEST 1 ACTIVE")
@@ -343,7 +346,7 @@ class CarController():
         apply_angle = -90
         self.test_results1 = CS.out.steeringAngleDeg
         self.failed_test = 0
-        if start_angle != self.test_results1:
+        if self.start_angle != self.test_results1:
           print("TEST 1 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 1
@@ -353,7 +356,7 @@ class CarController():
       elif self.test_count == 4:
         apply_angle = -80
         self.test_results2 = CS.out.steeringAngleDeg
-        if start_angle != self.test_results2:
+        if self.start_angle != self.test_results2:
           print("TEST 2 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 2
@@ -363,7 +366,7 @@ class CarController():
       elif self.test_count == 6:
         apply_angle = -70
         self.test_results3 = CS.out.steeringAngleDeg
-        if start_angle != self.test_results3:
+        if self.start_angle != self.test_results3:
           print("TEST 3 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 3
@@ -373,7 +376,7 @@ class CarController():
       elif self.test_count == 8:
         apply_angle = -60
         self.test_results4 = CS.out.steeringAngleDeg
-        if start_angle != self.test_results4:
+        if self.start_angle != self.test_results4:
           print("TEST 4 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 4
@@ -384,7 +387,7 @@ class CarController():
         apply_angle = -50
         self.test_results5 = CS.out.steeringAngleDeg
         self.failed_test = 0
-        if start_angle != self.test_results5:
+        if self.start_angle != self.test_results5:
           print("TEST 5 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 5
@@ -394,7 +397,7 @@ class CarController():
       elif self.test_count == 12:
         apply_angle = -40
         self.test_results6 = CS.out.steeringAngleDeg
-        if start_angle != self.test_results6:
+        if self.start_angle != self.test_results6:
           print("TEST 6 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 6
@@ -403,7 +406,7 @@ class CarController():
       elif self.test_count == 14:
         apply_angle = -30
         self.test_results7 = CS.out.steeringAngleDeg
-        if start_angle != self.test_results7:
+        if self.start_angle != self.test_results7:
           print("TEST 7 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 7
@@ -413,11 +416,11 @@ class CarController():
       elif self.test_count == 16:
         apply_angle = -20
         self.test_results8 = CS.out.steeringAngleDeg
-        if start_angle != self.test_results8:
+        if self.start_angle != self.test_results8:
           print("TEST 8 !!---!! FAILED !!---!!")
           self.fail_count += 1
           self.failed_test = 8
-        if start_angle != self.test_results8 or self.fail_count == 0 or self.failed_test == 0:
+        if self.start_angle != self.test_results8 or self.fail_count == 0 or self.failed_test == 0:
           print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
           self.test_count = 0
         else:
