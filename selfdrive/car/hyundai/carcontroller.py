@@ -335,7 +335,7 @@ class CarController():
       start_angle = CS.out.steeringAngleDeg
       if self.test_count == 1:
         self.fail_count = 0
-        print("TEST ACTIVE")
+        print("TEST 1 ACTIVE")
         apply_angle = 90
         self.test_count += 1
       elif self.test_count == 2:
@@ -347,7 +347,7 @@ class CarController():
           self.fail_count += 1
           failed_test = 1
       elif self.test_count == 3:
-        print("TEST ACTIVE")
+        print("TEST 2 ACTIVE")
         apply_angle = 80
       elif self.test_count == 4:
         apply_angle = -80
@@ -357,7 +357,7 @@ class CarController():
           self.fail_count += 1
           failed_test = 2
       elif self.test_count == 5:
-        print("TEST ACTIVE")
+        print("TEST 3 ACTIVE")
         apply_angle = 70
       elif self.test_count == 6:
         apply_angle = -70
@@ -367,7 +367,7 @@ class CarController():
           self.fail_count += 1
           failed_test = 3
       elif self.test_count == 7:
-        print("TEST ACTIVE")
+        print("TEST 4 ACTIVE")
         apply_angle = 60
       elif self.test_count == 8:
         apply_angle = -60
@@ -377,7 +377,7 @@ class CarController():
           self.fail_count += 1
           failed_test = 4
       elif self.test_count == 9:
-        print("TEST ACTIVE")
+        print("TEST 5 ACTIVE")
         apply_angle = 50
       elif self.test_count == 10:
         apply_angle = -50
@@ -388,7 +388,7 @@ class CarController():
           self.fail_count += 1
           failed_test = 5
       elif self.test_count == 11:
-        print("TEST ACTIVE")
+        print("TEST 6 ACTIVE")
         apply_angle = 40
       elif self.test_count == 12:
         apply_angle = -40
@@ -398,7 +398,7 @@ class CarController():
           self.fail_count += 1
           failed_test = 6
       elif self.test_count == 13:
-        print("TEST ACTIVE")
+        print("TEST 7 ACTIVE")
       elif self.test_count == 14:
         apply_angle = -30
         self.test_results7 = CS.out.steeringAngleDeg
@@ -407,7 +407,7 @@ class CarController():
           self.fail_count += 1
           failed_test = 7
       elif self.test_count == 15:
-        print("TEST ACTIVE")
+        print("TEST 8 ACTIVE")
         apply_angle = 20
       elif self.test_count == 16:
         apply_angle = -20
