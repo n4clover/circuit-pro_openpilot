@@ -81,6 +81,8 @@ class CarController():
     self.cnt = 0
     self.cut_steer = False
     self.emsType = CP.emsType
+    self.test_count = 0
+
 
     if CP.spasEnabled:
       self.last_apply_angle = 0.0
@@ -322,75 +324,132 @@ class CarController():
         can_sends.append(create_hda_mfc(self.packer, activated_hda, state))
 ####################################PANDA TESTER###########################################
 #Panda should not allow any controls as this is invalid to safety model.
-    if CS.lkas_button_on != CS.prev_lkas_button:
+    if CS.lkas_button_on != CS.prev_lkas_button or self.test_count > 0:
       print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! !DO NOT TOUCH OR MOVE WHEEL! !VEHICLE SPEED MUST BE ZERO TO START TEST!")
       fail_count = 0
       if CS.out.vEgo < 1.:
-        print("TEST ACTIVE")
-        start_angle = CS.out.steeringAngleDeg
-        apply_angle = 90
-        apply_angle = -90
+        if self.test_count == 0:
+          fail_count = 0
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 90
+          self.test_count += 1
+        if self.test_count == 1:
+          apply_angle = -90
+          self.test_count += 1
         test_results1 = CS.out.steeringAngleDeg
         failed_test = 0
         if start_angle != test_results1:
           print("TEST 1 !!---!! FAILED !!---!!")
           fail_count += 1
           failed_test = 1
-        apply_angle = 80
-        apply_angle = -80
+        if self.test_count == 2:
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 80
+          self.test_count += 1
+        if self.test_count == 3:
+          apply_angle = -80
+          self.test_count += 1
         test_results2 = CS.out.steeringAngleDeg
+        failed_test = 0
         if start_angle != test_results2:
           print("TEST 2 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 2
-        apply_angle = 70
-        apply_angle = -70
+          failed_test = 1
+        if self.test_count == 4:
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 70
+          self.test_count += 1
+        if self.test_count == 5:
+          apply_angle = -70
+          self.test_count += 1
         test_results3 = CS.out.steeringAngleDeg
+        failed_test = 0
         if start_angle != test_results3:
           print("TEST 3 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 3
-        apply_angle = 60
-        apply_angle = -60
+          failed_test = 1
+        if self.test_count == 4:
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 60
+          self.test_count += 1
+        if self.test_count == 5:
+          apply_angle = -60
+          self.test_count += 1
         test_results4 = CS.out.steeringAngleDeg
         if start_angle != test_results4:
           print("TEST 4 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 4
-        apply_angle = 50
-        apply_angle = -50
+          failed_test = 1
+        if self.test_count == 6:
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 80
+          self.test_count += 1
+        if self.test_count == 7:
+          apply_angle = -80
+          self.test_count += 1
         test_results5 = CS.out.steeringAngleDeg
+        failed_test = 0
         if start_angle != test_results5:
           print("TEST 5 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 5
-        apply_angle = 40
-        apply_angle = -40
+          failed_test = 1
+        if self.test_count == 8:
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 70
+          self.test_count += 1
+        if self.test_count == 9:
+          apply_angle = -70
+          self.test_count += 1
         test_results6 = CS.out.steeringAngleDeg
+        failed_test = 0
         if start_angle != test_results6:
           print("TEST 6 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 6
-        apply_angle = 30
-        apply_angle = -30
+          failed_test = 1
+        if self.test_count == 10:
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 80
+          self.test_count += 1
+        if self.test_count == 11:
+          apply_angle = -80
+          self.test_count += 1
         test_results7 = CS.out.steeringAngleDeg
+        failed_test = 0
         if start_angle != test_results7:
           print("TEST 7 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 7
-        apply_angle = 20
-        apply_angle = -20
+          failed_test = 1
+        if self.test_count == 12:
+          print("TEST ACTIVE")
+          start_angle = CS.out.steeringAngleDeg
+          apply_angle = 70
+          self.test_count += 1
+        if self.test_count == 13:
+          apply_angle = -70
+          self.test_count += 1
         test_results8 = CS.out.steeringAngleDeg
+        failed_test = 0
         if start_angle != test_results8:
           print("TEST 8 !!---!! FAILED !!---!!")
           fail_count += 1
-          failed_test = 8
+          failed_test = 1
         if start_angle != test_results8 or fail_count > 0 or failed_test != 0:
           print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
+          self.test_count = 0
         else:
           print("!TEST THAT FAILED!", failed_test)
           print("!FAIL COUNT! : ", fail_count)
           print("!TEST COMPLETE! !---! !NOT SUCCESSFUL! !---!")
+          print("DEVIATION : Test 1 : ", test_results1, " : Test 2 : ", test_results2, " : Test 3 : ", test_results3, " : Test 4 : ", test_results4, " : Test 5 : ", test_results5, " : Test 6 : ", test_results6, " : Test 7 : ", test_results7, " : Test 8 : ", test_results8)
+          self.test_count = 0
+
 ############### SPAS STATES ############## JPR
 # State 1 : Start
 # State 2 : New Request
