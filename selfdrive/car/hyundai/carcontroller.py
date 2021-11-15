@@ -84,6 +84,7 @@ class CarController():
     self.test_count = 0
     self.test_results3 = 0
     self.fail_count = 0
+    self.failed_test = 0
 
 
     if CP.spasEnabled:
@@ -329,7 +330,7 @@ class CarController():
     if CS.lkas_button_on != CS.prev_lkas_button:
       print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! !DO NOT TOUCH OR MOVE WHEEL! !VEHICLE SPEED MUST BE ZERO TO START TEST!")
       self.fail_count = 0
-      failed_test = 0
+      self.failed_test = 0
       self.test_count = 1
     if CS.out.vEgo < 1.:
       start_angle = CS.out.steeringAngleDeg
@@ -341,11 +342,11 @@ class CarController():
       elif self.test_count == 2:
         apply_angle = -90
         self.test_results1 = CS.out.steeringAngleDeg
-        failed_test = 0
+        self.failed_test = 0
         if start_angle != self.test_results1:
           print("TEST 1 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 1
+          self.failed_test = 1
       elif self.test_count == 3:
         print("TEST 2 ACTIVE")
         apply_angle = 80
@@ -355,7 +356,7 @@ class CarController():
         if start_angle != self.test_results2:
           print("TEST 2 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 2
+          self.failed_test = 2
       elif self.test_count == 5:
         print("TEST 3 ACTIVE")
         apply_angle = 70
@@ -365,7 +366,7 @@ class CarController():
         if start_angle != self.test_results3:
           print("TEST 3 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 3
+          self.failed_test = 3
       elif self.test_count == 7:
         print("TEST 4 ACTIVE")
         apply_angle = 60
@@ -375,18 +376,18 @@ class CarController():
         if start_angle != self.test_results4:
           print("TEST 4 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 4
+          self.failed_test = 4
       elif self.test_count == 9:
         print("TEST 5 ACTIVE")
         apply_angle = 50
       elif self.test_count == 10:
         apply_angle = -50
         self.test_results5 = CS.out.steeringAngleDeg
-        failed_test = 0
+        self.failed_test = 0
         if start_angle != self.test_results5:
           print("TEST 5 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 5
+          self.failed_test = 5
       elif self.test_count == 11:
         print("TEST 6 ACTIVE")
         apply_angle = 40
@@ -396,7 +397,7 @@ class CarController():
         if start_angle != self.test_results6:
           print("TEST 6 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 6
+          self.failed_test = 6
       elif self.test_count == 13:
         print("TEST 7 ACTIVE")
       elif self.test_count == 14:
@@ -405,7 +406,7 @@ class CarController():
         if start_angle != self.test_results7:
           print("TEST 7 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 7
+          self.failed_test = 7
       elif self.test_count == 15:
         print("TEST 8 ACTIVE")
         apply_angle = 20
@@ -415,12 +416,12 @@ class CarController():
         if start_angle != self.test_results8:
           print("TEST 8 !!---!! FAILED !!---!!")
           self.fail_count += 1
-          failed_test = 8
-        if start_angle != self.test_results8 or self.fail_count == 0 or failed_test == 0:
+          self.failed_test = 8
+        if start_angle != self.test_results8 or self.fail_count == 0 or self.failed_test == 0:
           print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
           self.test_count = 0
         else:
-          print("!TEST THAT FAILED!", failed_test)
+          print("!TEST THAT FAILED!", self.failed_test)
           print("!FAIL COUNT! : ", self.fail_count)
           print("!TEST COMPLETE! !---! !NOT SUCCESSFUL! !---!")
           print("DEVIATION : Test 1 : ", self.test_results1, " : Test 2 : ", self.test_results2, " : Test 3 : ", self.test_results3, " : Test 4 : ", self.test_results4, " : Test 5 : ", self.test_results5, " : Test 6 : ", self.test_results6, " : Test 7 : ", self.test_results7, " : Test 8 : ", self.test_results8)
