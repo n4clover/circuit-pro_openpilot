@@ -17,7 +17,7 @@ const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value fr
     {0.5, 1.02, 0.72}};
     //{1.22, 1.02, 0.72}};
 
-const int HYUNDAI_DEG_TO_CAN = 1;
+const int HYUNDAI_DEG_TO_CAN = 10;
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
@@ -200,7 +200,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
-    int desired_angle = raw_angle_can - 3276.8;
+    int desired_angle = raw_angle_can - 10000;
     puts("desired angle"); puth(desired_angle); puts("\n");
     bool steer_enabled = ((((GET_BYTE(to_send, 1) & 0x7) << 1) | GET_BYTE(to_send, 0) >> 7) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
     // Rate limit check
