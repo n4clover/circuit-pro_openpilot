@@ -83,6 +83,7 @@ class CarController():
     self.emsType = CP.emsType
     self.test_count = 0
     self.test_results3 = 0
+    self.fail_count = 0
 
 
     if CP.spasEnabled:
@@ -327,13 +328,13 @@ class CarController():
 #Panda should not allow any controls as this is invalid to safety model.
     if CS.lkas_button_on != CS.prev_lkas_button:
       print("!!!TESTING PANDA!!! DO NOT MOVE VEHICLE! !DO NOT TOUCH OR MOVE WHEEL! !VEHICLE SPEED MUST BE ZERO TO START TEST!")
-      fail_count = 0
+      self.fail_count = 0
       failed_test = 0
       self.test_count = 1
     if CS.out.vEgo < 1.:
       start_angle = CS.out.steeringAngleDeg
       if self.test_count == 1:
-        fail_count = 0
+        self.fail_count = 0
         print("TEST ACTIVE")
         apply_angle = 90
         self.test_count += 1
@@ -343,7 +344,7 @@ class CarController():
         failed_test = 0
         if start_angle != self.test_results1:
           print("TEST 1 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 1
       elif self.test_count == 3:
         print("TEST ACTIVE")
@@ -353,7 +354,7 @@ class CarController():
         self.test_results2 = CS.out.steeringAngleDeg
         if start_angle != self.test_results2:
           print("TEST 2 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 2
       elif self.test_count == 5:
         print("TEST ACTIVE")
@@ -363,7 +364,7 @@ class CarController():
         self.test_results3 = CS.out.steeringAngleDeg
         if start_angle != self.test_results3:
           print("TEST 3 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 3
       elif self.test_count == 7:
         print("TEST ACTIVE")
@@ -373,7 +374,7 @@ class CarController():
         self.test_results4 = CS.out.steeringAngleDeg
         if start_angle != self.test_results4:
           print("TEST 4 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 4
       elif self.test_count == 9:
         print("TEST ACTIVE")
@@ -384,7 +385,7 @@ class CarController():
         failed_test = 0
         if start_angle != self.test_results5:
           print("TEST 5 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 5
       elif self.test_count == 11:
         print("TEST ACTIVE")
@@ -394,7 +395,7 @@ class CarController():
         self.test_results6 = CS.out.steeringAngleDeg
         if start_angle != self.test_results6:
           print("TEST 6 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 6
       elif self.test_count == 13:
         print("TEST ACTIVE")
@@ -403,7 +404,7 @@ class CarController():
         self.test_results7 = CS.out.steeringAngleDeg
         if start_angle != self.test_results7:
           print("TEST 7 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 7
       elif self.test_count == 15:
         print("TEST ACTIVE")
@@ -413,14 +414,14 @@ class CarController():
         self.test_results8 = CS.out.steeringAngleDeg
         if start_angle != self.test_results8:
           print("TEST 8 !!---!! FAILED !!---!!")
-          fail_count += 1
+          self.fail_count += 1
           failed_test = 8
-        if start_angle != self.test_results8 or fail_count == 0 or failed_test == 0:
+        if start_angle != self.test_results8 or self.fail_count == 0 or failed_test == 0:
           print("!TEST COMPLETE! --- APPEARS SUCCESSFUL FROM DATA! --- !THE STEERING WHEEL SHOULD NOT HAVE JERKED OR MOVEED AT ALL PANDA SHOULD HAVE FILTERD IT AND NOT ALLOWED CONTROLS!")
           self.test_count = 0
         else:
           print("!TEST THAT FAILED!", failed_test)
-          print("!FAIL COUNT! : ", fail_count)
+          print("!FAIL COUNT! : ", self.fail_count)
           print("!TEST COMPLETE! !---! !NOT SUCCESSFUL! !---!")
           print("DEVIATION : Test 1 : ", self.test_results1, " : Test 2 : ", self.test_results2, " : Test 3 : ", self.test_results3, " : Test 4 : ", self.test_results4, " : Test 5 : ", self.test_results5, " : Test 6 : ", self.test_results6, " : Test 7 : ", self.test_results7, " : Test 8 : ", self.test_results8)
           self.test_count = 0
