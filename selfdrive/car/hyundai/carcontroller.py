@@ -322,7 +322,9 @@ class CarController():
 ####################################PANDA TESTER###########################################
 #Panda should not allow any controls as this is invalid to safety model.
     if CS.lkas_button_on != CS.prev_lkas_button:
-      if CS.out.vEgo < 0.1:
+      print("TESTING PANDA")
+      if CS.out.vEgo < 2.:
+        print("TEST ACTIVE")
         apply_angle = 80
         apply_angle = -80
         apply_angle = 80
@@ -331,6 +333,7 @@ class CarController():
         apply_angle = -80
         apply_angle = 80
         apply_angle = -80
+        print("TEST COMPLETE! STEERING SHOULD NOT HAVE JERKED OR MOVEED")
     
 ############### SPAS STATES ############## JPR
 # State 1 : Start
