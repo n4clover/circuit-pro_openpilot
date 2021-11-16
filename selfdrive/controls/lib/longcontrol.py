@@ -24,7 +24,7 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target, v_
                         ((v_pid < stopping_target_speed and v_target < stopping_target_speed) or
                          brake_pressed))
 
-  stopping_condition = stopping_condition or (v_ego < 2. and v_target < 2.)
+  stopping_condition = stopping_condition or (v_ego < 2. and v_target < 3.)
   starting_condition = v_target > CP.vEgoStarting and not cruise_standstill
   
   # neokii
