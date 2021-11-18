@@ -105,6 +105,12 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
+    if (addr == 914 && bus == HKG_mdps_bus) {
+      int driver_torque_new = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
+      // update array of samples
+      update_sample(&driver_torque, driver_torque_new);
+    }
+
     if (addr == 1056 && !OP_SCC_live) { // for cars without long control
       // 2 bits: 13-14
       int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
@@ -211,14 +217,6 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       ts_last = ts;
     }
   }
-  if (addr == 914){
-    //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
-    // We use 1/10 deg as a unit here
-    //if (abs(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
-    //  violation = 1;
-    //  puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
-    //}
-  }
 
   if (addr == 912) { // SPAS Steering Rate Limit Check
     bool steer_enabled = ((((GET_BYTE(to_send, 1) & 0x7) << 1) | GET_BYTE(to_send, 0) >> 7) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
@@ -241,6 +239,10 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     if(!controls_allowed && steer_enabled) {
       violation = 1;
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
+    }
+    if (abs(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
+      violation = 1;
+      puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
     }
   }
 
