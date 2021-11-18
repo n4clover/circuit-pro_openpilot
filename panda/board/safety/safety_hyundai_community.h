@@ -23,7 +23,7 @@ const int HYUNDAI_SPAS_OVERRIDE_TQ = 290; // = torque_driver / 100 = NM  Set wit
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
-  {897, 0, 8}, {897, 1, 8}, // MDPS11 Bus 0, 1
+  {897, 0, 8}, {897, 2, 8}, // MDPS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4}, // CLU11 Bus 0, 1, 2
   {1157, 0, 4}, // LFAHDA_MFC Bus 0
   {593, 2, 8},  // MDPS12, Bus 2
