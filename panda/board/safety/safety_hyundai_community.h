@@ -162,7 +162,6 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     tx = 0;
     puts("  CAN TX not allowed LKAS on bus0"); puts("\n");
   }
-  puts("    TEST    TEST    TEST    "); puts("\n");
 
   // LKA STEER: safety check
   if (addr == 832) {
@@ -222,10 +221,11 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   if(addr == 897) { // SPAS Steering Rate Limit Check
     //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
     // We use 1/10 deg as a unit here
+    puts("    TEST    TEST    TEST    "); puts("\n");
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
-    puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
+    puts("    Raw CAN Angle   "); puth(raw_angle_can); puts("\n");
     int desired_angle = raw_angle_can;
-    puts("desired angle"); puth(desired_angle); puts("\n");
+    puts("    desired angle   "); puth(desired_angle); puts("\n");
     bool steer_enabled = ((((GET_BYTE(to_send, 1) & 0x7) << 1) | GET_BYTE(to_send, 0) >> 7) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
     // Rate limit check
     if (controls_allowed && steer_enabled) {
