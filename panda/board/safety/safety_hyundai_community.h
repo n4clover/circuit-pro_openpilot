@@ -23,7 +23,7 @@ const int HYUNDAI_SPAS_OVERRIDE_TQ = 290; // = torque_driver / 100 = NM  Set wit
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
-  {897, 0, 8}, {897, 2, 8}, // MDPS11 Bus 0, 1
+  {914, 0, 8}, {914, 1, 8}, // MDPS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4}, // CLU11 Bus 0, 1, 2
   {1157, 0, 4}, // LFAHDA_MFC Bus 0
   {593, 2, 8},  // MDPS12, Bus 2
@@ -211,14 +211,21 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       ts_last = ts;
     }
   }
-
-  if (addr == 897) { // SPAS Steering Rate Limit Check
+  if (addr == 914){
     //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
     // We use 1/10 deg as a unit here
+    //if (abs(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
+    //  violation = 1;
+    //  puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
+    //}
+  }
+
+  if (addr == 912) { // SPAS Steering Rate Limit Check
+    bool steer_enabled = ((((GET_BYTE(to_send, 1) & 0x7) << 1) | GET_BYTE(to_send, 0) >> 7) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     puts("    Raw CAN Angle   "); puth(raw_angle_can); puts("\n");
+    puts("    steer enabled   "); puth(steer_enabled); puts("\n");
     int desired_angle = raw_angle_can;
-    bool steer_enabled = ((((GET_BYTE(to_send, 1) & 0x7) << 1) | GET_BYTE(to_send, 0) >> 7) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
     // Rate limit check
     if (controls_allowed && steer_enabled) {
       float delta_angle_float;
@@ -229,10 +236,6 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
       int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
       violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
-      //if (abs(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
-      //  violation = 1;
-      //  puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
-      //}
     }
     desired_angle_last = desired_angle;
     if(!controls_allowed && steer_enabled) {
