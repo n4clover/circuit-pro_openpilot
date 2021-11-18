@@ -151,6 +151,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int tx = 1;
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
+  bool violation = 0;
 
   if (!msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]))) {
     tx = 0;
@@ -167,7 +168,6 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     OP_LKAS_live = 20;
     int desired_torque = ((GET_BYTES_04(to_send) >> 16) & 0x7ff) - 1024;
     uint32_t ts = microsecond_timer_get();
-    bool violation = 0;
 
     if (controls_allowed) {
 
@@ -198,7 +198,25 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
         ts_last = ts;
       }
     }
-    if(addr == 897) { // SPAS Steering Rate Limit Check
+
+    // no torque if controls is not allowed
+    if (!controls_allowed && (desired_torque != 0)) {
+      violation = 1;
+      puts("  LKAS torque not allowed: controls not allowed!"); puts("\n");
+    }
+
+    // reset to 0 if either controls is not allowed or there's a violation
+    if (!controls_allowed) { // a reset worsen the issue of Panda blocking some valid LKAS messages
+      desired_torque_last = 0;
+      rt_torque_last = 0;
+      ts_last = ts;
+    }
+
+    if (violation) {
+      tx = 0;
+    }
+  }
+  if(addr == 897) { // SPAS Steering Rate Limit Check
     //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read mdps11 driver torque
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
@@ -216,7 +234,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
       int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
       violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
-      //if (abs(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ){
+      //if (abs(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
       //  violation = 1;
       //  puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
       //}
@@ -227,25 +245,12 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
   }
-  if
-    // no torque if controls is not allowed
-    if (!controls_allowed && (desired_torque != 0)) {
-      violation = 1;
-      puts("  LKAS torque not allowed: controls not allowed!"); puts("\n");
-    }
-
-    // reset to 0 if either controls is not allowed or there's a violation
-    if (!controls_allowed) { // a reset worsen the issue of Panda blocking some valid LKAS messages
-      desired_torque_last = 0;
-      rt_torque_last = 0;
-      ts_last = ts;
-    }
-
-    if (violation) {
-      tx = 0;
-      controls_allowed = 0;
-    }
+    if(violation) {
+    tx = 0;
+    controls_allowed = 0;
   }
+  return tx;
+}
 
   // FORCE CANCEL: safety check only relevant when spamming the cancel button.
   // ensuring that only the cancel button press is sent (VAL 4) when controls are off.
