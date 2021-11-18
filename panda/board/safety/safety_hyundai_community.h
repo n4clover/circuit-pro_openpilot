@@ -152,7 +152,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
     bool violation = 0;
-    
+
   if (!msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]))) {
     tx = 0;
     puts("  CAN TX not allowed: "); puth(addr); puts(", "); puth(bus); puts("\n");
@@ -218,7 +218,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     }
   }
     if(addr == 897) { // SPAS Steering Rate Limit Check
-    //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read mdps11 driver torque
+    //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
