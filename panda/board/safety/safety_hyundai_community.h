@@ -19,6 +19,8 @@ const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value fr
 
 const int HYUNDAI_DEG_TO_CAN = 10; 
 
+const int HYUNDAI_SPAS_OVERRIDE_TQ = 290; // = torque_driver / 100 = NM  Set with a little headroom over the carcontroller set override torque.
+
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4}, // CLU11 Bus 0, 1, 2
@@ -197,6 +199,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       }
     }
     if(addr == 897) { // SPAS Steering Rate Limit Check
+    //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read mdps11 driver torque
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     puts("Raw CAN Angle"); puth(raw_angle_can); puts("\n");
@@ -213,6 +216,10 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
       int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
       violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+      //if (abs(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ){
+      //  violation = 1;
+      //  puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
+      //}
     }
     desired_angle_last = desired_angle;
     if(!controls_allowed && steer_enabled) {
@@ -220,6 +227,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
   }
+  if
     // no torque if controls is not allowed
     if (!controls_allowed && (desired_torque != 0)) {
       violation = 1;
