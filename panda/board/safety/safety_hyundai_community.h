@@ -23,6 +23,7 @@ const int HYUNDAI_SPAS_OVERRIDE_TQ = 290; // = torque_driver / 100 = NM  Set wit
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
+  {897, 0, 8}, {897, 1, 8}, // MDPS11 Bus 0, 1
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4}, // CLU11 Bus 0, 1, 2
   {1157, 0, 4}, // LFAHDA_MFC Bus 0
   {593, 2, 8},  // MDPS12, Bus 2
@@ -218,7 +219,6 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
     puts("    Raw CAN Angle   "); puth(raw_angle_can); puts("\n");
     int desired_angle = raw_angle_can;
-    puts("    desired angle   "); puth(desired_angle); puts("\n");
     bool steer_enabled = ((((GET_BYTE(to_send, 1) & 0x7) << 1) | GET_BYTE(to_send, 0) >> 7) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
     // Rate limit check
     if (controls_allowed && steer_enabled) {
@@ -241,11 +241,11 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
   }
+
   if(violation) {
     tx = 0;
     controls_allowed = 0;
   }
-  
 
   // FORCE CANCEL: safety check only relevant when spamming the cancel button.
   // ensuring that only the cancel button press is sent (VAL 4) when controls are off.
