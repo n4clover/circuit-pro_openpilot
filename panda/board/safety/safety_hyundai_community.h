@@ -211,7 +211,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     }
   }
 
-  if(addr == 897) { // SPAS Steering Rate Limit Check
+  if (addr == 897) { // SPAS Steering Rate Limit Check
     //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
     // We use 1/10 deg as a unit here
     puts("    TEST    TEST    TEST    "); puts("\n");
