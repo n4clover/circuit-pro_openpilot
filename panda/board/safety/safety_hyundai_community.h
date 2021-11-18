@@ -105,8 +105,8 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-    if (addr == 914 && bus == HKG_mdps_bus) {
-      int driver_torque_new = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
+    if (addr == 914 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
+      int driver_torque_new = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); 
       // update array of samples
       update_sample(&driver_torque, driver_torque_new);
     }
