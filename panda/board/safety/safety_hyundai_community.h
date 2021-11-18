@@ -151,8 +151,8 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int tx = 1;
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
-  bool violation = 0;
-
+    bool violation = 0;
+    
   if (!msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]))) {
     tx = 0;
     puts("  CAN TX not allowed: "); puth(addr); puts(", "); puth(bus); puts("\n");
@@ -168,6 +168,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     OP_LKAS_live = 20;
     int desired_torque = ((GET_BYTES_04(to_send) >> 16) & 0x7ff) - 1024;
     uint32_t ts = microsecond_timer_get();
+
 
     if (controls_allowed) {
 
@@ -216,7 +217,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       tx = 0;
     }
   }
-  if(addr == 897) { // SPAS Steering Rate Limit Check
+    if(addr == 897) { // SPAS Steering Rate Limit Check
     //int driver_torque = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4)); // Read mdps11 driver torque
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 3) << 8) | GET_BYTE(to_send, 4));
@@ -247,10 +248,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   }
     if(violation) {
     tx = 0;
-    controls_allowed = 0;
   }
-  return tx;
-}
 
   // FORCE CANCEL: safety check only relevant when spamming the cancel button.
   // ensuring that only the cancel button press is sent (VAL 4) when controls are off.
