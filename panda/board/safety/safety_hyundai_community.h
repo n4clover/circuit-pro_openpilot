@@ -169,9 +169,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     int desired_torque = ((GET_BYTES_04(to_send) >> 16) & 0x7ff) - 1024;
     uint32_t ts = microsecond_timer_get();
 
-
     if (controls_allowed) {
-
       // *** global torque limit check ***
       bool torque_check = 0;
       violation |= torque_check = max_limit_check(desired_torque, HYUNDAI_MAX_STEER, -HYUNDAI_MAX_STEER);
@@ -212,10 +210,6 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       rt_torque_last = 0;
       ts_last = ts;
     }
-
-    if (violation) {
-      tx = 0;
-    }
   }
 
   if(addr == 897) { // SPAS Steering Rate Limit Check
@@ -252,6 +246,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     tx = 0;
     controls_allowed = 0;
   }
+  
 
   // FORCE CANCEL: safety check only relevant when spamming the cancel button.
   // ensuring that only the cancel button press is sent (VAL 4) when controls are off.
