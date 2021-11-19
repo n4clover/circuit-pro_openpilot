@@ -240,11 +240,11 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       violation = 1;
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
-    if (driver_torque > HYUNDAI_SPAS_OVERRIDE_TQ) {
+    if (&driver_torque > HYUNDAI_SPAS_OVERRIDE_TQ) {
       violation = 1;
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
     }
-    if (driver_torque > -HYUNDAI_SPAS_OVERRIDE_TQ) {
+    if (&driver_torque > -HYUNDAI_SPAS_OVERRIDE_TQ) {
       violation = 1;
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
     }
