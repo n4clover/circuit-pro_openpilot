@@ -46,7 +46,7 @@ DriveStats::DriveStats(QWidget* parent) : QFrame(parent) {
   add_stats_layouts("PAST WEEK", week_);
 
   /*if (auto dongleId = getDongleId()) {
-    QString url = "https://api.retropilot.org/v1.1/devices/" + *dongleId + "/stats";
+    QString url = "192.168.1.25:3000/v1.1/devices/" + *dongleId + "/stats";
     RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_DriveStats", 30);
     QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &DriveStats::parseResponse);
   }*/
