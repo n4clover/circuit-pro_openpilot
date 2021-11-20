@@ -218,7 +218,7 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
 
   if (addr == 912) { // SPAS Steering Rate Limit Check
     bool steer_enabled = ((GET_BYTE(to_send, 0) & 0xF) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
-    int raw_angle_can = ((GET_BYTE(to_send, 1) << 8) | GET_BYTE(to_send, 2));
+    int raw_angle_can = ((GET_BYTE(to_send, 2) << 8) | GET_BYTE(to_send, 1));
     puts("    Raw CAN Angle   "); puth(raw_angle_can); puts("\n");
     puts("    steer enabled   "); puth(steer_enabled); puts("\n");
     int desired_angle = raw_angle_can;
