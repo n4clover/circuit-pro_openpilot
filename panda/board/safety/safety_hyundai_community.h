@@ -235,14 +235,14 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     }
     desired_angle_last = desired_angle;
     if(!controls_allowed && steer_enabled) {
-      violation = 1;
+      //violation = 1;
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
     puts("    Driver Torque   "); puth(driver_torque); puts("\n");
-    /*if (driver_torque > HYUNDAI_SPAS_OVERRIDE_TQ) {
+    if (driver_torque > HYUNDAI_SPAS_OVERRIDE_TQ) {
       violation = 1;
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
-    }*/
+    }
     if (driver_torque < -HYUNDAI_SPAS_OVERRIDE_TQ) {
       violation = 1;
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
