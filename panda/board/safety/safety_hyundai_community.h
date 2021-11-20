@@ -105,9 +105,9 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-    if (addr == 914 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
+   /*if (addr == 914 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
       driver_torque = ((GET_BYTES_04(to_push) & 0x7ff) * 0.79) - 808;
-    }
+    */}
 
     if (addr == 1056 && !OP_SCC_live) { // for cars without long control
       // 2 bits: 13-14
@@ -239,10 +239,10 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
     puts("    Driver Torque   "); puth(driver_torque); puts("\n");
-    if (driver_torque > HYUNDAI_SPAS_OVERRIDE_TQ) {
+    /*if (driver_torque > HYUNDAI_SPAS_OVERRIDE_TQ) {
       violation = 1;
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
-    }
+    */}
     if (driver_torque < -HYUNDAI_SPAS_OVERRIDE_TQ) {
       violation = 1;
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
