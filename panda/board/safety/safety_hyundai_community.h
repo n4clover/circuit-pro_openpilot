@@ -1,3 +1,4 @@
+#include <math.h>
 int OP_LKAS_live = 0;
 int OP_MDPS_live = 0;
 int OP_CLU_live = 0;
