@@ -8,18 +8,16 @@ int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
-    {0., 6., 16.},
-    //{0.5, .5, .5}};
-    {1.12, .92, .62}};
+    {2., 30., 60.}, //kph
+    {10., 9., 8.}};  //deg
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value from car controller to leave a bit of margin.
-    {0., 6., 16.},
-    //{0.5, 0.5, 0.5}};
-    {1.22, 1.02, 0.72}};
+    {2., 30., 60.}, //kph
+    {11., 10., 9.}}; //deg 
 
 const int HYUNDAI_DEG_TO_CAN = 10; 
 
-const int HYUNDAI_SPAS_OVERRIDE_TQ = 290; // = torque_driver / 100 = NM  Set with a little headroom over the carcontroller set override torque.
+const int HYUNDAI_SPAS_OVERRIDE_TQ = 300; // = torque_driver / 100 = NM  Set with a little headroom over the carcontroller set override torque.
 
 const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {832, 0, 8}, {832, 1, 8}, // LKAS11 Bus 0, 1
@@ -27,6 +25,7 @@ const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {1265, 0, 4}, {1265, 1, 4}, {1265, 2, 4}, // CLU11 Bus 0, 1, 2
   {1157, 0, 4}, // LFAHDA_MFC Bus 0
   {593, 2, 8},  // MDPS12, Bus 2
+  {897, 2, 8},  // MDPS11, Bus 2
   {1056, 0, 8}, //   SCC11,  Bus 0
   {1057, 0, 8}, //   SCC12,  Bus 0
   {1290, 0, 8}, //   SCC13,  Bus 0
@@ -105,9 +104,10 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-   /*if (addr == 914 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
-      driver_torque = ((GET_BYTES_04(to_push) & 0x7ff) * 0.79) - 808;
-    } */
+   if (addr == 897 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
+      driver_torque = (((GET_BYTE(to_push, 2) & 0x7F) << 5) | (GET_BYTE(to_push, 1) & 0x78)) - 2048;
+      puts("   Driver Torque   "); puth(driver_torque); puts("\n");
+    } 
 
     if (addr == 1056 && !OP_SCC_live) { // for cars without long control
       // 2 bits: 13-14
@@ -143,7 +143,7 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       int hyundai_speed = GET_BYTES_04(to_push) & 0x3FFF;  // FL
       hyundai_speed += (GET_BYTES_48(to_push) >> 16) & 0x3FFF;  // RL
       hyundai_speed /= 2;
-      vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;      
+      vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;    
       vehicle_speed = hyundai_speed;
     }
     generic_rx_checks((addr == 832 && bus == 0));
@@ -218,10 +218,11 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
 
   if (addr == 912) { // SPAS Steering Rate Limit Check
     bool steer_enabled = ((GET_BYTE(to_send, 0) & 0xF) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
-    int raw_angle_can = intlog(10, ((GET_BYTE(to_send, 2) << 8) | GET_BYTE(to_send, 1)));
+    int mdps_state = (GET_BYTE(to_send, 0) & 0xF);
+    int raw_angle_can = ((GET_BYTE(to_send, 2) << 8) | GET_BYTE(to_send, 1));
     int desired_angle = to_signed(raw_angle_can, 16);
     puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
-    puts("    steer enabled   "); puth(steer_enabled); puts("\n");
+    puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
     // Rate limit check
     if (controls_allowed && steer_enabled) {
       float delta_angle_float;
@@ -238,14 +239,13 @@ static int hyundai_community_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       violation = 1;
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
-    puts("    Driver Torque   "); puth(driver_torque); puts("\n");
-    if (driver_torque > HYUNDAI_SPAS_OVERRIDE_TQ) {
-      violation = 1;
+    if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
+      //violation = 1; bugged 
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
-    }
-    if (driver_torque < -HYUNDAI_SPAS_OVERRIDE_TQ) {
-      violation = 1;
-      puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
+      if (mdps_state == 7) { // test fix need to figure out how to send state 7 to mdps from panda
+        violation = 1;
+        puts("  Driver override torque reached : Cancled  "); puts("\n");
+      }
     }
   }
 

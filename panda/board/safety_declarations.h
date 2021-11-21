@@ -117,7 +117,6 @@ uint32_t ts_last = 0;
 // for safety modes with angle steering control
 uint32_t ts_angle_last = 0;
 int desired_angle_last = 0;
-int driver_torque = 0;
 struct sample_t angle_meas;         // last 3 steer angles
 
 // This can be set with a USB command
