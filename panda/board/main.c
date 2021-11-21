@@ -1,6 +1,5 @@
 // ********************* Includes *********************
 #include "config.h"
-
 #include "drivers/pwm.h"
 #include "drivers/usb.h"
 #include "drivers/gmlan_alt.h"
