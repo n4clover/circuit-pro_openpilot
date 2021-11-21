@@ -112,7 +112,6 @@ flags = [
   "-mthumb",
   "-nostdlib",
   "-fno-builtin",
-  "-lm"
   f"-T{linkerscript_fn}",
   "-std=gnu11",
 ] + PROJECT_FLAGS
