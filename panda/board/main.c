@@ -4,7 +4,7 @@
 #include "drivers/usb.h"
 #include "drivers/gmlan_alt.h"
 #include "drivers/kline_init.h"
-
+#include "math.h"
 #include "early_init.h"
 #include "provision.h"
 
