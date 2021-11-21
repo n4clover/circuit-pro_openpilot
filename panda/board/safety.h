@@ -312,6 +312,10 @@ int set_safety_hooks(uint16_t mode, int16_t param) {
   return set_status;
 }
 
+int intlog(double base, double x) {
+    return (int)(log(x) / log(base));
+}
+
 // convert a trimmed integer to signed 32 bit int
 int to_signed(int d, int bits) {
   int d_signed = d;
