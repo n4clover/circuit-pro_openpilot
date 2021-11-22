@@ -24,9 +24,9 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target, v_
                         ((v_pid < stopping_target_speed and v_target < stopping_target_speed) or
                          brake_pressed))
 
-  stopping_condition = stopping_condition or (v_ego < 2. and v_target < 3.5 and not long_control_state == LongCtrlState.starting)
+  stopping_condition = stopping_condition or (v_ego < 2.5 and v_target < 3.5 and not long_control_state == LongCtrlState.starting and not radarState.leadOne.vLead > CP.vEgoStarting)
   starting_condition = v_target > CP.vEgoStarting and not cruise_standstill
-  
+
   # neokii
   if radarState is not None and radarState.leadOne is not None and radarState.leadOne.status:
     starting_condition = starting_condition and radarState.leadOne.vLead > CP.vEgoStarting
@@ -52,7 +52,6 @@ def long_control_state_trans(CP, active, long_control_state, v_ego, v_target, v_
         long_control_state = LongCtrlState.stopping
       elif output_accel >= CP.startAccel:
         long_control_state = LongCtrlState.pid
-
   return long_control_state
 
 

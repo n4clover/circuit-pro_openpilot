@@ -224,7 +224,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
     puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
     // Rate limit check
-    if (controls_allowed && steer_enabled) {
+    if (controls_allowed && (steer_enabled || mdps_state == 5)) {
       float delta_angle_float;
       delta_angle_float = (interpolate(HYUNDAI_LOOKUP_ANGLE_RATE_UP, vehicle_speed) * HYUNDAI_DEG_TO_CAN);
       int delta_angle_up = (int)(delta_angle_float) + 1;
