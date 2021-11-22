@@ -644,8 +644,6 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.belowSteerSpeed)
     if self.CC.turning_indicator_alert:
       events.add(EventName.turningIndicatorOn)
-    if EventName.spasEnabled in events.events: #DO NOT LET OP ENGAGE UNTIL THIS MESSAGE GOES AWAY!
-      events.add(EventName.buttonCancel)
     if self.mad_mode_enabled and EventName.pedalPressed in events.events:
       events.events.remove(EventName.pedalPressed)
 
