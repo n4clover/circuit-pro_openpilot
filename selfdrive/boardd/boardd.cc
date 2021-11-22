@@ -158,8 +158,6 @@ Panda *usb_connect(std::string serial="", uint32_t index=0) {
     return nullptr;
   }
 
-  Params params = Params();
-
   if (getenv("BOARDD_LOOPBACK")) {
     panda->set_loopback(true);
   }
@@ -239,6 +237,7 @@ void can_recv_thread(std::vector<Panda *> pandas) {
   // run at 100hz
   const uint64_t dt = 10000000ULL;
   uint64_t next_frame_time = nanos_since_boot() + dt;
+  std::vector<can_frame> raw_can_data;
 
   while (!do_exit) {
     if (!check_all_connected(pandas)){
@@ -246,8 +245,8 @@ void can_recv_thread(std::vector<Panda *> pandas) {
       break;
     }
 
-    std::vector<can_frame> raw_can_data;
     bool comms_healthy = true;
+    raw_can_data.clear();
     for (const auto& panda : pandas) {
       comms_healthy &= panda->can_receive(raw_can_data);
     }
@@ -628,11 +627,7 @@ void pigeon_thread(Panda *panda) {
   delete pigeon;
 }
 
-int main(int argc, char* argv[]) {
-  std::vector<std::thread> threads;
-  std::vector<Panda *> pandas;
-  Panda *peripheral_panda;
-
+int main(int argc, char *argv[]) {
   LOGW("starting boardd");
 
   if (!Hardware::PC()) {
@@ -646,44 +641,42 @@ int main(int argc, char* argv[]) {
   LOGW("attempting to connect");
   PubMaster pm({"pandaStates", "peripheralState"});
 
-  // connect loop
-  while (!do_exit) {
-    std::vector<std::string> serials(argv + 1, argv + argc);
-    if (serials.size() == 0) serials.push_back("");
+  std::vector<std::string> serials(argv + 1, argv + argc);
+  if (serials.size() == 0) serials.push_back("");
 
-    // connect to all provided serials
-    for (int i=0; i<serials.size(); i++) {
-      Panda *p = usb_connect(serials[i], i);
-      if (p != NULL) {
-        pandas.push_back(p);
-      }
-    }
-
-    // send empty pandaState & peripheralState and try again
-    if (pandas.size() != serials.size()) {
+  // connect to all provided serials
+  std::vector<Panda *> pandas;
+  for (int i = 0; i < serials.size() && !do_exit; /**/) {
+    Panda *p = usb_connect(serials[i], i);
+    if (!p) {
+      // send empty pandaState & peripheralState and try again
       send_empty_panda_state(&pm);
       send_empty_peripheral_state(&pm);
       util::sleep_for(500);
-    } else {
-      break;
+      continue;
     }
+
+    pandas.push_back(p);
+    ++i;
   }
 
-  peripheral_panda = pandas[0];
+  if (!do_exit) {
+    LOGW("connected to board");
+    Panda *peripheral_panda = pandas[0];
+    std::vector<std::thread> threads;
 
-  LOGW("connected to board");
+    threads.emplace_back(panda_state_thread, &pm, pandas, getenv("STARTED") != nullptr);
+    threads.emplace_back(peripheral_control_thread, peripheral_panda);
+    threads.emplace_back(pigeon_thread, peripheral_panda);
 
-  threads.emplace_back(panda_state_thread, &pm, pandas, getenv("STARTED") != nullptr);
-  threads.emplace_back(peripheral_control_thread, peripheral_panda);
-  threads.emplace_back(pigeon_thread, peripheral_panda);
+    threads.emplace_back(can_send_thread, pandas, getenv("FAKESEND") != nullptr);
+    threads.emplace_back(can_recv_thread, pandas);
 
-  threads.emplace_back(can_send_thread, pandas, getenv("FAKESEND") != nullptr);
-  threads.emplace_back(can_recv_thread, pandas);
-
-  for (auto &t : threads) t.join();
+    for (auto &t : threads) t.join();
+  }
 
   // we have exited, clean up pandas
-  for (const auto& panda : pandas){
+  for (Panda *panda : pandas) {
     delete panda;
   }
 }

@@ -26,11 +26,12 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <optional>
 
 #include <QObject>
 #include <QTimer>
 #include <QColor>
-
+#include <QTransform>
 #include "nanovg.h"
 
 #include "cereal/messaging/messaging.h"
@@ -63,7 +64,6 @@ const int header_h = 420;
 const int footer_h = 280;
 
 const int UI_FREQ = 20;   // Hz
-
 typedef cereal::CarControl::HUDControl::AudibleAlert AudibleAlert;
 
 // TODO: this is also hardcoded in common/transformations/camera.py
@@ -89,7 +89,7 @@ struct Alert {
   cereal::ControlsState::AlertSize size;
   AudibleAlert sound;
   bool equal(const Alert &a2) {
-    return text1 == a2.text1 && text2 == a2.text2 && type == a2.type;
+    return text1 == a2.text1 && text2 == a2.text2 && type == a2.type && sound == a2.sound;
   }
 
   static Alert get(const SubMaster &sm, uint64_t started_frame) {
@@ -196,8 +196,10 @@ typedef struct UIState {
   bool awake;
   bool has_prime = false;
 
-  float car_space_transform[6];
+  QTransform car_space_transform;
   bool wide_camera;
+
+  float running_time;
 
   //
   bool show_debug_ui, custom_lead_mark;
@@ -241,7 +243,7 @@ private:
   // auto brightness
   const float accel_samples = 5*UI_FREQ;
 
-  bool awake;
+  bool awake = false;
   int awake_timeout = 0;
   float accel_prev = 0;
   float gyro_prev = 0;

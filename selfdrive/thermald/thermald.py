@@ -126,9 +126,15 @@ def handle_fan_uno(controller, max_cpu_temp, fan_speed, ignition):
   return new_speed
 
 
+last_ignition = False
 def handle_fan_tici(controller, max_cpu_temp, fan_speed, ignition):
+  global last_ignition
+
   controller.neg_limit = -(80 if ignition else 30)
   controller.pos_limit = -(30 if ignition else 0)
+
+  if ignition != last_ignition:
+    controller.reset()
 
   fan_pwr_out = -int(controller.update(
                      setpoint=(75 if ignition else (OFFROAD_DANGER_TEMP - 2)),
@@ -136,6 +142,7 @@ def handle_fan_tici(controller, max_cpu_temp, fan_speed, ignition):
                      feedforward=interp(max_cpu_temp, [60.0, 100.0], [0, -80])
                   ))
 
+  last_ignition = ignition
   return fan_pwr_out
 
 
@@ -363,10 +370,10 @@ def thermald_thread():
       set_offroad_alert_if_changed("Offroad_ConnectivityNeededPrompt", False)
       set_offroad_alert_if_changed("Offroad_ConnectivityNeeded", True)
     elif dt.days > DAYS_NO_CONNECTIVITY_PROMPT:
-      remaining_time = str(max(DAYS_NO_CONNECTIVITY_MAX - dt.days, 0))
+      remaining = max(DAYS_NO_CONNECTIVITY_MAX - dt.days, 1)
       set_offroad_alert_if_changed("Offroad_UpdateFailed", False)
       set_offroad_alert_if_changed("Offroad_ConnectivityNeeded", False)
-      set_offroad_alert_if_changed("Offroad_ConnectivityNeededPrompt", True, extra_text=f"{remaining_time} days.")
+      set_offroad_alert_if_changed("Offroad_ConnectivityNeededPrompt", True, extra_text=f"{remaining} day{'' if remaining == 1 else 's'}.")
     else:
       set_offroad_alert_if_changed("Offroad_UpdateFailed", False)
       set_offroad_alert_if_changed("Offroad_ConnectivityNeeded", False)

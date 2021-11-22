@@ -37,6 +37,7 @@ private:
   QWidget *lane_widget;
   QHBoxLayout *lane_layout;
   bool error = false;
+  bool is_rhd = false;
 
 public:
   MapInstructions(QWidget * parent=nullptr);
@@ -115,6 +116,7 @@ private:
   MapETA* map_eta;
 
   void clearRoute();
+  uint64_t route_rcv_frame = 0;
 
 private slots:
   void timerUpdate();

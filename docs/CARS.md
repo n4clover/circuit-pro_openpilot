@@ -46,7 +46,7 @@
 | Toyota    | Avalon 2016-21                | TSS-P             | Stock<sup>3</sup>| 20mph<sup>1</sup>  | 0mph              |
 | Toyota    | Avalon Hybrid 2019-21         | TSS-P             | Stock<sup>3</sup>| 20mph<sup>1</sup>  | 0mph              |
 | Toyota    | Camry 2018-20                 | All               | Stock            | 0mph<sup>4</sup>   | 0mph              |
-| Toyota    | Camry 2021                    | All               | openpilot        | 0mph<sup>4</sup>   | 0mph              |
+| Toyota    | Camry 2021-22                 | All               | openpilot        | 0mph<sup>4</sup>   | 0mph              |
 | Toyota    | Camry Hybrid 2018-20          | All               | Stock            | 0mph<sup>4</sup>   | 0mph              |
 | Toyota    | Camry Hybrid 2021-22          | All               | openpilot        | 0mph               | 0mph              |
 | Toyota    | C-HR 2017-20                  | All               | Stock            | 0mph               | 0mph              |
@@ -56,9 +56,9 @@
 | Toyota    | Corolla Hatchback 2019-22     | All               | openpilot        | 0mph               | 0mph              |
 | Toyota    | Corolla Hybrid 2020-22        | All               | openpilot        | 0mph               | 0mph              |
 | Toyota    | Highlander 2017-19            | All               | Stock<sup>3</sup>| 0mph               | 0mph              |
-| Toyota    | Highlander 2020-21            | All               | openpilot        | 0mph               | 0mph              |
+| Toyota    | Highlander 2020-22            | All               | openpilot        | 0mph               | 0mph              |
 | Toyota    | Highlander Hybrid 2017-19     | All               | Stock<sup>3</sup>| 0mph               | 0mph              |
-| Toyota    | Highlander Hybrid 2020-21     | All               | openpilot        | 0mph               | 0mph              |
+| Toyota    | Highlander Hybrid 2020-22     | All               | openpilot        | 0mph               | 0mph              |
 | Toyota    | Mirai 2021                    | All               | openpilot        | 0mph               | 0mph              |
 | Toyota    | Prius 2016-20                 | TSS-P             | Stock<sup>3</sup>| 0mph               | 0mph              |
 | Toyota    | Prius 2021                    | All               | openpilot        | 0mph               | 0mph              |
@@ -93,6 +93,7 @@
 | Chrysler  | Pacifica Hybrid 2017-18       | Adaptive Cruise   | Stock            | 0mph               | 9mph         |
 | Chrysler  | Pacifica Hybrid 2019-21       | Adaptive Cruise   | Stock            | 0mph               | 39mph        |
 | Genesis   | G70 2018                      | All               | Stock            | 0mph               | 0mph         |
+| Genesis   | G70 2020                      | All               | Stock            | 0mph               | 0mph         |
 | Genesis   | G80 2018                      | All               | Stock            | 0mph               | 0mph         |
 | Genesis   | G90 2018                      | All               | Stock            | 0mph               | 0mph         |
 | GMC       | Acadia 2018<sup>1</sup>       | Adaptive Cruise   | openpilot        | 0mph               | 7mph         |
@@ -111,6 +112,7 @@
 | Hyundai   | Kona Hybrid 2020              | SCC + LKAS        | Stock            | 0mph               | 0mph         |
 | Hyundai   | Santa Fe 2019-20              | All               | Stock            | 0mph               | 0mph         |
 | Hyundai   | Santa Fe 2021-22              | All               | Stock            | 0mph               | 0mph         |
+| Hyundai   | Santa Fe Hybrid 2022          | All               | Stock            | 0mph               | 0mph         |
 | Hyundai   | Sonata 2018-2019              | SCC + LKAS        | Stock            | 0mph               | 0mph         |
 | Hyundai   | Sonata Hybrid 2021-22         | All               | Stock            | 0mph               | 0mph         |
 | Hyundai   | Veloster 2019-20              | SCC + LKAS        | Stock            | 5mph               | 0mph         |
@@ -162,6 +164,7 @@
 | Volkswagen| Passat 2016-18<sup>3</sup>    | Driver Assistance | Stock            | 0mph               | 0mph         |
 | Volkswagen| Polo 2020                     | Driver Assistance | Stock            | 0mph               | 0mph         |
 | Volkswagen| T-Cross 2021<sup>4</sup>      | Driver Assistance | Stock            | 0mph               | 0mph         |
+| Volkswagen| T-Roc 2021<sup>4</sup>        | Driver Assistance | Stock            | 0mph               | 0mph         |
 | Volkswagen| Taos 2022<sup>4</sup>         | Driver Assistance | Stock            | 0mph               | 0mph         |
 | Volkswagen| Tiguan 2020                   | Driver Assistance | Stock            | 0mph               | 0mph         |
 | Volkswagen| Touran 2017                   | Driver Assistance | Stock            | 0mph               | 0mph         |

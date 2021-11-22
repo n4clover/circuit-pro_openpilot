@@ -275,7 +275,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.27 * 1.15   # 15% higher at the center seems reasonable
       tire_stiffness_factor = 0.65
       ret.centerToFront = ret.wheelbase * 0.4
-    elif candidate in [CAR.SANTA_FE_2022]:
+    elif candidate in [CAR.SANTA_FE_2022, CAR.SANTA_FE_HEV_2022]:
       ret.mass = 1750 + STD_CARGO_KG
       ret.wheelbase = 2.766
       ret.centerToFront = ret.wheelbase * 0.4
