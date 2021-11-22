@@ -255,8 +255,7 @@ static void ui_draw_world(UIState *s) {
       else
         draw_lead_radar(s, lead_radar, s->scene.lead_vertices_radar[0]);
     }
-  }
-
+  
   nvgResetScissor(s->vg);
 }
 
