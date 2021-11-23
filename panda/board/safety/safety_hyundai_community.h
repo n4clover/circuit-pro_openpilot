@@ -217,14 +217,14 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
   }
 
   if (addr == 912) { // SPAS Steering Rate Limit Check
-    bool steer_enabled = ((GET_BYTE(to_send, 0) & 0xF) == 5) ? true : false; // If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
-    int mdps_state = (GET_BYTE(to_send, 0) & 0xF);
+    bool steer_enabled = ((GET_BYTE(to_send, 0) & 0xF) == 5) ? true : false; // OP SEND STATE TO MDPS If MDPS11 state 5 then steering is active. - JPR, Helped with code - Desta!
+    int mdps_state = (GET_BYTE(to_send, 0) & 0xF); // MDPS REPORTED STATE
     int raw_angle_can = ((GET_BYTE(to_send, 2) << 8) | GET_BYTE(to_send, 1));
     int desired_angle = to_signed(raw_angle_can, 16);
     puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
     puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
     // Rate limit check
-    if (controls_allowed && (steer_enabled || mdps_state == 5)) {
+    if (controls_allowed && mdps_state == 5) {
       float delta_angle_float;
       delta_angle_float = (interpolate(HYUNDAI_LOOKUP_ANGLE_RATE_UP, vehicle_speed) * HYUNDAI_DEG_TO_CAN);
       int delta_angle_up = (int)(delta_angle_float) + 1;
@@ -235,7 +235,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
       violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
     }
     desired_angle_last = desired_angle;
-    if(!controls_allowed && steer_enabled) {
+    if(!controls_allowed && (steer_enabled || mdps_state == 5)) {
       violation = 1;
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
