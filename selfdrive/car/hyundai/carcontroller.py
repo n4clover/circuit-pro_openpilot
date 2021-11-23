@@ -154,13 +154,11 @@ class CarController():
         self.override = False
 
     # Disable steering while turning blinker on and speed below 60 kph
-    if enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2 and (CS.out.leftBlinker or CS.out.rightBlinker):
+    if enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2 and CS.out.leftBlinker or CS.out.rightBlinker and enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2:
       self.cut_steer = True
 
     if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30: # start timer
       self.cut_timer = 0.5 / DT_CTRL
-    else:
-      self.cut_steer = 0
 
     if self.cut_timer > 0:
       self.cut_timer -= 1  
@@ -174,9 +172,6 @@ class CarController():
     self.lkas_active = lkas_active
     if CS.spas_enabled:
       self.spas_active = spas_active
-
-    if self.turning_signal_timer > 0:
-      self.turning_signal_timer -= 1  
 
     self.apply_steer_last = apply_steer
 
