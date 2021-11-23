@@ -155,7 +155,7 @@ class CarController():
 
     # Disable steering while turning blinker on and speed below 60 kph
     if enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2 and CS.out.leftBlinker or CS.out.rightBlinker and enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2:
-      self.cut_steer = True
+      self.cut_condition = True
 
     if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30: # start timer
       self.cut_timer = 0.5 / DT_CTRL
