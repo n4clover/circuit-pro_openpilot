@@ -76,6 +76,7 @@ class CarController():
     self.resume_wait_timer = 0
 
     self.turning_signal_timer = 0
+    self.cut_timer = 0
     self.longcontrol = CP.openpilotLongitudinalControl
     self.scc_live = not CP.radarOffCan
 
