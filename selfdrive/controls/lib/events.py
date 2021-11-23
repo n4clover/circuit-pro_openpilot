@@ -258,7 +258,6 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
     ET.PERMANENT: StartupAlert("Be ready to take over at any time")
   },
   EventName.spasEnabled: {
-    ET.NO_ENTRY: NoEntryAlert(""),
     ET.PERMANENT: Alert(
       "! Warning SPAS Enabled !                 ! Keep hands On Wheel !",
       "Understand the safety implications! Be ready to take over at any time!",
