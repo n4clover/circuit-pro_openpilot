@@ -161,7 +161,7 @@ class CarController():
     if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30: # start timer
       self.cut_timer = 0.5 / DT_CTRL
       
-    if self.cut_timer and abs(CS.out.steeringWheelTorque) < 30:
+    if self.cut_timer:
       self.cut_steer = False
 
     if not lkas_active:
