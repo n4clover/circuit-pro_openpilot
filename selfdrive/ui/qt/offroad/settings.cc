@@ -558,6 +558,21 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
   )");
 
   QList<ParamControl*> toggles;
+  toggles.append(new ParamControl("LoggerEnabled",
+                                            "Enable Logger / Uploader",
+                                            "This causes slow frame time on weak hardware.",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+  toggles.append(new ParamControl("UseLQR",
+                                            "Enable LQR Lateral Control",
+                                            "For Linear Quadratic Ratio Control: Warning please run nTune after 15-20 miles of driving.",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+  toggles.append(new ParamControl("LowSpeedAlerts",
+                                            "Enable Low Speed Alerts",
+                                            "Enables Low Speed alerts for cars with min steer speeds.",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
 
   toggles.append(new ParamControl("UseClusterSpeed",
                                             "Use Cluster Speed",
@@ -612,14 +627,14 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "Use the stock navi based deceleration for longcontrol",
                                             "../assets/offroad/icon_road.png",
                                             this));
-
+/*
   toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
                                             "",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
-  /*toggles.append(new ParamControl("DisableOpFcw",
+  toggles.append(new ParamControl("DisableOpFcw",
                                             "Disable Openpilot FCW",
                                             "",
                                             "../assets/offroad/icon_shell.png",
