@@ -15,6 +15,7 @@ from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerPa
 from opendbc.can.packer import CANPacker
 from selfdrive.config import Conversions as CV
 from common.params import Params
+from selfdrive.controls.lib.lateral_planner import LANE_CHANGE_SPEED_MIN
 
 from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.road_speed_limiter import road_speed_limiter_get_active
@@ -153,7 +154,7 @@ class CarController():
         self.override = False
 
     # Disable steering while turning blinker on and speed below 60 kph
-    if enabled and self.turning_indicator_alert and (CS.out.leftBlinker or CS.out.rightBlinker):
+    if enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2 and (CS.out.leftBlinker or CS.out.rightBlinker):
       self.cut_steer = True
 
     if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30: # start timer
