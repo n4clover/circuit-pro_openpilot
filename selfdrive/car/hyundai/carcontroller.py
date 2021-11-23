@@ -158,7 +158,7 @@ class CarController():
     if enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2 and CS.out.leftBlinker or CS.out.rightBlinker and enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2:
       self.cut_condition = True
 
-    if self.cut_condition and abs(CS.out.steeringWheelTorque) < 30: # start timer
+    if self.cut_condition and abs(CS.out.steeringWheelTorque) > 30: # start timer
       self.cut_timer = 0.5 / DT_CTRL
 
     if self.cut_timer > 0:
