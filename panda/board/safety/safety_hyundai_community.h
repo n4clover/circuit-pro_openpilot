@@ -9,11 +9,11 @@ int HKG_scc_bus = -1;
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
     {2., 30., 60.}, //kph
-    {12., 11., 10.}};  //deg
+    {13., 12., 11.}};  //deg
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value from car controller to leave a bit of margin.
     {2., 30., 60.}, //kph
-    {13., 12., 11.}}; //deg 
+    {14., 13., 12.}}; //deg 
 
 const int HYUNDAI_DEG_TO_CAN = 10; 
 
