@@ -133,11 +133,9 @@ class CarController():
       self.last_apply_angle = apply_angle
         
     if not self.cut_steer:
-      
       if CS.spas_enabled:
         spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
         lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
-        
       else:
         lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
     else:
@@ -158,9 +156,12 @@ class CarController():
       
     if self.turning_indicator_alert and enabled: # set and clear by interface
       self.cut_steer = True
+
+    if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30:
+      self.cut_timer = 0.5 / DT_CTRL
       
-    if abs(CS.out.steeringWheelTorque) < 30:
-        self.cut_steer = False
+    if self.cut_timer and abs(CS.out.steeringWheelTorque) < 30:
+      self.cut_steer = False
 
     if not lkas_active:
       apply_steer = 0
