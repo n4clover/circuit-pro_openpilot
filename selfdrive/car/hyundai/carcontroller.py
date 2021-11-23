@@ -157,7 +157,7 @@ class CarController():
     if self.turning_indicator_alert and enabled: # set and clear by interface
       self.cut_steer = True
 
-    if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30:
+    if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30: # start timer
       self.cut_timer = 0.5 / DT_CTRL
       
     if self.cut_timer and abs(CS.out.steeringWheelTorque) < 30:
