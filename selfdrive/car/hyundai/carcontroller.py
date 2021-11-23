@@ -119,7 +119,7 @@ class CarController():
 
     # SPAS limit angle extremes for safety
     if CS.spas_enabled:
-      apply_angle = actuators.steeringAngleDeg #, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
+      apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       if abs(apply_angle - CS.out.steeringAngleDeg) > 8: # Rate limit for when steering angle is far from apply_angle - JPR
         rate_limit = interp(CS.out.steeringAngleDeg, ENGAGE_ANGLE, ENGAGE_DELTA_V)
         #print(rate_limit)
@@ -133,9 +133,11 @@ class CarController():
       self.last_apply_angle = apply_angle
         
     if not self.cut_steer:
-      spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
+      
       if CS.spas_enabled:
+        spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
         lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+        
       else:
         lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
     else:
