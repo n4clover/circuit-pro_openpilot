@@ -8,24 +8,20 @@ from selfdrive.ntune import ntune_scc_get
 
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
-STOPPING_TARGET_SPEED_OFFSET = 0.01
-
 # As per ISO 15622:2018 for all speeds
 ACCEL_MIN_ISO = -3.5 # m/s^2
 ACCEL_MAX_ISO = 2.0 # m/s^2
 
 
-def long_control_state_trans(CP, active, long_control_state, v_ego, v_target, v_pid,
-                             output_accel, brake_pressed, cruise_standstill, min_speed_can, radarState):
+def long_control_state_trans(CP, active, long_control_state, v_ego, v_target_future,
+                             output_accel, brake_pressed, cruise_standstill, radarState):
   """Update longitudinal control state machine"""
-  stopping_target_speed = min_speed_can + STOPPING_TARGET_SPEED_OFFSET
   stopping_condition = (v_ego < 2.0 and cruise_standstill) or \
                        (v_ego < CP.vEgoStopping and
-                        ((v_pid < stopping_target_speed and v_target < stopping_target_speed) or
-                         brake_pressed))
+                        (v_target_future < CP.vEgoStopping or brake_pressed))
 
   stopping_condition = stopping_condition or (v_ego < 2.5 and v_target < 3.5 and not long_control_state == LongCtrlState.starting and not radarState.leadOne.vLead > CP.vEgoStarting)
-  starting_condition = v_target > CP.vEgoStarting and not cruise_standstill
+  starting_condition = v_target_future > CP.vEgoStarting and not cruise_standstill
 
   # neokii
   if radarState is not None and radarState.leadOne is not None and radarState.leadOne.status:
@@ -103,8 +99,8 @@ class LongControl():
     # Update state machine
     output_accel = self.last_output_accel
     self.long_control_state = long_control_state_trans(CP, active, self.long_control_state, CS.vEgo,
-                                                       v_target_future, self.v_pid, output_accel,
-                                                       CS.brakePressed, CS.cruiseState.standstill, CP.minSpeedCan, radarState)
+                                                       v_target_future, output_accel,
+                                                       CS.brakePressed, CS.cruiseState.standstill, radarState)
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.reset(CS.vEgo)
@@ -116,7 +112,7 @@ class LongControl():
 
       # Toyota starts braking more when it thinks you want to stop
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
-      prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
+      prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7 and v_target_future < v_target
       deadzone = interp(CS.vEgo, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
       freeze_integrator = prevent_overshoot
 
@@ -129,7 +125,8 @@ class LongControl():
     elif self.long_control_state == LongCtrlState.stopping:
       # Keep applying brakes until the car is stopped
       if not CS.standstill or output_accel > CP.stopAccel:
-        output_accel -= CP.stoppingDecelRate * DT_CTRL
+        output_accel -= CP.stoppingDecelRate * DT_CTRL * \
+                        interp(output_accel, [CP.stopAccel, CP.stopAccel/2., 0], [1., 1.3, 2.3])
       output_accel = clip(output_accel, accel_limits[0], accel_limits[1])
 
       self.reset(CS.vEgo)
