@@ -89,6 +89,7 @@ class CarController():
     self.fail_count = 0
     self.failed_test = 0
     self.start_angle = 0
+    self.turning_indicator_alert = False
 
 
     if CP.spasEnabled:
@@ -152,19 +153,17 @@ class CarController():
         self.override = False
 
     # Disable steering while turning blinker on and speed below 60 kph
-    if CS.out.leftBlinker or CS.out.rightBlinker:
-      self.turning_signal_timer = 0.5 / DT_CTRL  # Disable for 1.0 Seconds after blinker turned off
-      
-    if self.turning_indicator_alert and enabled: # set and clear by interface
+    if enabled and self.turning_indicator_alert and (CS.out.leftBlinker or CS.out.rightBlinker):
       self.cut_steer = True
 
     if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30: # start timer
       self.cut_timer = 0.5 / DT_CTRL
+    else:
+      self.cut_steer = 0
 
     if self.cut_timer > 0:
       self.cut_timer -= 1  
 
-      
     if self.cut_timer:
       self.cut_steer = False
 
