@@ -84,6 +84,7 @@ class CarController():
     self.mad_mode_enabled = Params().get_bool('MadModeEnabled')
     self.cnt = 0
     self.cut_steer = False
+    self.cut_condition = False
     self.emsType = CP.emsType
     self.test_count = 0
     self.test_results3 = 0
@@ -157,13 +158,15 @@ class CarController():
     if enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2 and CS.out.leftBlinker or CS.out.rightBlinker and enabled and CS.out.vEgo < LANE_CHANGE_SPEED_MIN - 1.2:
       self.cut_condition = True
 
-    if self.cut_steer and abs(CS.out.steeringWheelTorque) < 30: # start timer
+    if self.cut_condition and abs(CS.out.steeringWheelTorque) < 30: # start timer
       self.cut_timer = 0.5 / DT_CTRL
 
     if self.cut_timer > 0:
       self.cut_timer -= 1  
 
     if self.cut_timer:
+      self.cut_steer = True
+    else:
       self.cut_steer = False
 
     if not lkas_active:
