@@ -239,7 +239,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
       violation = 1;
       puts("  SPAS angle send not allowed: controls not allowed!"); puts("\n");
     }
-    if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
+    if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ && mdps_state == 5) {
       //violation = 1; bugged 
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
     }
