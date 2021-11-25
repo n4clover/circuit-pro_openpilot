@@ -242,10 +242,6 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ) {
       //violation = 1; bugged 
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
-      if (mdps_state == 7) { // test fix need to figure out how to send state 7 to mdps from panda
-        violation = 1;
-        puts("  Driver override torque reached : Cancled  "); puts("\n");
-      }
     }
   }
 
