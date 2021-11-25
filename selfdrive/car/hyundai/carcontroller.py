@@ -84,11 +84,6 @@ class CarController():
     self.cut_steer = False
     self.cut_condition = False
     self.emsType = CP.emsType
-    self.test_count = 0
-    self.test_results3 = 0
-    self.fail_count = 0
-    self.failed_test = 0
-    self.start_angle = 0
     self.turning_indicator_alert = False
 
 
