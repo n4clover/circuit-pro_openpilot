@@ -106,7 +106,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
 
    if (addr == 897 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
       driver_torque = (((GET_BYTE(to_push, 2) & 0x7F) << 5) | (GET_BYTE(to_push, 1) & 0x78)) - 2048;
-      puts("   Driver Torque   "); puth(driver_torque); puts("\n");
+      //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
     if (addr == 1056 && !OP_SCC_live) { // for cars without long control
