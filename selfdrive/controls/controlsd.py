@@ -214,7 +214,7 @@ class Controls:
     # Handle startup event
     if self.startup_event is not None:
       if Params().get_bool('spasEnabled'):
-        self.events.add(EventName.spasEnabled)
+        self.events.add(EventName.spasStartup)
       else:
         self.events.add(self.startup_event)
       self.startup_event = None
