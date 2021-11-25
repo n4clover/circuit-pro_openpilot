@@ -400,6 +400,4 @@ class CarController():
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
       self.spas_active_last = spas_active
-      if self.test_count >= 1:
-        self.test_count += 1
     return can_sends
