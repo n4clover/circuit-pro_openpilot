@@ -258,8 +258,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
     ET.PERMANENT: StartupAlert("Be ready to take over at any time")
   },
   EventName.spasStartup: {
-    ET.PERMANENT: StartupAlert("!Warning SPAS Enabled! !Hands On Wheel!",
-                               "!Be ready to take over at any time!"),
+    ET.PERMANENT: StartupAlert("! Warning SPAS Enabled ! ! Hands On Wheel !",
+                               "! Be ready to take over at any time !"),
   },
 
   EventName.startupMaster: {
