@@ -28,7 +28,7 @@ class CarInterface(CarInterfaceBase):
     v_current_kph = current_speed * CV.MS_TO_KPH
 
     gas_max_bp = [0., 10., 20., 50., 70., 130.]
-    gas_max_v = [2., 1.8, 1.4, 0.95, 0.60, 0.38]
+    gas_max_v = [CarControllerParams.ACCEL_MAX, 2., 1.8, 1.4, 0.95, 0.60, 0.38]
 
     return CarControllerParams.ACCEL_MIN, interp(v_current_kph, gas_max_bp, gas_max_v)
 
@@ -203,17 +203,6 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kiBP = [0., 130. * CV.KPH_TO_MS]
       ret.longitudinalTuning.kiV = [0.06, 0.03]
 
-      if not UseLQR:
-        ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [0.]
-        ret.lateralTuning.indi.innerLoopGainV = [3.1]
-        ret.lateralTuning.indi.outerLoopGainBP = [0.]
-        ret.lateralTuning.indi.outerLoopGainV = [2.5]
-        ret.lateralTuning.indi.timeConstantBP = [0.]
-        ret.lateralTuning.indi.timeConstantV = [1.4]
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
-        ret.lateralTuning.indi.actuatorEffectivenessV = [2.]
-
     elif candidate == CAR.GENESIS_EQ900_L:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Genesis.png img_spinner_comma.png")
       ret.mass = 2290
@@ -221,7 +210,6 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.4
       ret.emsType = 1 
       tire_stiffness_factor = 0.85
-      ret.maxSteeringAngleDeg = 90.
       ret.longitudinalTuning.kpBP = [0., 10.*CV.KPH_TO_MS, 20.*CV.KPH_TO_MS, 40.*CV.KPH_TO_MS, 70.*CV.KPH_TO_MS, 100.*CV.KPH_TO_MS, 130.*CV.KPH_TO_MS]
       ret.longitudinalTuning.kpV = [1.2, 0.93, 0.8, 0.68, 0.59, 0.51, 0.43]
       ret.longitudinalTuning.kiBP = [0., 130. * CV.KPH_TO_MS]
@@ -243,7 +231,6 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 3.16
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.85
-      ret.maxSteeringAngleDeg = 90.
       ret.emsType = 1 
       ret.longitudinalTuning.kpBP = [0., 10.*CV.KPH_TO_MS, 20.*CV.KPH_TO_MS, 40.*CV.KPH_TO_MS, 70.*CV.KPH_TO_MS, 100.*CV.KPH_TO_MS, 130.*CV.KPH_TO_MS]
       ret.longitudinalTuning.kpV = [1.2, 0.93, 0.8, 0.68, 0.59, 0.51, 0.43]
