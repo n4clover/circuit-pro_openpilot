@@ -79,6 +79,10 @@ def manager_init():
   if params.get_bool("RecordFrontLock"):
     params.put_bool("RecordFront", True)
 
+  if params.get_bool("spasEnabled") or params.get_bool("SPASDebug"): #MAKE SURE SPAS params are not persistent from another branch! - JPR
+    params.delete("SPASDebug")
+    params.delete("spasEnabled")
+
   if not params.get_bool("DisableRadar_Allow"):
     params.delete("DisableRadar")
 
