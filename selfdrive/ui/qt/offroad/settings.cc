@@ -651,7 +651,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "",
                                             "../assets/offroad/icon_road.png",
                                             this));
-  toggles.append(new ParamControl("spasEnabled",
+  /* toggles.append(new ParamControl("spasEnabled",
                                             "Enable SPAS.",
                                             "Enable Send Parking Assist Messages up to 38mph. Warning: It is beta, be careful!!",
                                             "../assets/offroad/icon_road.png",
@@ -660,7 +660,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "Enable SPAS Debugging.",
                                             "This outputs OP SPAS State: (The state that op is calling MDPS to) and MDPS SPAS State: (The state MDPS is actually in)",
                                             "../assets/offroad/icon_road.png",
-                                            this));
+                                            this)); */
   toggles.append(new ParamControl("CreepDebug",
                                             "Enable Creep / Stopping State Debugging.",
                                             "This outputs relevent information.",
