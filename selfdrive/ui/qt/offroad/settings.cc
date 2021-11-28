@@ -563,11 +563,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "This causes slow frame time on weak hardware.",
                                             "../assets/offroad/icon_road.png",
                                             this));
+
   toggles.append(new ParamControl("UseLQR",
                                             "Enable LQR Lateral Control",
                                             "For Linear Quadratic Ratio Control: Warning please run nTune after 15-20 miles of driving.",
                                             "../assets/offroad/icon_road.png",
                                             this));
+
   toggles.append(new ParamControl("LowSpeedAlerts",
                                             "Enable Low Speed Alerts",
                                             "Enables Low Speed alerts for cars with min steer speeds.",
@@ -580,17 +582,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));
 
-  toggles.append(new ParamControl("LongControlEnabled",
-                                            "Enable HKG Long Control",
-                                            "warnings: it is beta, be careful!! Openpilot will control the speed of your car",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
 
-  toggles.append(new ParamControl("MadModeEnabled",
-                                            "Enable HKG MAD mode",
-                                            "Openpilot will engage when turn cruise control on",
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
 
   toggles.append(new ParamControl("IsLdwsCar",
                                             "LDWS",
@@ -598,6 +590,12 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
 
+  toggles.append(new ParamControl("MadModeEnabled",
+                                            "Enable HKG MAD mode",
+                                            "Openpilot will engage when turn cruise control on",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+                                            
   toggles.append(new ParamControl("LaneChangeEnabled",
                                             "Enable Lane Change Assist",
                                             "Perform assisted lane changes with openpilot by checking your surroundings for safety, activating the turn signal and gently nudging the steering wheel towards your desired lane. openpilot is not capable of checking if a lane change is safe. You must continuously observe your surroundings to use this feature.",
@@ -607,6 +605,24 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
   toggles.append(new ParamControl("AutoLaneChangeEnabled",
                                             "Enable Auto Lane Change(Nudgeless)",
                                             "warnings: it is beta, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+
+  toggles.append(new ParamControl("KeepSteeringTurnSignals",
+                                            "Keep steering while turn signals.",
+                                            "",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+
+  toggles.append(new ParamControl("TurnSignals",
+                                            "Neokii or Crwusiz on screen blinkers.",
+                                            "Your choice. No reboot required.",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+
+  toggles.append(new ParamControl("CustomLeadMark",
+                                            "Use custom lead mark",
+                                            "",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
@@ -628,16 +644,23 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));
 
-  toggles.append(new ParamControl("KeepSteeringTurnSignals",
-                                            "Keep steering while turn signals.",
-                                            "",
-                                            "../assets/offroad/icon_openpilot.png",
+  toggles.append(new ParamControl("UseSMDPSHarness",
+                                            "Use SMDPS Harness",
+                                            "Use of MDPS Harness to enable openpilot steering down to 0 MPH",
+                                            "../assets/offroad/icon_road.png",
                                             this));
-  toggles.append(new ParamControl("TurnSignals",
-                                            "Neokii or Crwusiz on screen blinkers.",
-                                            "Your choice reboot required.",
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
+
+  toggles.append(new ParamControl("LongControlEnabled",
+                                            "Enable HKG Long Control",
+                                            "warnings: it is beta, be careful!! Openpilot will control the speed of your car",
+                                            "../assets/offroad/icon_road.png",
+                                            this));  
+
+  toggles.append(new ParamControl("spasEnabled",
+                                            "Enable SPAS.",
+                                            "Enable Send Parking Assist Messages up to 38mph. Warning: It is beta, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));   
 
   /*toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
@@ -657,16 +680,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_shell.png",
                                             this));
 
-  toggles.append(new ParamControl("CustomLeadMark",
-                                            "Use custom lead mark",
-                                            "",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-  toggles.append(new ParamControl("spasEnabled",
-                                            "Enable SPAS.",
-                                            "Enable Send Parking Assist Messages up to 38mph. Warning: It is beta, be careful!!",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
+
   toggles.append(new ParamControl("SPASDebug",
                                             "Enable SPAS Debugging.",
                                             "This outputs OP SPAS State: (The state that op is calling MDPS to) and MDPS SPAS State: (The state MDPS is actually in)",
@@ -677,11 +691,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "This outputs relevent information.",
                                             "../assets/offroad/icon_road.png",
                                             this));
-  toggles.append(new ParamControl("UseSMDPSHarness",
-                                            "Use SMDPS Harness",
-                                            "Use of MDPS Harness to enable openpilot steering down to 0 MPH",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
+
 
   for(ParamControl *toggle : toggles) {
     if(main_layout->count() != 0) {
