@@ -128,19 +128,13 @@ class CarController():
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
         else:
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
-        apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)    
+        apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)  
+
       self.last_apply_angle = apply_angle
-        
-    if not self.cut_steer:
-      if CS.spas_enabled:
-        spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
-        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
-      else:
-        lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      spas_active = CS.spas_enabled and enabled and CS.out.vEgo < SPAS_SWITCH
+      lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
     else:
-      if CS.spas_enabled:
-        spas_active = False
-      lkas_active = False
+      lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if CS.spas_enabled:
       if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
@@ -152,7 +146,7 @@ class CarController():
     # Disable steering while turning blinker on and speed below 60 kph
     if (CS.out.leftBlinker or CS.out.rightBlinker):
       self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
-    if self.turning_indicator_alert : # set and clear by interface
+    if self.turning_indicator_alert and not self.keep_steering_turn_signals: # set and clear by interface
       lkas_active = False
       if CS.spas_enabled:
         spas_active = False
