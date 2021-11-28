@@ -34,6 +34,7 @@ const int bdr_is = bdr_s;
 const int box_y = bdr_s;
 const int box_w = vwp_w-sbr_w-(bdr_s*2);
 const int box_h = vwp_h-(bdr_s*2);
+Params params;
 
 
 static void ui_draw_text(const UIState *s, float x, float y, const char *string, float size, NVGcolor color, const char *font_name) {
@@ -595,6 +596,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
 AText textSpeed("sans-bold");
 
 static void ui_draw_vision_speed(UIState *s) {
+  
   const float speed = std::max(0.0, (*s->sm)["carState"].getCarState().getCluSpeedMs() * (s->scene.is_metric ? MS_TO_KPH : MS_TO_MPH));
   const std::string speed_str = std::to_string((int)std::nearbyint(speed));
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
@@ -745,6 +747,7 @@ static void ui_draw_vision_header(UIState *s) {
 }
 
 static void ui_draw_vision(UIState *s) {
+  
   const UIScene *scene = &s->scene;
   // Draw augmented elements
   if (scene->world_objects_visible) {
