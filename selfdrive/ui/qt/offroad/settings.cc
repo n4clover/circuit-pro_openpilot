@@ -108,9 +108,9 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
     auto toggle = new ParamControl(param, title, desc, icon, this);
     bool locked = params.getBool((param + "Lock").toStdString());
     toggle->setEnabled(!locked);
-    if (!locked) {
-      connect(parent, &SettingsWindow::offroadTransition, toggle, &ParamControl::setEnabled);
-    }
+    //if (!locked) {
+    //  connect(parent, &SettingsWindow::offroadTransition, toggle, &ParamControl::setEnabled);
+    //}
     addItem(toggle);
   }
 }
@@ -210,7 +210,7 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
 
   for (auto btn : {dcamBtn, resetCalibBtn, retrainingBtn, regulatoryBtn}) {
     if (btn) {
-      connect(parent, SIGNAL(offroadTransition(bool)), btn, SLOT(setEnabled(bool)));
+      //connect(parent, SIGNAL(offroadTransition(bool)), btn, SLOT(setEnabled(bool)));
       addItem(btn);
     }
   }
@@ -627,8 +627,14 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "Use the stock navi based deceleration for longcontrol",
                                             "../assets/offroad/icon_road.png",
                                             this));
-/*
-  toggles.append(new ParamControl("NewRadarInterface",
+
+  toggles.append(new ParamControl("KeepSteeringTurnSignals",
+                                            "Keep steering while turn signals.",
+                                            "",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+
+  /*toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
                                             "",
                                             "../assets/offroad/icon_road.png",
