@@ -633,6 +633,11 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "",
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
+  toggles.append(new ParamControl("TurnSignals",
+                                            "Neokii or Crwusiz on screen blinkers.",
+                                            "Your choice reboot required.",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
 
   /*toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
