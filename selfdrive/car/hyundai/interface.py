@@ -44,7 +44,10 @@ class CarInterface(CarInterfaceBase):
     ret.communityFeature = True
 
     tire_stiffness_factor = 1.
-    ret.maxSteeringAngleDeg = 1000.
+    if Params().get_bool('SteerLockout'):
+      ret.maxSteeringAngleDeg = 1000
+    else:
+      ret.maxSteeringAngleDeg = 90
     UseLQR = Params().get_bool('UseLQR')
     # lateral LQR global hyundai
     if UseLQR:
@@ -246,7 +249,6 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.timeConstantV = [1.4]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
         ret.lateralTuning.indi.actuatorEffectivenessV = [2.]
-
 
     # hyundai
     elif candidate in [CAR.SANTA_FE]:

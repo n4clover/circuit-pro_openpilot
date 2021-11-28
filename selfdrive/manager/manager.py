@@ -71,6 +71,7 @@ def manager_init():
     ("DisableOpFcw", "0"),
     ("NewRadarInterface", "0"),
     ("LowSpeedAlerts", "1"),
+    ("SteerLockout", "0"),
     ("spasEnabled", "0"),
     ("SPASDebug", "0"),
     ("CreepDebug", "0"),

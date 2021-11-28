@@ -201,6 +201,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"ShowDebugUI", PERSISTENT},
     {"CustomLeadMark", PERSISTENT},
     {"LowSpeedAlerts", PERSISTENT},
+    {"SteerLockout", PERSISTENT},
     {"SoftRestartTriggered", CLEAR_ON_MANAGER_START},
     {"spasEnabled", PERSISTENT},
     {"SPASDebug", PERSISTENT},
