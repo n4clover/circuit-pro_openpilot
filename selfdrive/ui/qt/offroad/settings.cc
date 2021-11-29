@@ -153,36 +153,69 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   });
   addItem(reset_layout);
 
-  QHBoxLayout *custom_layout = new QHBoxLayout();
-  custom_layout->setSpacing(30);
+  QHBoxLayout *custom1_layout = new QHBoxLayout();
+  custom1_layout->setSpacing(30);
 
   QPushButton *run_ntune_btn = new QPushButton("Run nTune Calibration");
   run_ntune_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
-  custom_layout->addWidget(run_ntune_btn);
+  custom1_layout->addWidget(run_ntune_btn);
   QObject::connect(run_ntune_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to run nTune calibration? This lags for a second.", this)) {
       std::system("cd /data/openpilot/selfdrive && python ntune.py");
+      ConfirmationDialog::alert("You have successfully run nTune");
       emit closeSettings();
     }
   });
 
   QPushButton *delete_recordings_btn = new QPushButton("Delete UI Screen Recordings");
   delete_recordings_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
-  custom_layout->addWidget(delete_recordings_btn);
+  custom1_layout->addWidget(delete_recordings_btn);
   QObject::connect(delete_recordings_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? ", this)) {
       if (Hardware::TICI()) {
         std::system("cd /data/media/0/videos && rm *.*");
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 3");
         emit closeSettings();   
       }
-      else {
+      else if (Hardware::EON()) {
         std::system("cd /storage/emulated/0/videos && rm *.*");
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 2");
         emit closeSettings();        
+      }
+      else {
+        ConfirmationDialog::alert("You have NOT successfully deleted screen recordings! : Unknown location : Unknown Device");
+        emit closeSettings();
       }
     }
   });
 
-  addItem(custom_layout);
+  addItem(custom1_layout);
+
+  QHBoxLayout *custom2_layout = new QHBoxLayout();
+  custom2_layout->setSpacing(30);
+
+  QPushButton *delete_logs_btn = new QPushButton("Delete All Logs To Be Uploaded");
+  delete_logs_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  custom1_layout->addWidget(delete_logs_btn);
+  QObject::connect(delete_logs_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("Are you sure you want to delete all logs of drives to be uploaded?", this)) {
+      if (Hardware::TICI()) {
+        std::system("cd /data/media/0/realdata && rm *.*");
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 3");
+        emit closeSettings();
+      }
+      else if (Hardware::EON()) {
+        std::system("cd /storage/emulated/0/realdata && rm *.*");
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 2");
+        emit closeSettings();
+      }
+      else {
+        ConfirmationDialog::alert("You have NOT successfully deleted logs of drives to be uploaded! : Unknown location : Unknown Device");
+        emit closeSettings();
+      }
+    }
+  });
+  addItem(custom2_layout);
 
   // offroad-only buttons
 
