@@ -167,7 +167,7 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   reset_layout->addWidget(delete_recordings_btn);
   QObject::connect(delete_recordings_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? ", this)) {
-      if (TICI()) {
+      if (Hardware::TICI()) {
         std::system("cd /data/media/0/videos && rm *.*");
         emit closeSettings();   
       }
