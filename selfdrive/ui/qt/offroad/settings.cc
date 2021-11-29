@@ -162,7 +162,7 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   QObject::connect(run_ntune_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to run nTune calibration? This lags for a second.", this)) {
       std::system("cd /data/openpilot/selfdrive && python ntune.py");
-      ConfirmationDialog::alert("You have successfully run nTune");
+      ConfirmationDialog::alert("You have successfully run nTune", this);
       emit closeSettings();
     }
   });
@@ -174,16 +174,16 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
     if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? ", this)) {
       if (Hardware::TICI()) {
         std::system("cd /data/media/0/videos && rm *.*");
-        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 3");
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 3", this);
         emit closeSettings();   
       }
       else if (Hardware::EON()) {
         std::system("cd /storage/emulated/0/videos && rm *.*");
-        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 2");
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 2", this);
         emit closeSettings();        
       }
       else {
-        ConfirmationDialog::alert("You have NOT successfully deleted screen recordings! : Unknown location : Unknown Device");
+        ConfirmationDialog::alert("You have NOT successfully deleted screen recordings! : Unknown location : Unknown Device", this);
         emit closeSettings();
       }
     }
@@ -201,16 +201,16 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
     if (ConfirmationDialog::confirm("Are you sure you want to delete all logs of drives to be uploaded?", this)) {
       if (Hardware::TICI()) {
         std::system("cd /data/media/0/realdata && rm *.*");
-        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 3");
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 3", this);
         emit closeSettings();
       }
       else if (Hardware::EON()) {
         std::system("cd /storage/emulated/0/realdata && rm *.*");
-        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 2");
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 2", this);
         emit closeSettings();
       }
       else {
-        ConfirmationDialog::alert("You have NOT successfully deleted logs of drives to be uploaded! : Unknown location : Unknown Device");
+        ConfirmationDialog::alert("You have NOT successfully deleted logs of drives to be uploaded! : Unknown location : Unknown Device", this);
         emit closeSettings();
       }
     }
