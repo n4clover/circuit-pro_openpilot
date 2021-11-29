@@ -196,7 +196,7 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
 
   QPushButton *delete_logs_btn = new QPushButton("Delete All Logs To Be Uploaded");
   delete_logs_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
-  custom1_layout->addWidget(delete_logs_btn);
+  custom2_layout->addWidget(delete_logs_btn);
   QObject::connect(delete_logs_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to delete all logs of drives to be uploaded?", this)) {
       if (Hardware::TICI()) {
