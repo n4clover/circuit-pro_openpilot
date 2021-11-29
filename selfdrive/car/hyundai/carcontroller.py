@@ -210,7 +210,7 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    if pcm_cancel_cmd and (self.longcontrol and not self.mad_mode_enabled) or not enabled and self.enabled_cnt >= 1: #Make SCC cancle when op disengage -JPR
+    if pcm_cancel_cmd and (self.longcontrol and not self.mad_mode_enabled) or not enabled and (self.enabled_cnt >= 1 or CS.out.cruiseState.enabled): #Make SCC cancle when op disengage -JPR
       can_sends.append(create_clu11(self.packer, frame % 0x10, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
       self.enabled_cnt += 1
     else:
