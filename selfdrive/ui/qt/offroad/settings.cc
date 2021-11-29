@@ -634,7 +634,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));
 
   toggles.append(new ParamControl("SteerLockout",
-                                            "Enable Higher Than 90° Lateral Control",
+                                            "Enable Higher Than 90° Lateral Control for LKAS",
                                             "This disables the max steer limit of 90°. SPAS does not apply to this. This will cause fault on certain cars that have a 90° limit on LKAS.",
                                             "../assets/offroad/icon_road.png",
                                             this));
