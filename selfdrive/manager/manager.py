@@ -52,6 +52,7 @@ def manager_init():
     ("SccSmootherSyncGasPressed", "0"),
     ("StockNaviDecelEnabled", "0"),
     ("KeepSteeringTurnSignals", "0"),
+    ("NoMinLaneChangeSpeed", "0"),
     ("TurnSignals", "0"),
     ("ShowDebugUI", "0"),
     ("UseSMDPSHarness", "0"),

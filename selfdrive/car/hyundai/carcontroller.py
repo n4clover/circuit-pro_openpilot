@@ -101,6 +101,7 @@ class CarController():
     self.ldws_opt = Params().get_bool('IsLdwsCar')
     self.stock_navi_decel_enabled = Params().get_bool('StockNaviDecelEnabled')
     self.keep_steering_turn_signals = Params().get_bool('KeepSteeringTurnSignals')
+    self.NoMinLaneChangeSpeed = Params().get_bool('NoMinLaneChangeSpeed')
 
     # gas_factor, brake_factor
     # Adjust it in the range of 0.7 to 1.3
@@ -143,10 +144,10 @@ class CarController():
       else:
         self.override = False
 
-    # Disable steering while turning blinker on and speed below 60 kph
+    # Disable steering while turning blinker on and speed below min lane chnage speed
     if (CS.out.leftBlinker or CS.out.rightBlinker):
       self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
-    if self.turning_indicator_alert and not self.keep_steering_turn_signals: # set and clear by interface
+    if self.turning_indicator_alert and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed: # set and clear by interface
       lkas_active = False
       if CS.spas_enabled:
         spas_active = False

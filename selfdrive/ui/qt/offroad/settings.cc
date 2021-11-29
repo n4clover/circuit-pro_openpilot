@@ -612,6 +612,12 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));
 
+  toggles.append(new ParamControl("NoMinLaneChangeSpeed",
+                                            "Enable Auto Lane Change at any speed.",
+                                            "warnings: it is beta, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+
   toggles.append(new ParamControl("KeepSteeringTurnSignals",
                                             "Keep steering while turn signals.",
                                             "",
