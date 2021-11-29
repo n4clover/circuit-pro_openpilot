@@ -162,6 +162,22 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
     }
   });
 
+  QPushButton *delete_recordings_btn = new QPushButton("Delete UI Screen Recordings");
+  delete_recordings_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  reset_layout->addWidget(delete_recordings_btn);
+  QObject::connect(delete_recordings_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? ", this)) {
+      if (TICI()) {
+        std::system("cd /data/media/0/videos && rm *.*")
+        emit closeSettings();   
+      }
+      else {
+        std::system("cd /storage/emulated/0/videos && rm *.*");
+        emit closeSettings();        
+      }
+    }
+  });
+
   addItem(reset_layout);
 
   // offroad-only buttons
