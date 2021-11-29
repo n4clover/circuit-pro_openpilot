@@ -200,12 +200,12 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   QObject::connect(delete_logs_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to delete all logs of drives to be uploaded?", this)) {
       if (Hardware::TICI()) {
-        std::system("cd /data/media/0/realdata && rm *.*");
+        std::system("cd /data/media/0/realdata && rm -rf *");
         ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 3", this);
         emit closeSettings();
       }
       else if (Hardware::EON()) {
-        std::system("cd /storage/emulated/0/realdata && rm *.*");
+        std::system("cd /storage/emulated/0/realdata && rm -rf *");
         ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 2", this);
         emit closeSettings();
       }
