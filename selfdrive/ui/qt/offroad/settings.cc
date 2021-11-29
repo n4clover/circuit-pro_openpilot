@@ -162,7 +162,7 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   QObject::connect(run_ntune_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to run nTune calibration? This lags for a second.", this)) {
       std::system("cd /data/openpilot/selfdrive && python ntune.py");
-      ConfirmationDialog::alert("You have successfully run nTune", this);
+      ConfirmationDialog::alert("You have successfully run nTune!", this);
       emit closeSettings();
     }
   });
@@ -171,15 +171,15 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   delete_recordings_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   custom1_layout->addWidget(delete_recordings_btn);
   QObject::connect(delete_recordings_btn, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? ", this)) {
+    if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? This cannot be undone.", this)) {
       if (Hardware::TICI()) {
         std::system("cd /data/media/0/videos && rm *.*");
-        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 3", this);
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 3!", this);
         emit closeSettings();   
       }
       else if (Hardware::EON()) {
         std::system("cd /storage/emulated/0/videos && rm *.*");
-        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 2", this);
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 2!", this);
         emit closeSettings();        
       }
       else {
@@ -198,15 +198,15 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   delete_logs_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   custom2_layout->addWidget(delete_logs_btn);
   QObject::connect(delete_logs_btn, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("Are you sure you want to delete all logs of drives to be uploaded?", this)) {
+    if (ConfirmationDialog::confirm("Are you sure you want to delete all logs of drives to be uploaded? This cannot be undone.", this)) {
       if (Hardware::TICI()) {
         std::system("cd /data/media/0/realdata && rm -rf *");
-        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 3", this);
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 3!", this);
         emit closeSettings();
       }
       else if (Hardware::EON()) {
         std::system("cd /storage/emulated/0/realdata && rm -rf *");
-        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 2", this);
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 2!", this);
         emit closeSettings();
       }
       else {
