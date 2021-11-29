@@ -152,6 +152,16 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
     }
   });
 
+  QPushButton *run_ntune_btn = new QPushButton("Run nTune Calibration");
+  run_ntune_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  reset_layout->addWidget(run_ntune_btn);
+  QObject::connect(run_ntune_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("Are you sure you want to run nTune calibration? This lags for a second.", this)) {
+      std::system("cd /data/openpilot/selfdrive && python ntune.py");
+      emit closeSettings();
+    }
+  });
+
   addItem(reset_layout);
 
   // offroad-only buttons
