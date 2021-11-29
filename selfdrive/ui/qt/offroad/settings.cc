@@ -151,10 +151,14 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
       });
     }
   });
+  addItem(reset_layout);
+
+  QHBoxLayout *custom_layout = new QHBoxLayout();
+  custom_layout->setSpacing(30);
 
   QPushButton *run_ntune_btn = new QPushButton("Run nTune Calibration");
   run_ntune_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
-  reset_layout->addWidget(run_ntune_btn);
+  custom_layout->addWidget(run_ntune_btn);
   QObject::connect(run_ntune_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to run nTune calibration? This lags for a second.", this)) {
       std::system("cd /data/openpilot/selfdrive && python ntune.py");
@@ -164,7 +168,7 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
 
   QPushButton *delete_recordings_btn = new QPushButton("Delete UI Screen Recordings");
   delete_recordings_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
-  reset_layout->addWidget(delete_recordings_btn);
+  custom_layout->addWidget(delete_recordings_btn);
   QObject::connect(delete_recordings_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? ", this)) {
       if (Hardware::TICI()) {
@@ -178,7 +182,7 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
     }
   });
 
-  addItem(reset_layout);
+  addItem(custom_layout);
 
   // offroad-only buttons
 
