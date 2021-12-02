@@ -735,6 +735,12 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));   
 
+  toggles.append(new ParamControl("DynamicSpas",
+                                            "Enable Dynamic SPAS - LKAS switch - !ALPHA!",
+                                            "Enable Send Parking Assist Messages depending on situation and factors. Warning: It is !ALPHA!, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));   
+
   /*toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
                                             "",

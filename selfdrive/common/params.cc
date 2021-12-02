@@ -205,6 +205,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"SteerLockout", PERSISTENT},
     {"SoftRestartTriggered", CLEAR_ON_MANAGER_START},
     {"spasEnabled", PERSISTENT},
+    {"DynamicSpas", PERSISTENT},
     {"SPASDebug", PERSISTENT},
     {"CreepDebug", PERSISTENT},
 };

@@ -74,6 +74,7 @@ def manager_init():
     ("LowSpeedAlerts", "1"),
     ("SteerLockout", "0"),
     ("spasEnabled", "0"),
+    ("DynamicSpas", "0"),
     ("SPASDebug", "0"),
     ("CreepDebug", "0"),
   ]
