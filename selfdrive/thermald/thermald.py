@@ -22,7 +22,7 @@ from selfdrive.hardware import EON, TICI, PC, HARDWARE
 from selfdrive.loggerd.config import get_available_percent
 from selfdrive.swaglog import cloudlog
 from selfdrive.thermald.power_monitoring import PowerMonitoring
-from selfdrive.version import tested_branch, terms_version, training_version
+from selfdrive.version import get_tested_branch, terms_version, training_version
 
 ThermalStatus = log.DeviceState.ThermalStatus
 NetworkType = log.DeviceState.NetworkType
@@ -202,6 +202,7 @@ def thermald_thread():
   thermal_config = HARDWARE.get_thermal_config()
 
   restart_triggered_ts = 0.
+  panda_state_ts = 0.
 
   # TODO: use PI controller for UNO
   controller = PIController(k_p=0, k_i=2e-3, neg_limit=-80, pos_limit=0, rate=(1 / DT_TRML))
@@ -240,6 +241,7 @@ def thermald_thread():
           startup_conditions["ignition"] = False
       else:
         no_panda_cnt = 0
+        panda_state_ts = sec_since_boot()
         startup_conditions["ignition"] = pandaState.ignitionLine or pandaState.ignitionCan
 
       in_car = pandaState.harnessStatus != log.PandaState.HarnessStatus.notConnected
@@ -266,6 +268,12 @@ def thermald_thread():
           pandaState_prev.pandaType != log.PandaState.PandaType.unknown:
           params.clear_all(ParamKeyType.CLEAR_ON_PANDA_DISCONNECT)
       pandaState_prev = pandaState
+
+    else:
+      if sec_since_boot() - panda_state_ts > 3.:
+        if startup_conditions["ignition"]:
+          cloudlog.error("Lost panda connection while onroad")
+        startup_conditions["ignition"] = False
 
     # these are expensive calls. update every 10s
     if (count % int(10. / DT_TRML)) == 0:
@@ -358,7 +366,7 @@ def thermald_thread():
     last_update_exception = params.get("LastUpdateException", encoding='utf8')
 
     if update_failed_count > 15 and last_update_exception is not None:
-      if tested_branch:
+      if get_tested_branch():
         extra_text = "Ensure the software is correctly installed"
       else:
         extra_text = last_update_exception

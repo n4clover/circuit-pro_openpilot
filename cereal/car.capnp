@@ -206,7 +206,7 @@ struct CarState {
   autoHold @41 : Int32;
   tpms @42 : Tpms;
   mdps11Stat @44 : Int32;
-  vDelta @45 :Float32;
+  vCluRatio @45 :Float32;
 
   struct Tpms {
     fl @0 :Float32;
@@ -390,15 +390,18 @@ struct CarControl {
 
     enum AudibleAlert {
       none @0;
-      chimeEngage @1;
-      chimeDisengage @2;
-      chimeError @3;
-      chimeWarning1 @4; # unused
-      chimeWarningRepeat @5;
-      chimeWarningRepeatInfinite @6;
-      chimePrompt @7;
-      chimeWarning2RepeatInfinite @8;
-      chimeSlowingDownSpeed @9;
+      engage @1;
+      disengage @2;
+      refuse @3;
+
+      warningSoft @4;
+      warningImmediate @5;
+      warningDEPRECATED @6;
+
+      prompt @7;
+      promptRepeat @8;
+
+      slowingDownSpeed @9;
     }
   }
 
@@ -555,9 +558,9 @@ struct CarParams {
     toyota @2;
     elm327 @3;
     gm @4;
-    hondaBoschGiraffeDEPRECATED @5;
+    hondaBoschGiraffe @5;
     ford @6;
-    cadillacDEPRECATED @7;
+    cadillac @7;
     hyundai @8;
     chrysler @9;
     tesla @10;
@@ -566,9 +569,9 @@ struct CarParams {
     mazda @13;
     nissan @14;
     volkswagen @15;
-    toyotaIpasDEPRECATED @16;
+    toyotaIpas @16;
     allOutput @17;
-    gmAscmDEPRECATED @18;
+    gmAscm @18;
     noOutput @19;  # like silent but without silent CAN TXs
     hondaBosch @20;
     volkswagenPq @21;
