@@ -17,7 +17,7 @@ AUTO_LCA_START_TIME = .1
 LaneChangeState = log.LateralPlan.LaneChangeState
 LaneChangeDirection = log.LateralPlan.LaneChangeDirection
 
-LANE_CHANGE_SPEED_MIN = 0 if Params().get_bool('NoMinLaneChangeSpeed') else 24 * CV.MPH_TO_MS
+LANE_CHANGE_SPEED_MIN = 1 if Params().get_bool('NoMinLaneChangeSpeed') else 24 * CV.MPH_TO_MS
 LANE_CHANGE_TIME_MAX = 10.
 
 DESIRES = {
