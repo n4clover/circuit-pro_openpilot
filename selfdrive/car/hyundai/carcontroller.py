@@ -94,6 +94,7 @@ class CarController():
       self.lkas_active = False
       self.spas_active = False
       self.spas_active_last = 0
+      self.DTQL = 0
       self.assist = False
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
@@ -143,7 +144,7 @@ class CarController():
       lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if CS.spas_enabled:
-      if abs(CS.out.steeringWheelTorque) > TQ and spas_active and not lkas_active:
+      if abs(CS.out.steeringWheelTorque) > TQ  and self.DTQL > TQ and spas_active and not lkas_active:
         self.override = True
         print("OVERRIDE")
       else:
@@ -408,4 +409,5 @@ class CarController():
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
       self.spas_active_last = spas_active
+      self.DTQL = abs(CS.out.steeringWheelTorque)
     return can_sends
