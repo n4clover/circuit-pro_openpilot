@@ -101,7 +101,7 @@ class CarInterface(CarInterfaceBase):
     ret.stoppingDecelRate = 0.6  # brake_travel/s while trying to stop
     ret.vEgoStopping = 0.5
     ret.vEgoStarting = 0.6
-    ret.minSpeedCan = 1.0 # fix stopping conditions -JPR
+    ret.minSpeedCan = 1.2 # fix stopping conditions -JPR
 
     # genesis
     if candidate == CAR.GENESIS:
@@ -439,7 +439,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.actuatorEffectivenessV = [2.]
       
       ret.longitudinalTuning.kpBP = [0, 10. * CV.KPH_TO_MS, 20. * CV.KPH_TO_MS, 40. * CV.KPH_TO_MS, 70. * CV.KPH_TO_MS, 100. * CV.KPH_TO_MS, 130. * CV.KPH_TO_MS]
-      ret.longitudinalTuning.kpV = [1.26, 1.16, 1.07, 0.98, 0.92, 0.87, 0.82]
+      ret.longitudinalTuning.kpV = [1.23, 1.16, 1.07, 0.98, 0.92, 0.87, 0.82]
       ret.longitudinalTuning.kiBP = [0., 130. * CV.KPH_TO_MS]
       ret.longitudinalTuning.kiV = [0.05, 0.03]
 
