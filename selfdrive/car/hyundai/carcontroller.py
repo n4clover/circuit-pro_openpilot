@@ -130,7 +130,7 @@ class CarController():
       if apply_diff > 1.5: # Rate limit for when steering angle is not apply_angle - JPR
         self.ratelimit += 0.05 # Increase each cycle - JPR
         rate_limit = clip(self.ratelimit, -10, 10) # Make sure not to go past +-10 on rate - JPR
-        apply_angle = clip(actuators.steeringAngleDeg, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
+        apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
       else:
         self.ratelimit = 0.5 # Reset it back to 1 - JPR
         if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
