@@ -29,7 +29,7 @@ ANGLE_DELTA_BP = [0., 8., 16.]
 ANGLE_DELTA_V = [1.2, 1.1, 1.]    # windup limit
 ANGLE_DELTA_VU = [1.3, 1.2, 1.1]   # unwind limit
 TQ = 285 # = TQ / 100 = NM is unit of measure for wheel.
-SPAS_SWITCH = 35 * CV.MPH_TO_MS #MPH
+SPAS_SWITCH = 38 * CV.MPH_TO_MS #MPH
 ###### SPAS #######
 
 SP_CARS = [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
@@ -98,7 +98,7 @@ class CarController():
       self.assist = False
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
-      
+
     param = Params()
 
     self.mad_mode_enabled = param.get_bool('MadModeEnabled')
@@ -135,7 +135,7 @@ class CarController():
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
         else:
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
-        apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)  
+        apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
       spas_active = CS.spas_enabled and enabled and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 2 and CS.out.vEgo < 26.82 and self.dynamicSpas)
@@ -153,7 +153,7 @@ class CarController():
     # Disable steering while turning blinker on and speed below min lane chnage speed
     if (CS.out.leftBlinker or CS.out.rightBlinker):
       self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
-    if self.turning_indicator_alert and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed: # set and clear by interface
+    if self.turning_indicator_alert and not self.keep_steering_turn_signals: # set and clear by interface...Temporarily removed (and not self.NoMinLaneChangeSpeed) due to controls mismatch error
       lkas_active = False
       if CS.spas_enabled:
         spas_active = False
@@ -267,7 +267,7 @@ class CarController():
     if self.longcontrol and CS.cruiseState_enabled and (CS.scc_bus or not self.scc_live):
 
       if frame % 2 == 0:
-        
+
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
         apply_accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
         apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
@@ -306,7 +306,7 @@ class CarController():
 
         if frame % 20 == 0 and CS.has_scc13:
           can_sends.append(create_scc13(self.packer, CS.scc13))
-          
+
         if CS.has_scc14:
           acc_standstill = stopping if CS.out.vEgo < 2. else False
 
@@ -347,7 +347,7 @@ class CarController():
       if CS.mdps_bus:
         spas_active_stat = False
         if spas_active: # Spoof Speed on mdps11_stat 4 and 5 JPR
-          if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3: 
+          if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3:
             spas_active_stat = True
           else:
             spas_active_stat = False
@@ -372,13 +372,13 @@ class CarController():
           self.en_spas = 3
           if CS.mdps11_stat == 3:
             self.en_spas = 2
-          
+
         if CS.mdps11_stat == 2 and spas_active:
           self.en_spas = 3 # Switch to State 3, and get Ready to Assist(Steer). JPR
 
         if CS.mdps11_stat == 3 and spas_active:
           self.en_spas = 4
-          
+
         if CS.mdps11_stat == 4 and spas_active:
           self.en_spas = 5
 
@@ -386,10 +386,10 @@ class CarController():
           self.en_spas = 7
 
         if CS.mdps11_stat == 6: # Failed to Assist and Steer, Set state back to 2 for a new request. JPR
-          self.en_spas = 2    
+          self.en_spas = 2
 
         if CS.mdps11_stat == 8: #MDPS ECU Fails to get into state 3 and ready for state 5. JPR
-          self.en_spas = 2    
+          self.en_spas = 2
 
         if not spas_active:
           apply_angle = CS.mdps11_strang
