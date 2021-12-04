@@ -101,7 +101,7 @@ class CarInterface(CarInterfaceBase):
     ret.stoppingDecelRate = 0.6  # brake_travel/s while trying to stop
     ret.vEgoStopping = 0.6
     ret.vEgoStarting = 0.5
-    ret.minSpeedCan = 1.5 # fix stopping conditions -JPR
+    #ret.minSpeedCan = 1.5 # fix stopping conditions -JPR
 
     # genesis
     if candidate == CAR.GENESIS:
