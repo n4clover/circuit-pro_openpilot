@@ -390,17 +390,18 @@ struct CarControl {
 
     enum AudibleAlert {
       none @0;
+
       engage @1;
       disengage @2;
       refuse @3;
 
       warningSoft @4;
       warningImmediate @5;
-      warningDEPRECATED @6;
 
-      prompt @7;
-      promptRepeat @8;
-
+      prompt @6;
+      promptRepeat @7;
+      promptDistracted @8;
+      
       slowingDownSpeed @9;
     }
   }
@@ -485,20 +486,22 @@ struct CarParams {
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
 
+  wheelSpeedFactor @63 :Float32; # Multiplier on wheels speeds to computer actual speeds
+
   struct SafetyConfig {
     safetyModel @0 :SafetyModel;
     safetyParam @1 :Int16;
   }
   
-  mdpsBus @63: Int8;
-  sasBus @64: Int8;
-  sccBus @65: Int8;
-  enableAutoHold @66 :Bool;
-  hasScc13 @67 :Bool;
-  hasScc14 @68 :Bool;
-  hasEms @69 :Bool;
-  spasEnabled @70: Bool;
-  emsType @71: Int8;
+  mdpsBus @64: Int8;
+  sasBus @65: Int8;
+  sccBus @66: Int8;
+  enableAutoHold @67 :Bool;
+  hasScc13 @68 :Bool;
+  hasScc14 @69 :Bool;
+  hasEms @70 :Bool;
+  spasEnabled @71: Bool;
+  emsType @72: Int8;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
