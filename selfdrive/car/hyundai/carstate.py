@@ -348,7 +348,7 @@ class CarState(CarStateBase):
       ("PRESSURE_RL", "TPMS11", 0),
       ("PRESSURE_RR", "TPMS11", 0),
     ]
-    if CP.sccBus == 0 and CP.pcmCruise:
+    if CP.sccBus == 0 and CP.pcmCruise and not CP.radarDisablePossible:
       signals += [
         ("MainMode_ACC", "SCC11", 1),
         ("SCCInfoDisplay", "SCC11", 0),
@@ -411,7 +411,7 @@ class CarState(CarStateBase):
       ("WHL_SPD11", 50),
     ]
 
-    if CP.sccBus == 0 and CP.pcmCruise:
+    if CP.sccBus == 0 and CP.pcmCruise and not CP.radarDisablePossible:
       checks += [
         ("SCC11", 50),
         ("SCC12", 50),
