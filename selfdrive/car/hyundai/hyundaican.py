@@ -1,5 +1,4 @@
 import copy
-
 import crcmod
 from selfdrive.car.hyundai.values import CAR, CHECKSUM, FEATURES, EV_HYBRID_CAR
 
