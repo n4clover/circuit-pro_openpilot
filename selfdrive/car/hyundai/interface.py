@@ -422,9 +422,10 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 1.0
       ret.mass = 1640.0 + STD_CARGO_KG
       ret.wheelbase = 2.84
-      ret.steerRatio = 14.   # 15% higher at the center seems reasonable - before was 14.44 
+      ret.steerRatio = 14.4 * 1.15   # 15% higher at the center seems reasonable - before was 14.44 
       ret.centerToFront = ret.wheelbase * 0.4
       ret.emsType = 1 
+      
       if not UseLQR:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [0.]

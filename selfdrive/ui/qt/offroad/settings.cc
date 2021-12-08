@@ -729,6 +729,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "Use of MDPS Harness to enable openpilot steering down to 0 MPH",
                                             "../assets/offroad/icon_road.png",
                                             this));
+                                            
   toggles.append(new ParamControl("WarningOverSpeedLimit",
                                             "Warning when speed limit is exceeded.",
                                             "",
