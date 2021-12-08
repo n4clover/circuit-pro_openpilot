@@ -334,7 +334,7 @@ class CarController():
       can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
 
     # send scc to car if longcontrol enabled and SCC not on bus 0 or ont live
-    if self.longcontrol and CS.cruiseState_enabled and (CS.scc_bus or not self.scc_live):
+    if self.longcontrol and CS.cruiseState_enabled and (CS.scc_bus or not self.scc_live or self.radarDisableActivated):
 
       if frame % 2 == 0:
 
