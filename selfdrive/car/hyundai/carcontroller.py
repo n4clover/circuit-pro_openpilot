@@ -272,16 +272,16 @@ class CarController():
 
     if self.longcontrol: # XPS-Genesis
       self.gapcount += 1
-      if self.gapcount == 50 and self.gapsettingdance == 2:
+      if self.gapcount == 30 and self.gapsettingdance == 2:
         self.gapsettingdance = 1
         self.gapcount = 0
-      elif self.gapcount == 50 and self.gapsettingdance == 1:
+      elif self.gapcount == 30 and self.gapsettingdance == 1:
         self.gapsettingdance = 4
         self.gapcount = 0
-      elif self.gapcount == 50 and self.gapsettingdance == 4:
+      elif self.gapcount == 30 and self.gapsettingdance == 4:
         self.gapsettingdance = 3
         self.gapcount = 0
-      elif self.gapcount == 50 and self.gapsettingdance == 3:
+      elif self.gapcount == 30 and self.gapsettingdance == 3:
         self.gapsettingdance = 2
         self.gapcount = 0
 
