@@ -165,14 +165,14 @@ def main(sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageStd = float(P[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetFastStd = float(P[States.ANGLE_OFFSET_FAST])
 
-      if sm.frame % 1200 == 0 and Params().get_bool('spasEnabled'):#sm['carState'].mdps11Stat == 5:  # once a minute and SPAS enabled - TO DO - when active mdps11 state 5 - JPR
-        params = {
-          'carFingerprint': CP.carFingerprint,
-          'steerRatio': CP.steerRatio,
-          'stiffnessFactor': msg.liveParameters.stiffnessFactor,
-          'angleOffsetAverageDeg': msg.liveParameters.angleOffsetAverageDeg,
-        }
-      elif sm.frame % 1200 == 0:
+    #  if sm.frame % 1200 == 0 and Params().get_bool('spasEnabled'): #sm['carState'].mdps11Stat == 5:  # once a minute and SPAS enabled - TO DO - when active mdps11 state 5 - JPR
+    #    params = {
+    #      'carFingerprint': CP.carFingerprint,
+    #      'steerRatio': CP.steerRatio,
+    #      'stiffnessFactor': msg.liveParameters.stiffnessFactor,
+    #      'angleOffsetAverageDeg': msg.liveParameters.angleOffsetAverageDeg,
+    #    }
+      if sm.frame % 1200 == 0:
          params = {
           'carFingerprint': CP.carFingerprint,
           'steerRatio': msg.liveParameters.steerRatio,
