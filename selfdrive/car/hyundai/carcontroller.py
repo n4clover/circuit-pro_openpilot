@@ -270,7 +270,7 @@ class CarController():
     elif self.last_lead_distance != 0:
       self.last_lead_distance = 0
 
-    if not self.longcontrol: # XPS-Genesis
+    if self.longcontrol: # XPS-Genesis
       self.gapcount += 1
       if self.gapcount == 50 and self.gapsettingdance == 2:
         self.gapsettingdance = 1
@@ -326,7 +326,7 @@ class CarController():
                                       CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill,
                                       self.car_fingerprint))
 
-        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.scc_live, CS.scc11, self.gapsettingdance,
+        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsettingdance, self.scc_live, CS.scc11,
                                       self.scc_smoother.active_cam, stock_cam))
 
         if frame % 20 == 0 and CS.has_scc13:
