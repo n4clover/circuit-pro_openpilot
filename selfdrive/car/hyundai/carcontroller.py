@@ -290,7 +290,7 @@ class CarController():
         self.gapsetting = self.gapsettingdance
       elif 10 > CS.lead_distance > 0: # Set gap to associated distance of lead. - JPR
         self.gapsetting = 1
-      elif 30 > CS.lead_distance > 10:
+      elif 30 > CS.lead_distance > 15:
         self.gapsetting = 2
       elif 55 > CS.lead_distance > 30:
         self.gapsetting = 3
