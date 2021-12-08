@@ -754,7 +754,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));   
 
   toggles.append(new ParamControl("SpasMode",
-                                            "Switch to LKAS or Disengage on SPAS override",
+                                            "Switch to LKAS or Disengage on SPAS override !ALPHA!",
                                             "Switch to LKAS on Steering Pressed or Disengage on override torque.",
                                             "../assets/offroad/icon_road.png",
                                             this));  
