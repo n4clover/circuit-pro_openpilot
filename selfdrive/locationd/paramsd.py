@@ -69,7 +69,14 @@ class ParamsLearner:
       # Reset time when stopped so uncertainty doesn't grow
       self.kf.filter.set_filter_time(t)
       self.kf.filter.reset_rewind()
-
+      
+  def data_sample(self):
+    """Receive data from sockets and update carState"""
+    # Update carState from CAN
+    can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
+    CS = self.CI.update(car.CarControl.new_message(), can_strs)
+    self.sm.update(0)
+    return CS
 
 def main(CS, sm=None, pm=None):
   gc.disable()
