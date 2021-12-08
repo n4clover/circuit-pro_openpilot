@@ -621,7 +621,7 @@ class CarInterface(CarInterfaceBase):
 
     events = self.create_common_events(ret)
 
-    if self.CS.brake_error:
+    if self.CC.longcontrol and self.CS.cruise_unavail:
       events.add(EventName.brakeUnavailable)
     #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
     #  events.add(EventName.steerTempUnavailable)
