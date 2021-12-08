@@ -126,9 +126,6 @@ def main(sm=None, pm=None):
   learner = ParamsLearner(CP, params['steerRatio'], params['stiffnessFactor'], math.radians(params['angleOffsetAverageDeg']))
   angle_offset_average = params['angleOffsetAverageDeg']
   angle_offset = angle_offset_average
-  car_state = messaging.new_message('carState')
-  mdps11Stat = car_state.carState.mdps11Stat # Monitor carState MDPS11 State. - JPR
-  print("CarState MDPS11", mdps11Stat)
 
   while True:
     sm.update()
@@ -168,7 +165,7 @@ def main(sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageStd = float(P[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetFastStd = float(P[States.ANGLE_OFFSET_FAST])
 
-      if sm.frame % 1200 == 0 and mdps11Stat == 5:  # once a minute and SPAS active
+      if sm.frame % 1200 == 0 and msg.logMonoTime.mdps11Stat == 5:  # once a minute and SPAS active
         params = {
           'carFingerprint': CP.carFingerprint,
           'steerRatio': CP.steerRatio,
