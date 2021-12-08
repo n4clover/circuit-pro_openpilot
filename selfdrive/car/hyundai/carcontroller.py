@@ -275,16 +275,16 @@ class CarController():
       self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
       if not lead_visible:
         self.gapcount += 1 # XPS-Genesis; Adapted by JPR. Searching for lead animation 
-        if self.gapcount == self.animationSpeed and self.gapsettingdance == 2:
+        if self.gapcount > self.animationSpeed and self.gapsettingdance == 2:
           self.gapsettingdance = 1
           self.gapcount = 0
-        elif self.gapcount == self.animationSpeed and self.gapsettingdance == 1:
+        elif self.gapcount > self.animationSpeed and self.gapsettingdance == 1:
           self.gapsettingdance = 4
           self.gapcount = 0
-        elif self.gapcount == self.animationSpeed and self.gapsettingdance == 4:
+        elif self.gapcount > self.animationSpeed and self.gapsettingdance == 4:
           self.gapsettingdance = 3
           self.gapcount = 0
-        elif self.gapcount == self.animationSpeed and self.gapsettingdance == 3:
+        elif self.gapcount > self.animationSpeed and self.gapsettingdance == 3:
           self.gapsettingdance = 2
           self.gapcount = 0
         self.gapsetting = self.gapsettingdance
