@@ -273,7 +273,7 @@ class CarController():
 
     if self.longcontrol:
       if CS.lead_distance == 0:
-        self.gapcount += 1 # XPS-Genesis
+        self.gapcount += 1 # XPS-Genesis; Adapted by JPR. Searching for lead animation 
         if self.gapcount == 38 and self.gapsettingdance == 2:
           self.gapsettingdance = 1
           self.gapcount = 0
@@ -287,7 +287,7 @@ class CarController():
           self.gapsettingdance = 2
           self.gapcount = 0
         self.gapsetting = self.gapsettingdance
-      elif CS.lead_distance > 0: # JPR
+      elif CS.lead_distance > 0: # Set gap to associated distance of lead. - JPR
         self.gapsetting = 1
       elif CS.lead_distance > 20:
         self.gapsetting = 2
