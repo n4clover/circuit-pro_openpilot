@@ -69,7 +69,7 @@ class CarController():
     self.lkas11_cnt = 0
     self.scc12_cnt = -1
 
-    self.enabled_cnt = 0
+    self.pcm_cnt = 0
     self.resume_cnt = 0
     self.last_lead_distance = 0
     self.resume_wait_timer = 0
@@ -233,16 +233,15 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    if pcm_cancel_cmd and (self.longcontrol and not self.mad_mode_enabled) or not enabled and self.enabled_cnt >= 1 and CS.out.cruiseState.enabled: #Make SCC cancle when op disengage or last accel is kept (IDK) -JPR
+    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 5 and CS.out.cruiseState.enabled: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
       can_sends.append(create_clu11(self.packer, frame % 0x10, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
-      self.enabled_cnt += 1
+      self.pcm_cnt += 1
     else:
+      self.pcm_cnt += 1
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
-
-    if enabled: # Enable count so we don't spam cancel to SCC - JPR
-      self.enabled_cnt = 1
-    if self.enabled_cnt == 6:
-      self.enabled_cnt = 0
+    
+    if self.pcm_cnt == 6:
+      self.pcm_cnt = 0 
 
     # fix auto resume - by neokii
     if CS.out.cruiseState.standstill and not CS.out.gasPressed:
