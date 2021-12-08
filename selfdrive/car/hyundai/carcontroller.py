@@ -29,7 +29,7 @@ ANGLE_DELTA_BP = [0., 10., 20.]
 ANGLE_DELTA_V = [1.3, 1.2, 1.1]    # windup limit
 ANGLE_DELTA_VU = [1.4, 1.3, 1.2]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
-SPAS_SWITCH = 38 * CV.MPH_TO_MS #MPH
+SPAS_SWITCH = 30 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRatio
 ###### SPAS #######
 
 SP_CARS = [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
