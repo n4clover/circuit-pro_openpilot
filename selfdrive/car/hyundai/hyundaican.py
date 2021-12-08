@@ -112,17 +112,14 @@ def create_mdps12(packer, frame, mdps12):
 
   return packer.make_can_msg("MDPS12", 2, values)
 
-def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, scc_live, scc11, active_cam, stock_cam, sendaccmode, standstill, lead_dist, lead_vrel, lead_yrel):
+def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, scc_live, scc11, active_cam, stock_cam, sendaccmode, standstill, lead_dist):
   values = copy.copy(scc11)
   values["DriverAlertDisplay"] = 0
   values["AliveCounterACC"] = frame // 2 % 0x10
   values["ObjValid"] = lead_visible
   values["ACC_ObjStatus"] = lead_visible
   values["TauGapSet"] = gapsetting
-  values["ACC_ObjStatus"] = lead_visible
-  values["ACC_ObjRelSpd"] = lead_vrel
   values["ACC_ObjDist"] = lead_dist
-  values["ACC_ObjLatPos"] = -lead_yrel
 
   if not stock_cam:
     values["Navi_SCC_Camera_Act"] = 2 if active_cam else 0
