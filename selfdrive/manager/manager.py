@@ -79,7 +79,7 @@ def manager_init():
     ("SteerLockout", "0"),
     ("spasEnabled", "0"),
     ("DynamicSpas", "0"),
-    ("SpasMode", "1"),
+    ("SpasMode", "0"),
     ("SPASDebug", "0"),
     ("CreepDebug", "0"),
   ]
