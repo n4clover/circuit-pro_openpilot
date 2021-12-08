@@ -71,7 +71,7 @@ class ParamsLearner:
       self.kf.filter.set_filter_time(t)
       self.kf.filter.reset_rewind()
 
-def main(self, sm=None, pm=None):
+def main(sm=None, pm=None):
   gc.disable()
   set_realtime_priority(5)
 
@@ -144,6 +144,8 @@ def main(self, sm=None, pm=None):
 
       angle_offset_average = clip(math.degrees(x[States.ANGLE_OFFSET]), angle_offset_average - MAX_ANGLE_OFFSET_DELTA, angle_offset_average + MAX_ANGLE_OFFSET_DELTA)
       angle_offset = clip(math.degrees(x[States.ANGLE_OFFSET] + x[States.ANGLE_OFFSET_FAST]), angle_offset - MAX_ANGLE_OFFSET_DELTA, angle_offset + MAX_ANGLE_OFFSET_DELTA)
+      
+      mdps11Stat = messaging.new_message('carState').mdps11Stat
 
       msg = messaging.new_message('liveParameters')
       msg.logMonoTime = sm.logMonoTime['carState']
@@ -165,7 +167,7 @@ def main(self, sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageStd = float(P[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetFastStd = float(P[States.ANGLE_OFFSET_FAST])
 
-      if sm.frame % 1200 == 0 and self.mdps11Stat == 5:  # once a minute and SPAS active
+      if sm.frame % 1200 == 0 and mdps11Stat == 5:  # once a minute and SPAS active
         params = {
           'carFingerprint': CP.carFingerprint,
           'steerRatio': CP.steerRatio,
