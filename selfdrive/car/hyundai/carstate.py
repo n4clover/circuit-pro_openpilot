@@ -194,6 +194,12 @@ class CarState(CarStateBase):
     else:
       ret.leftBlindspot = False
       ret.rightBlindspot = False
+    
+    if not self.CP.openpilotLongitudinalControl:
+      self.brake_error = 0
+    else:
+      self.brake_error = cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"]
+    ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
     # save the entire LKAS11, CLU11, SCC12 and MDPS12
     self.lkas11 = cp_cam.vl["LKAS11"]
