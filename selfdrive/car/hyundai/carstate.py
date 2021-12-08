@@ -51,7 +51,6 @@ class CarState(CarStateBase):
     self.use_cluster_speed = Params().get_bool('UseClusterSpeed')
     self.long_control_enabled = Params().get_bool('LongControlEnabled')
     self.spas_enabled = CP.spasEnabled
-    self.radarDisablePossible = Params().get_bool('radarDisablePossible')
     self.mdps11_stat = 0
 
   def update(self, cp, cp2, cp_cam):
