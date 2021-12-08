@@ -56,6 +56,7 @@ class ParamsLearner:
     elif which == 'carState':
       self.steering_angle = msg.steeringAngleDeg
       self.steering_pressed = msg.steeringPressed
+      self.mdps11Stat = msg.mdps11Stat
       self.speed = msg.vEgo
 
       in_linear_region = abs(self.steering_angle) < 45 or not self.steering_pressed
@@ -69,16 +70,8 @@ class ParamsLearner:
       # Reset time when stopped so uncertainty doesn't grow
       self.kf.filter.set_filter_time(t)
       self.kf.filter.reset_rewind()
-      
-  def data_sample(self):
-    """Receive data from sockets and update carState"""
-    # Update carState from CAN
-    can_strs = messaging.drain_sock_raw(self.can_sock, wait_for_one=True)
-    CS = self.CI.update(car.CarControl.new_message(), can_strs)
-    self.sm.update(0)
-    return CS
 
-def main(CS, sm=None, pm=None):
+def main(self, sm=None, pm=None):
   gc.disable()
   set_realtime_priority(5)
 
@@ -172,7 +165,7 @@ def main(CS, sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageStd = float(P[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetFastStd = float(P[States.ANGLE_OFFSET_FAST])
 
-      if sm.frame % 1200 == 0 and CS.mdps11Stat == 5:  # once a minute
+      if sm.frame % 1200 == 0 and self.mdps11Stat == 5:  # once a minute and SPAS active
         params = {
           'carFingerprint': CP.carFingerprint,
           'steerRatio': CP.steerRatio,
@@ -188,7 +181,6 @@ def main(CS, sm=None, pm=None):
         }
       put_nonblocking("LiveParameters", json.dumps(params))
       pm.send('liveParameters', msg)
-
 
 if __name__ == "__main__":
   main()
