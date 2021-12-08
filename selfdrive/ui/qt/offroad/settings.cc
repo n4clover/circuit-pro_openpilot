@@ -659,7 +659,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));
 
   toggles.append(new ParamControl("IsLdwsCar",
-                                            "LDWS",
+                                            "LDWS Only Car; No SCC",
                                             "If your car only supports LDWS, turn it on.",
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
