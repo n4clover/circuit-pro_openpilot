@@ -130,7 +130,7 @@ class CarController():
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       apply_diff = abs(apply_angle - CS.out.steeringAngleDeg)
       if apply_diff > 1.5 and enabled: # Rate limit for when steering angle is not apply_angle - JPR
-        self.ratelimit = self.ratelimit + 0.05 # Increase each cycle - JPR
+        self.ratelimit = self.ratelimit + 0.03 # Increase each cycle - JPR
         rate_limit = clip(self.ratelimit, -10, 10) # Make sure not to go past +-10 on rate - JPR
         print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
@@ -272,16 +272,16 @@ class CarController():
 
     if self.longcontrol: # XPS-Genesis
       self.gapcount += 1
-      if self.gapcount == 30 and self.gapsettingdance == 2:
+      if self.gapcount == 40 and self.gapsettingdance == 2:
         self.gapsettingdance = 1
         self.gapcount = 0
-      elif self.gapcount == 30 and self.gapsettingdance == 1:
+      elif self.gapcount == 40 and self.gapsettingdance == 1:
         self.gapsettingdance = 4
         self.gapcount = 0
-      elif self.gapcount == 30 and self.gapsettingdance == 4:
+      elif self.gapcount == 40 and self.gapsettingdance == 4:
         self.gapsettingdance = 3
         self.gapcount = 0
-      elif self.gapcount == 30 and self.gapsettingdance == 3:
+      elif self.gapcount == 40 and self.gapsettingdance == 3:
         self.gapsettingdance = 2
         self.gapcount = 0
 
