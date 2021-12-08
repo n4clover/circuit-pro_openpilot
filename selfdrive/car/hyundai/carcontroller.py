@@ -292,9 +292,9 @@ class CarController():
         self.gapsetting = 1
       elif 30 > CS.lead_distance > 10:
         self.gapsetting = 2
-      elif 50 > CS.lead_distance > 30:
+      elif 55 > CS.lead_distance > 30:
         self.gapsetting = 3
-      elif CS.lead_distance > 50:
+      elif CS.lead_distance > 55:
         self.gapsetting = 4
 
     # scc smoother
