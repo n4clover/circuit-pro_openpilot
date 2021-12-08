@@ -482,7 +482,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14 
       tire_stiffness_factor = 0.7
       ret.centerToFront = ret.wheelbase * 0.4
-      ret.emsType = 3 
+      ret.emsType = 3
+      
       if not UseLQR:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [0.]
@@ -518,11 +519,9 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.8
     ret.radarTimeStep = 0.05
-    
 
     if ret.centerToFront == 0:
       ret.centerToFront = ret.wheelbase * 0.4
-
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
