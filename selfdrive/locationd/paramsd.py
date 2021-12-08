@@ -172,7 +172,6 @@ def main(CS, sm=None, pm=None):
           'stiffnessFactor': msg.liveParameters.stiffnessFactor,
           'angleOffsetAverageDeg': msg.liveParameters.angleOffsetAverageDeg,
         }
-        put_nonblocking("LiveParameters", json.dumps(params))
       elif sm.frame % 1200 == 0:
          params = {
           'carFingerprint': CP.carFingerprint,
@@ -180,8 +179,7 @@ def main(CS, sm=None, pm=None):
           'stiffnessFactor': msg.liveParameters.stiffnessFactor,
           'angleOffsetAverageDeg': msg.liveParameters.angleOffsetAverageDeg,
         }
-        put_nonblocking("LiveParameters", json.dumps(params))
-
+      put_nonblocking("LiveParameters", json.dumps(params))
       pm.send('liveParameters', msg)
 
 
