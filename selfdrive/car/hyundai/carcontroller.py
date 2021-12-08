@@ -29,8 +29,8 @@ TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
 SPAS_SWITCH = 30 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRatio
 ###### SPAS #######
 
-CLUSTER_ANIMATION_BP = [0., 1., 30., 60., 90., 120.]
-CLUSTER_ANIMATION_SPEED= [0., 120., 90., 60., 30., 3.]
+CLUSTER_ANIMATION_BP = [0., 1., 15., 30., 60., 90.]
+CLUSTER_ANIMATION_SPEED= [0., 150., 90., 60., 30., 3.]
 
 SP_CARS = [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
            CAR.GENESIS_EQ900, CAR.GENESIS_EQ900_L, CAR.K9, CAR.GENESIS_G90]
