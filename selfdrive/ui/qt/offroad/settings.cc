@@ -214,6 +214,25 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
       }
     }
   });
+  QPushButton *recover_panda_btn = new QPushButton("Recover Panda");
+  recover_panda_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  custom2_layout->addWidget(recover_panda_btn);
+  QObject::connect(recover_panda_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("Are you sure you want to kill openpilot and attempt panda recover?", this)) {
+      if (Hardware::TICI()) {
+        std::system("pkill -f openpilot; cd panda/board; ./recover.sh; sudo reboot");
+        emit closeSettings();
+      }
+      else if (Hardware::EON()) {
+        std::system("pkill -f openpilot; cd panda/board; ./recover.sh; reboot");
+        emit closeSettings();
+      }
+      else {
+        ConfirmationDialog::alert("You have NOT successfully attempted panda recover!: Unknown location : Unknown Device", this);
+        emit closeSettings();
+      }
+    }
+  });
   addItem(custom2_layout);
 
   // offroad-only buttons
@@ -729,7 +748,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "Use of MDPS Harness to enable openpilot steering down to 0 MPH",
                                             "../assets/offroad/icon_road.png",
                                             this));
-                                            
+
   toggles.append(new ParamControl("WarningOverSpeedLimit",
                                             "Warning when speed limit is exceeded.",
                                             "",
