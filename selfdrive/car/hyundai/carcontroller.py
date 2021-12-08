@@ -156,6 +156,7 @@ class CarController():
       else:
         if CS.out.steeringPressed:
           spas_active = False
+          lkas_active = True
 
     # Disable steering while turning blinker on and speed below min lane chnage speed
     if (CS.out.leftBlinker or CS.out.rightBlinker):
