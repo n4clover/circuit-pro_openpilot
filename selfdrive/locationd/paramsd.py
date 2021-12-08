@@ -165,7 +165,7 @@ def main(sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageStd = float(P[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetFastStd = float(P[States.ANGLE_OFFSET_FAST])
 
-      if sm.frame % 1200 == 0 and msg.logMonoTime.mdps11Stat == 5:  # once a minute and SPAS active
+      if sm.frame % 1200 == 0 and sm['carState'].mdps11Stat == 5:  # once a minute and SPAS active
         print("MDPS 11 State 5")
         params = {
           'carFingerprint': CP.carFingerprint,
