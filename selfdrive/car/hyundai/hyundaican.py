@@ -231,3 +231,6 @@ def create_eems11(packer, eems11, enabled):
     values["Accel_Pedal_Pos"] = 1
     values["CR_Vcu_AccPedDep_Pos"] = 1
   return packer.make_can_msg("E_EMS11", 1, values)
+  
+def create_scc7d0(cmd):
+  return[2000, 0, cmd, 0]
