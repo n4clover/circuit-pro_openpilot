@@ -80,9 +80,6 @@ class CarController():
     self.scc_live = not CP.radarOffCan
 
     self.turning_indicator_alert = False
-    self.cnt = 0
-    self.cut_steer = False
-    self.cut_condition = False
     self.emsType = CP.emsType
     self.turning_indicator_alert = False
     self.gapsettingdance = 2
@@ -158,8 +155,11 @@ class CarController():
           self.override = False
       else:
         if CS.out.steeringPressed:
+            self.cut_timer = 0
+        if CS.out.steeringPressed or self.cut_timer <= 50: # Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
           spas_active = False
           lkas_active = True
+          self.cut_timer += 1
 
     # Disable steering while turning blinker on and speed below min lane chnage speed
     if (CS.out.leftBlinker or CS.out.rightBlinker):
