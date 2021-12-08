@@ -113,10 +113,13 @@ def create_mdps12(packer, frame, mdps12):
 
   return packer.make_can_msg("MDPS12", 2, values)
 
-def create_scc11(packer, frame, enabled, set_speed, lead_visible, scc_live, scc11, active_cam, stock_cam):
+def create_scc11(packer, frame, enabled, set_speed, lead_visible, scc_live, scc11, gapsetting, active_cam, stock_cam):
   values = copy.copy(scc11)
   values["AliveCounterACC"] = frame // 2 % 0x10
-
+  values["ObjValid"] = lead_visible
+  values["ACC_ObjStatus"] = lead_visible
+  values["TauGapSet"] = gapsetting
+  
   if not stock_cam:
     values["Navi_SCC_Camera_Act"] = 2 if active_cam else 0
     values["Navi_SCC_Camera_Status"] = 2 if active_cam else 0
@@ -125,7 +128,6 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, scc_live, scc1
     values["MainMode_ACC"] = 1
     values["VSetDis"] = set_speed
     values["ObjValid"] = 1 if enabled else 0
-#  values["ACC_ObjStatus"] = lead_visible
 
   return packer.make_can_msg("SCC11", 0, values)
 

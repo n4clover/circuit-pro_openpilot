@@ -85,6 +85,8 @@ class CarController():
     self.cut_condition = False
     self.emsType = CP.emsType
     self.turning_indicator_alert = False
+    self.gapsettingdance = 2
+    self.gapcount = 0
 
     if CP.spasEnabled:
       self.last_apply_angle = 0.0
@@ -268,6 +270,21 @@ class CarController():
     elif self.last_lead_distance != 0:
       self.last_lead_distance = 0
 
+    if not self.longcontrol: # XPS-Genesis
+      self.gapcount += 1
+      if self.gapcount == 50 and self.gapsettingdance == 2:
+        self.gapsettingdance = 1
+        self.gapcount = 0
+      elif self.gapcount == 50 and self.gapsettingdance == 1:
+        self.gapsettingdance = 4
+        self.gapcount = 0
+      elif self.gapcount == 50 and self.gapsettingdance == 4:
+        self.gapsettingdance = 3
+        self.gapcount = 0
+      elif self.gapcount == 50 and self.gapsettingdance == 3:
+        self.gapsettingdance = 2
+        self.gapcount = 0
+
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
@@ -309,7 +326,7 @@ class CarController():
                                       CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill,
                                       self.car_fingerprint))
 
-        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.scc_live, CS.scc11,
+        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.scc_live, CS.scc11, self.gapsettingdance,
                                       self.scc_smoother.active_cam, stock_cam))
 
         if frame % 20 == 0 and CS.has_scc13:
@@ -418,4 +435,5 @@ class CarController():
         can_sends.append(create_spas12(CS.mdps_bus))
       self.spas_active_last = spas_active
       self.DTQL = abs(CS.out.steeringWheelTorque)
+
     return can_sends
