@@ -86,6 +86,7 @@ class CarController():
     self.emsType = CP.emsType
     self.turning_indicator_alert = False
     self.gapsettingdance = 2
+    self.gapsetting = 0
     self.gapcount = 0
 
     if CP.spasEnabled:
@@ -270,20 +271,30 @@ class CarController():
     elif self.last_lead_distance != 0:
       self.last_lead_distance = 0
 
-    if self.longcontrol: # XPS-Genesis
-      self.gapcount += 1
-      if self.gapcount == 40 and self.gapsettingdance == 2:
-        self.gapsettingdance = 1
-        self.gapcount = 0
-      elif self.gapcount == 40 and self.gapsettingdance == 1:
-        self.gapsettingdance = 4
-        self.gapcount = 0
-      elif self.gapcount == 40 and self.gapsettingdance == 4:
-        self.gapsettingdance = 3
-        self.gapcount = 0
-      elif self.gapcount == 40 and self.gapsettingdance == 3:
-        self.gapsettingdance = 2
-        self.gapcount = 0
+    if self.longcontrol:
+      if CS.lead_distance == 0:
+        self.gapcount += 1 # XPS-Genesis
+        if self.gapcount == 38 and self.gapsettingdance == 2:
+          self.gapsettingdance = 1
+          self.gapcount = 0
+        elif self.gapcount == 38 and self.gapsettingdance == 1:
+          self.gapsettingdance = 4
+          self.gapcount = 0
+        elif self.gapcount == 38 and self.gapsettingdance == 4:
+          self.gapsettingdance = 3
+          self.gapcount = 0
+        elif self.gapcount == 38 and self.gapsettingdance == 3:
+          self.gapsettingdance = 2
+          self.gapcount = 0
+        self.gapsetting = self.gapsettingdance
+      elif CS.lead_distance > 0: # JPR
+        self.gapsetting = 1
+      elif CS.lead_distance > 20:
+        self.gapsetting = 2
+      elif CS.lead_distance > 40:
+        self.gapsetting = 3
+      elif CS.lead_distance > 65:
+        self.gapsetting = 4
 
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
@@ -326,7 +337,7 @@ class CarController():
                                       CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill,
                                       self.car_fingerprint))
 
-        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsettingdance, self.scc_live, CS.scc11,
+        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11,
                                       self.scc_smoother.active_cam, stock_cam))
 
         if frame % 20 == 0 and CS.has_scc13:
