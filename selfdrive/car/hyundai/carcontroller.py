@@ -68,6 +68,11 @@ class CarController():
     self.steer_rate_limited = False
     self.lkas11_cnt = 0
     self.scc12_cnt = -1
+    self.counter_init = False
+    self.radarDisableActivated = False
+    self.radarDisableResetTimer = 0
+    self.radarDisableOverlapTimer = 0
+    self.sendaccmode = not CP.radarDisablePossible
 
     self.pcm_cnt = 0
     self.resume_cnt = 0
@@ -115,6 +120,9 @@ class CarController():
 
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
+
+    if enabled:
+      self.sendaccmode = enabled
 
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
@@ -334,7 +342,7 @@ class CarController():
       can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
 
     # send scc to car if longcontrol enabled and SCC not on bus 0 or ont live
-    if self.longcontrol and CS.cruiseState_enabled and (CS.scc_bus or not self.scc_live or self.radarDisableActivated):
+    if self.longcontrol and CS.cruiseState_enabled and self.counter_init and (CS.scc_bus or not self.scc_live or self.radarDisableActivated):
 
       if frame % 2 == 0:
 
@@ -372,7 +380,7 @@ class CarController():
                                       self.car_fingerprint))
 
         can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11,
-                                      self.scc_smoother.active_cam, stock_cam))
+                                      self.scc_smoother.active_cam, stock_cam, self.sendaccmode))
 
         if frame % 20 == 0 and CS.has_scc13:
           can_sends.append(create_scc13(self.packer, CS.scc13))
@@ -391,6 +399,7 @@ class CarController():
           can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, acc_standstill, apply_accel, CS.out.gasPressed,
                                         obj_gap, CS.scc14))
     else:
+      self.counter_init = True
       self.scc12_cnt = -1
 
     # 20 Hz LFA MFA message
