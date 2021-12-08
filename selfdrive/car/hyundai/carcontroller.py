@@ -272,8 +272,9 @@ class CarController():
       self.last_lead_distance = 0
 
     if self.longcontrol:
-      self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
       if not lead_visible:
+        self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
+        print("animation speed", self.animationSpeed)
         self.gapcount += 1 # XPS-Genesis; Adapted by JPR. Searching for lead animation 
         if self.gapcount > self.animationSpeed and self.gapsettingdance == 2:
           self.gapsettingdance = 1
