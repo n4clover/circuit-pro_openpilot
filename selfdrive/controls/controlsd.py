@@ -509,7 +509,7 @@ class Controls:
     x = max(params.stiffnessFactor, 0.1)
     #sr = max(params.steerRatio, 0.1)
 
-    if ntune_common_enabled('useLiveSteerRatio'): # or CS.mdps11Stat == 5: # Don't use nTune steer ratio when SPAS active- JPR
+    if ntune_common_enabled('useLiveSteerRatio') or CS.mdps11Stat == 5: # Don't use nTune steer ratio when SPAS active- JPR
       sr = max(params.steerRatio, 0.1)
     else:
       sr = max(ntune_common_get('steerRatio'), 0.1)

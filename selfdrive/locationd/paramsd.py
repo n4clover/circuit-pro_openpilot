@@ -165,7 +165,7 @@ def main(CS, sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageStd = float(P[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetFastStd = float(P[States.ANGLE_OFFSET_FAST])
 
-      if sm.frame % 1200 == 0 and CS.out.mdps11_stat == 5:  # once a minute
+      if sm.frame % 1200 == 0 and CS.mdps11Stat == 5:  # once a minute
         params = {
           'carFingerprint': CP.carFingerprint,
           'steerRatio': CP.steerRatio,
