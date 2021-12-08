@@ -71,7 +71,7 @@ class ParamsLearner:
       self.kf.filter.reset_rewind()
 
 
-def main(sm=None, pm=None):
+def main(CS, sm=None, pm=None):
   gc.disable()
   set_realtime_priority(5)
 
@@ -165,8 +165,16 @@ def main(sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageStd = float(P[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetFastStd = float(P[States.ANGLE_OFFSET_FAST])
 
-      if sm.frame % 1200 == 0:  # once a minute
+      if sm.frame % 1200 == 0 and CS.out.mdps11_stat == 5:  # once a minute
         params = {
+          'carFingerprint': CP.carFingerprint,
+          'steerRatio': CP.steerRatio,
+          'stiffnessFactor': msg.liveParameters.stiffnessFactor,
+          'angleOffsetAverageDeg': msg.liveParameters.angleOffsetAverageDeg,
+        }
+        put_nonblocking("LiveParameters", json.dumps(params))
+      elif sm.frame % 1200 == 0:
+         params = {
           'carFingerprint': CP.carFingerprint,
           'steerRatio': msg.liveParameters.steerRatio,
           'stiffnessFactor': msg.liveParameters.stiffnessFactor,

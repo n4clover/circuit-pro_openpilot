@@ -28,7 +28,7 @@ ENGAGE_DELTA_V = [ 9., 8., 7., 6., 5., 4., 3., 2., 1.]
 ANGLE_DELTA_BP = [0., 10., 20.]
 ANGLE_DELTA_V = [1.3, 1.2, 1.1]    # windup limit
 ANGLE_DELTA_VU = [1.4, 1.3, 1.2]   # unwind limit
-TQ = 285 # = TQ / 100 = NM is unit of measure for wheel.
+TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
 SPAS_SWITCH = 38 * CV.MPH_TO_MS #MPH
 ###### SPAS #######
 
@@ -147,11 +147,15 @@ class CarController():
       lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if CS.spas_enabled:
-      if abs(CS.out.steeringWheelTorque) > TQ  and self.DTQL > TQ and spas_active and not lkas_active:
-        self.override = True
-        print("OVERRIDE")
+      if Params().get_bool("SpasMode"):
+        if abs(CS.out.steeringWheelTorque) > TQ  and self.DTQL > TQ and spas_active and not lkas_active:
+          self.override = True
+          print("OVERRIDE")
+        else:
+          self.override = False
       else:
-        self.override = False
+        if CS.out.steeringPressed:
+          spas_active = False
 
     # Disable steering while turning blinker on and speed below min lane chnage speed
     if (CS.out.leftBlinker or CS.out.rightBlinker):
@@ -233,7 +237,7 @@ class CarController():
 
     if enabled: # Enable count so we don't spam cancel to SCC - JPR
       self.enabled_cnt = 1
-    if self.enabled_cnt == 5:
+    if self.enabled_cnt == 6:
       self.enabled_cnt = 0
 
     # fix auto resume - by neokii

@@ -753,6 +753,12 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));   
 
+  toggles.append(new ParamControl("SpasMode",
+                                            "Switch to LKAS or Disengage on SPAS override",
+                                            "Switch to LKAS on Steering Pressed or Disengage on override torque.",
+                                            "../assets/offroad/icon_road.png",
+                                            this));  
+
   /*toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
                                             "",
