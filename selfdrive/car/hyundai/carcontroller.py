@@ -97,7 +97,7 @@ class CarController():
       self.assist = False
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
-      self.ratelimit = 2.0 # Starting point - JPR
+      self.ratelimit = 3.5 # Starting point - JPR
 
     param = Params()
 
