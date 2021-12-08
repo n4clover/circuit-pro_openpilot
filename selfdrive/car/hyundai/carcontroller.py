@@ -21,16 +21,16 @@ from selfdrive.road_speed_limiter import road_speed_limiter_get_active
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 min_set_speed = 30 * CV.KPH_TO_MS
 ###### SPAS ######
-STEER_ANG_MAX = 400         # SPAS Max Angle
-#MAX DELTA V limits values
-ENGAGE_ANGLE = [0., 100., 200., 300., 400., 500., 600., 700., 800.]
-ENGAGE_DELTA_V = [ 9., 8., 7., 6., 5., 4., 3., 2., 1.]
+STEER_ANG_MAX = 450 # SPAS Max Angle
 ANGLE_DELTA_BP = [0., 10., 20.]
 ANGLE_DELTA_V = [1.3, 1.2, 1.1]    # windup limit
 ANGLE_DELTA_VU = [1.4, 1.3, 1.2]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
 SPAS_SWITCH = 30 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRatio
 ###### SPAS #######
+
+CLUSTER_ANIMATION_BP = [0., 1., 30., 60., 90., 120.]
+CLUSTER_ANIMATION_SPEED= [0., 80., 40., 30., 20., 10.]
 
 SP_CARS = [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
            CAR.GENESIS_EQ900, CAR.GENESIS_EQ900_L, CAR.K9, CAR.GENESIS_G90]
@@ -272,18 +272,19 @@ class CarController():
       self.last_lead_distance = 0
 
     if self.longcontrol:
+      self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
       if not lead_visible:
         self.gapcount += 1 # XPS-Genesis; Adapted by JPR. Searching for lead animation 
-        if self.gapcount == 38 and self.gapsettingdance == 2:
+        if self.gapcount == self.animationSpeed and self.gapsettingdance == 2:
           self.gapsettingdance = 1
           self.gapcount = 0
-        elif self.gapcount == 38 and self.gapsettingdance == 1:
+        elif self.gapcount == self.animationSpeed and self.gapsettingdance == 1:
           self.gapsettingdance = 4
           self.gapcount = 0
-        elif self.gapcount == 38 and self.gapsettingdance == 4:
+        elif self.gapcount == self.animationSpeed and self.gapsettingdance == 4:
           self.gapsettingdance = 3
           self.gapcount = 0
-        elif self.gapcount == 38 and self.gapsettingdance == 3:
+        elif self.gapcount == self.animationSpeed and self.gapsettingdance == 3:
           self.gapsettingdance = 2
           self.gapcount = 0
         self.gapsetting = self.gapsettingdance
