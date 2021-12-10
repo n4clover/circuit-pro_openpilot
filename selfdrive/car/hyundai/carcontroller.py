@@ -97,7 +97,7 @@ class CarController():
       self.assist = False
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
-      self.ratelimit = 3.5 # Starting point - JPR
+      self.ratelimit = 3.3 # Starting point - JPR
 
     param = Params()
 
@@ -133,7 +133,7 @@ class CarController():
         print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
       elif enabled:
-        self.ratelimit = 4.0 # Reset it back to 0.5 - JPR
+        self.ratelimit = 3.3 # Reset it back to 0.5 - JPR
         if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
         else:
