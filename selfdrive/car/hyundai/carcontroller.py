@@ -458,11 +458,11 @@ class CarController():
       self.DTQL = abs(CS.out.steeringWheelTorque)
 
     # 5 Hz ACC options
-    if frame % 20 == 0 and CS.CP.openpilotLongitudinalControl and CS.CP.radarDisablePossible:
+    if frame % 20 == 0 and CS.CP.radarDisablePossible:
       can_sends.extend(create_acc_opt(self.packer))
 
     # 2 Hz front radar options
-    if frame % 50 == 0 and CS.CP.openpilotLongitudinalControl and CS.CP.radarDisablePossible:
+    if frame % 50 == 0 and CS.CP.radarDisablePossible:
       can_sends.append(create_frt_radar_opt(self.packer))
 
     return can_sends
