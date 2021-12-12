@@ -102,7 +102,7 @@ class CarController():
       self.assist = False
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
-      self.ratelimit = 3.5 # Starting point - JPR
+      self.ratelimit = 3.3 # Starting point - JPR
 
     param = Params()
 
@@ -141,7 +141,7 @@ class CarController():
         print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
       elif enabled:
-        self.ratelimit = 4.0 # Reset it back to 0.5 - JPR
+        self.ratelimit = 3.3 # Reset it back to 0.5 - JPR
         if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
         else:
@@ -241,14 +241,14 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 5 and CS.out.cruiseState.enabled: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
+    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 0 and CS.out.cruiseState.enabled: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
       can_sends.append(create_clu11(self.packer, frame % 0x10, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
       self.pcm_cnt += 1
     else:
       self.pcm_cnt += 1
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
     
-    if self.pcm_cnt == 6:
+    if self.pcm_cnt == 20:
       self.pcm_cnt = 0 
 
     # fix auto resume - by neokii
