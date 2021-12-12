@@ -119,7 +119,7 @@ class CarController():
     self.last_blinker_frame = 0
 
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
-             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
+             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls, lead_dist, lead_vrel, lead_yrel):
 
     if enabled:
       self.sendaccmode = enabled
@@ -380,7 +380,7 @@ class CarController():
                                       self.car_fingerprint))
 
         can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11,
-                                      self.scc_smoother.active_cam, stock_cam, self.sendaccmode))
+                                      self.scc_smoother.active_cam, stock_cam, self.sendaccmodesta, CS.out.standstill, lead_dist, lead_vrel, lead_yrel))
 
         if frame % 20 == 0 and CS.has_scc13:
           can_sends.append(create_scc13(self.packer, CS.scc13))
