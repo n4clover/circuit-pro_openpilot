@@ -124,8 +124,6 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, sc
   values["ACC_ObjStatus"] = lead_visible
   values["TauGapSet"] = gapsetting
   values["ACC_ObjDist"] = lead_dist
-  values["ACC_ObjLatPos"] = 0
-  values["ACC_ObjRelSpd"] = 0
 
   if not stock_cam:
     values["Navi_SCC_Camera_Act"] = 2 if active_cam else 0
@@ -135,6 +133,8 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, sc
     values["MainMode_ACC"] = sendaccmode
     values["VSetDis"] = set_speed
     values["ObjValid"] = 1 if enabled else 0
+    values["ACC_ObjLatPos"] = 0
+    values["ACC_ObjRelSpd"] = 0
 
   return packer.make_can_msg("SCC11", 0, values)
 
@@ -148,8 +148,6 @@ def create_scc12(packer, apply_accel, enabled, cnt, scc_live, scc12, gaspressed,
       values["StopReq"] = 1
   else:
     values["ACCMode"] = 0
-    values["aReqRaw"] = 0
-    values["aReqValue"] = 0
 
   if car_fingerprint in EV_HYBRID_CAR:
     # from xps-genesis
@@ -158,6 +156,8 @@ def create_scc12(packer, apply_accel, enabled, cnt, scc_live, scc12, gaspressed,
       values["aReqValue"] = apply_accel
     if not scc_live:
       values["CR_VSM_Alive"] = cnt
+      values["aReqRaw"] = 0
+      values["aReqValue"] = 0
 
   else:
     values["aReqRaw"] = apply_accel if enabled else 0  # aReqMax
@@ -165,6 +165,8 @@ def create_scc12(packer, apply_accel, enabled, cnt, scc_live, scc12, gaspressed,
     values["CR_VSM_Alive"] = cnt
     if not scc_live:
       values["ACCMode"] = 1 if enabled else 0  # 2 if gas padel pressed
+      values["aReqRaw"] = 0
+      values["aReqValue"] = 0
 
   values["CR_VSM_ChkSum"] = 0
   dat = packer.make_can_msg("SCC12", 0, values)[2]
