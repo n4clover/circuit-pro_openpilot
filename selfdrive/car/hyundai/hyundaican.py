@@ -142,19 +142,20 @@ def create_scc12(packer, apply_accel, enabled, cnt, scc_live, scc12, gaspressed,
                  standstill, car_fingerprint):
   values = copy.copy(scc12)
 
+  if enabled and not brakepressed:
+    values["ACCMode"] = 2 if gaspressed and (apply_accel > -0.2) else 1
+    if apply_accel < 0.0 and standstill:
+      values["StopReq"] = 1
+  else:
+    values["ACCMode"] = 0
+    values["aReqRaw"] = 0
+    values["aReqValue"] = 0
+
   if car_fingerprint in EV_HYBRID_CAR:
     # from xps-genesis
     if enabled and not brakepressed:
-      values["ACCMode"] = 2 if gaspressed and (apply_accel > -0.2) else 1
-      if apply_accel < 0.0 and standstill:
-        values["StopReq"] = 1
       values["aReqRaw"] = apply_accel
       values["aReqValue"] = apply_accel
-    else:
-      values["ACCMode"] = 0
-      values["aReqRaw"] = 0
-      values["aReqValue"] = 0
-
     if not scc_live:
       values["CR_VSM_Alive"] = cnt
 
