@@ -10,6 +10,7 @@ from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.lateral_planner import LANE_CHANGE_SPEED_MIN
 from selfdrive.car.hyundai.carstate import CarStateBase, CarState
 from common.params import Params
+from selfdrive.car.disable_ecu import disable_ecu
 
 GearShifter = car.CarState.GearShifter
 EventName = car.CarEvent.EventName
@@ -563,7 +564,11 @@ class CarInterface(CarInterfaceBase):
     if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled'):
       ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
     return ret
-    
+  
+  @staticmethod
+  def init(CP, logcan, sendcan):
+    if CP.openpilotLongitudinalControl and CP.radarDisablePossible:
+      disable_ecu(logcan, sendcan, addr=0x7d0, com_cont_req=b'\x28\x83\x01')
 
   def update(self, c, can_strings):
     self.cp.update_strings(can_strings)
