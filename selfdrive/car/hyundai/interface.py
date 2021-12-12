@@ -179,7 +179,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.indi.timeConstantV = [1.4]
         ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
         ret.lateralTuning.indi.actuatorEffectivenessV = [2.]
-
+      
       tire_stiffness_factor = 0.85
       ret.longitudinalTuning.kpBP = [0., 10.*CV.KPH_TO_MS, 20.*CV.KPH_TO_MS, 40.*CV.KPH_TO_MS, 70.*CV.KPH_TO_MS, 100.*CV.KPH_TO_MS, 130.*CV.KPH_TO_MS]
       ret.longitudinalTuning.kpV = [1.2, 0.93, 0.8, 0.68, 0.59, 0.51, 0.43]
@@ -596,9 +596,9 @@ class CarInterface(CarInterfaceBase):
 
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     if ret.vEgo < (self.CP.minSteerSpeed + 0.2) and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
+      self.CC.low_speed_alert = True
     if ret.vEgo > (self.CP.minSteerSpeed + 0.7):
-      self.low_speed_alert = False
+      self.CC.low_speed_alert = False
 
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
@@ -629,7 +629,7 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.brakeUnavailable)
     #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
     #  events.add(EventName.steerTempUnavailable)
-    if self.low_speed_alert and not self.CS.mdps_bus and Params().get_bool("LowSpeedAlerts"):
+    if self.CC.low_speed_alert and not self.CS.mdps_bus and Params().get_bool("LowSpeedAlerts"):
       events.add(EventName.belowSteerSpeed)
     if self.CC.turning_indicator_alert:
       events.add(EventName.turningIndicatorOn)

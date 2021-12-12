@@ -86,7 +86,7 @@ class CarController():
 
     self.turning_indicator_alert = False
     self.emsType = CP.emsType
-    self.turning_indicator_alert = False
+    self.low_speed_alert = False
     self.gapsettingdance = 2
     self.gapsetting = 0
     self.gapcount = 0
@@ -150,9 +150,9 @@ class CarController():
 
       self.last_apply_angle = apply_angle
       spas_active = CS.spas_enabled and enabled and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.5 and CS.out.vEgo < 26.82 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active)
-      lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+      lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
     else:
-      lkas_active = enabled and not CS.out.steerWarning and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if CS.spas_enabled:
       if Params().get_bool("SpasMode"):
