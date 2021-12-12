@@ -9,7 +9,7 @@ from common.numpy_fast import clip, interp
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_scc11, create_scc12, create_scc13, create_scc14, \
-  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11, create_scc7d0
+  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11, create_acc_opt, create_frt_radar_opt
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams
 from opendbc.can.packer import CANPacker
@@ -456,5 +456,13 @@ class CarController():
         can_sends.append(create_spas12(CS.mdps_bus))
       self.spas_active_last = spas_active
       self.DTQL = abs(CS.out.steeringWheelTorque)
+
+    # 5 Hz ACC options
+    if frame % 20 == 0 and CS.CP.openpilotLongitudinalControl and CS.CP.radarDisablePossible:
+      can_sends.extend(create_acc_opt(self.packer))
+
+    # 2 Hz front radar options
+    if frame % 50 == 0 and CS.CP.openpilotLongitudinalControl and CS.CP.radarDisablePossible:
+      can_sends.append(create_frt_radar_opt(self.packer))
 
     return can_sends
