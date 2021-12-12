@@ -92,7 +92,7 @@ def create_lfahda_mfc(packer, enabled, active):
 
 def create_acc_opt(packer):
   commands = []
-
+  
   scc13_values = {
     "SCCDrvModeRValue": 2,
     "SCC_Equip": 1,
