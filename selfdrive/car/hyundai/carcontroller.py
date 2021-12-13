@@ -102,7 +102,7 @@ class CarController():
       self.assist = False
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
-      self.ratelimit = 3.3 # Starting point - JPR
+      self.ratelimit = 2.8 # Starting point - JPR
 
     param = Params()
 
@@ -141,7 +141,7 @@ class CarController():
         print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
       elif enabled:
-        self.ratelimit = 3.3 # Reset it back to 0.5 - JPR
+        self.ratelimit = 2.8 # Reset it back to 0.5 - JPR
         if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
         else:
@@ -149,7 +149,7 @@ class CarController():
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-      spas_active = CS.spas_enabled and enabled and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.5 and CS.out.vEgo < 26.82 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active)
+      spas_active = CS.spas_enabled and enabled and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 4 and CS.out.vEgo < 26.82 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active)
       lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
     else:
       lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
@@ -182,10 +182,8 @@ class CarController():
     if not lkas_active:
       apply_steer = 0
 
-    if abs(CS.out.steeringAngleDeg) < 90 and CS.CP.steerLockout:
+    if abs(CS.out.steeringAngleDeg) > 90 and CS.CP.steerLockout:
       lkas_active = False
-      if CS.out.vEgo < 26.82 and CS.spas_enabled:
-        spas_active = True
 
     self.lkas_active = lkas_active
     if CS.spas_enabled:
