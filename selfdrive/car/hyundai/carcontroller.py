@@ -182,7 +182,7 @@ class CarController():
     if not lkas_active:
       apply_steer = 0
 
-    if abs(CS.out.steeringAngleDeg) < 90 and CS.CP.SteerLockout:
+    if abs(CS.out.steeringAngleDeg) < 90 and CS.CP.steerLockout:
       lkas_active = False
       if CS.out.vEgo < 26.82 and CS.spas_enabled:
         spas_active = True
