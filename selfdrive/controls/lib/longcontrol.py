@@ -11,7 +11,7 @@ LongCtrlState = car.CarControl.Actuators.LongControlState
 STOPPING_TARGET_SPEED_OFFSET = 0.01
 
 # As per ISO 15622:2018 for all speeds
-ACCEL_MIN_ISO = -3.5  # m/s^2
+ACCEL_MIN_ISO = -4.5  # m/s^2
 ACCEL_MAX_ISO = 2.0  # m/s^2
 
 
