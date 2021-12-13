@@ -49,7 +49,9 @@ class CarInterface(CarInterfaceBase):
     tire_stiffness_factor = 1.
     if Params().get_bool('SteerLockout'):
       ret.maxSteeringAngleDeg = 1000
+      ret.SteerLockout = False
     else:
+      ret.SteerLockout = True
       ret.maxSteeringAngleDeg = 90
     UseLQR = Params().get_bool('UseLQR')
     # lateral LQR global hyundai
