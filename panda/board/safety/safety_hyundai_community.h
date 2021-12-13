@@ -9,11 +9,11 @@ int HKG_scc_bus = -1;
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
     {2., 30., 60.}, //kph
-    {17.5, 16.5, 15.5}};  //deg
+    {18, 17., 16.}};  //deg
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value from car controller to leave a bit of margin.
     {2., 30., 60.}, //kph
-    {18.5, 17.5, 16.5}}; //deg 
+    {19., 18., 17.}}; //deg 
 
 const int HYUNDAI_DEG_TO_CAN = 10; 
 
@@ -36,6 +36,7 @@ const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {881, 1, 8}, // E_EMS11, Bus 1
   {912, 0, 7}, {912,1, 7}, // SPAS11, Bus 0, 1
   {1268, 0, 8}, {1268,1, 8}, // SPAS12, Bus 0, 1
+  {2000, 0, 8}, // SCC_DIAG, Bus 0
  };
 
 // older hyundai models have less checks due to missing counters and checksums
@@ -242,6 +243,13 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ && mdps_state == 5) {
       //violation = 1; bugged 
       puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
+    }
+  }
+
+  // UDS: Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
+  if (addr == 2000) {
+    if ((GET_BYTES_04(to_send) != 0x00803E02U) || (GET_BYTES_48(to_send) != 0x0U)) {
+      tx = 0;
     }
   }
 

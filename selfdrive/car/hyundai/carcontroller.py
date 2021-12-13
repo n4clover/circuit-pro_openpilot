@@ -9,7 +9,7 @@ from common.numpy_fast import clip, interp
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_scc11, create_scc12, create_scc13, create_scc14, \
-  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
+  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11, create_acc_opt, create_frt_radar_opt
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams
 from opendbc.can.packer import CANPacker
@@ -68,6 +68,11 @@ class CarController():
     self.steer_rate_limited = False
     self.lkas11_cnt = 0
     self.scc12_cnt = -1
+    self.counter_init = False
+    self.radarDisableActivated = False
+    self.radarDisableResetTimer = 0
+    self.radarDisableOverlapTimer = 0
+    self.sendaccmode = not CP.radarDisablePossible
 
     self.pcm_cnt = 0
     self.resume_cnt = 0
@@ -115,6 +120,9 @@ class CarController():
 
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
+
+    if enabled:
+      self.sendaccmode = enabled
 
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
@@ -173,6 +181,11 @@ class CarController():
 
     if not lkas_active:
       apply_steer = 0
+
+    if lkas_active and abs(CS.out.steeringAngleDeg) < 90 and CS.CP.SteerLockout:
+      lkas_active = False
+      if CS.out.vEgo < 26.82:
+        spas_active = True
 
     self.lkas_active = lkas_active
     if CS.spas_enabled:
@@ -301,7 +314,7 @@ class CarController():
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
     # send scc to car if longcontrol enabled and SCC not on bus 0 or ont live
-    if self.longcontrol and CS.cruiseState_enabled and (CS.scc_bus or not self.scc_live):
+    if self.longcontrol and CS.cruiseState_enabled and self.counter_init and (CS.scc_bus or not self.scc_live or self.radarDisableActivated):
 
       if frame % 2 == 0:
 
@@ -339,7 +352,7 @@ class CarController():
                                       self.car_fingerprint))
 
         can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11,
-                                      self.scc_smoother.active_cam, stock_cam))
+                                      self.scc_smoother.active_cam, stock_cam, self.sendaccmode, CS.out.standstill, CS.lead_distance))
 
         if frame % 20 == 0 and CS.has_scc13:
           can_sends.append(create_scc13(self.packer, CS.scc13))
@@ -358,6 +371,7 @@ class CarController():
           can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, acc_standstill, apply_accel, CS.out.gasPressed,
                                         obj_gap, CS.scc14))
     else:
+      self.counter_init = True
       self.scc12_cnt = -1
 
     # 20 Hz LFA MFA message
@@ -447,5 +461,13 @@ class CarController():
         can_sends.append(create_spas12(CS.mdps_bus))
       self.spas_active_last = spas_active
       self.DTQL = abs(CS.out.steeringWheelTorque)
+
+    # 5 Hz ACC options
+    if frame % 20 == 0 and CS.CP.radarDisablePossible:
+      can_sends.extend(create_acc_opt(self.packer))
+
+    # 2 Hz front radar options
+    if frame % 50 == 0 and CS.CP.radarDisablePossible:
+      can_sends.append(create_frt_radar_opt(self.packer))
 
     return can_sends

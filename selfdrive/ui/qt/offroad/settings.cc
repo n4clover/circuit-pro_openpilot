@@ -761,6 +761,12 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));  
 
+  toggles.append(new ParamControl("RadarDisableEnabled",
+                                            "Radar Disable",
+                                            "warnings: it is beta, be careful!! Openpilot will DISABLE SCC ECU! This means no !!AEB or EMA!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));  
+
   toggles.append(new ParamControl("spasEnabled",
                                             "Enable SPAS.",
                                             "Enable Send Parking Assist Messages up to 38mph. Warning: It is beta, be careful!!",

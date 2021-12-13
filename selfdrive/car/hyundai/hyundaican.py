@@ -1,5 +1,4 @@
 import copy
-
 import crcmod
 from selfdrive.car.hyundai.values import CAR, CHECKSUM, FEATURES, EV_HYBRID_CAR
 
@@ -91,6 +90,30 @@ def create_lfahda_mfc(packer, enabled, active):
 
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
+def create_acc_opt(packer):
+  commands = []
+  
+  scc13_values = {
+    "SCCDrvModeRValue": 2,
+    "SCC_Equip": 1,
+    "Lead_Veh_Dep_Alert_USM": 2,
+  }
+  commands.append(packer.make_can_msg("SCC13", 0, scc13_values))
+
+  fca12_values = {
+    "FCA_DrvSetState": 2,
+    "FCA_USM": 1, # AEB disabled
+  }
+  commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
+
+  return commands
+
+def create_frt_radar_opt(packer):
+  frt_radar11_values = {
+    "CF_FCA_Equip_Front_Radar": 1,
+  }
+  return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
+
 def create_hda_mfc(packer, active, state):
   values = {
     "HDA_USM": 2,
@@ -113,21 +136,29 @@ def create_mdps12(packer, frame, mdps12):
 
   return packer.make_can_msg("MDPS12", 2, values)
 
-def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, scc_live, scc11, active_cam, stock_cam):
+def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, scc_live, scc11, active_cam, stock_cam, sendaccmode, standstill, lead_dist):
   values = copy.copy(scc11)
+  if enabled:
+    values["VSetDis"] = set_speed
+  if standstill:
+    values["SCCInfoDisplay"] = 0
+  values["DriverAlertDisplay"] = 0
   values["AliveCounterACC"] = frame // 2 % 0x10
   values["ObjValid"] = lead_visible
   values["ACC_ObjStatus"] = lead_visible
   values["TauGapSet"] = gapsetting
+  values["ACC_ObjDist"] = lead_dist
 
   if not stock_cam:
     values["Navi_SCC_Camera_Act"] = 2 if active_cam else 0
     values["Navi_SCC_Camera_Status"] = 2 if active_cam else 0
 
   if not scc_live:
-    values["MainMode_ACC"] = 1
+    values["MainMode_ACC"] = sendaccmode
     values["VSetDis"] = set_speed
     values["ObjValid"] = 1 if enabled else 0
+    values["ACC_ObjLatPos"] = 0
+    values["ACC_ObjRelSpd"] = 0
 
   return packer.make_can_msg("SCC11", 0, values)
 
@@ -135,21 +166,22 @@ def create_scc12(packer, apply_accel, enabled, cnt, scc_live, scc12, gaspressed,
                  standstill, car_fingerprint):
   values = copy.copy(scc12)
 
+  if enabled and not brakepressed:
+    values["ACCMode"] = 2 if gaspressed and (apply_accel > -0.2) else 1
+    if apply_accel < 0.0 and standstill:
+      values["StopReq"] = 1
+  else:
+    values["ACCMode"] = 0
+
   if car_fingerprint in EV_HYBRID_CAR:
     # from xps-genesis
     if enabled and not brakepressed:
-      values["ACCMode"] = 2 if gaspressed and (apply_accel > -0.2) else 1
-      if apply_accel < 0.0 and standstill:
-        values["StopReq"] = 1
       values["aReqRaw"] = apply_accel
       values["aReqValue"] = apply_accel
-    else:
-      values["ACCMode"] = 0
-      values["aReqRaw"] = 0
-      values["aReqValue"] = 0
-
     if not scc_live:
       values["CR_VSM_Alive"] = cnt
+      values["aReqRaw"] = 0
+      values["aReqValue"] = 0
 
   else:
     values["aReqRaw"] = apply_accel if enabled else 0  # aReqMax
@@ -157,6 +189,8 @@ def create_scc12(packer, apply_accel, enabled, cnt, scc_live, scc12, gaspressed,
     values["CR_VSM_Alive"] = cnt
     if not scc_live:
       values["ACCMode"] = 1 if enabled else 0  # 2 if gas padel pressed
+      values["aReqRaw"] = 0
+      values["aReqValue"] = 0
 
   values["CR_VSM_ChkSum"] = 0
   dat = packer.make_can_msg("SCC12", 0, values)[2]
@@ -231,3 +265,4 @@ def create_eems11(packer, eems11, enabled):
     values["Accel_Pedal_Pos"] = 1
     values["CR_Vcu_AccPedDep_Pos"] = 1
   return packer.make_can_msg("E_EMS11", 1, values)
+

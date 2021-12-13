@@ -10,6 +10,7 @@ from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.lateral_planner import LANE_CHANGE_SPEED_MIN
 from selfdrive.car.hyundai.carstate import CarStateBase, CarState
 from common.params import Params
+from selfdrive.car.disable_ecu import disable_ecu
 
 GearShifter = car.CarState.GearShifter
 EventName = car.CarEvent.EventName
@@ -35,7 +36,10 @@ class CarInterface(CarInterfaceBase):
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=[]):  # pylint: disable=dangerous-default-value
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
 
-    ret.openpilotLongitudinalControl = Params().get_bool('LongControlEnabled')
+    ret.openpilotLongitudinalControl = Params().get_bool('LongControlEnabled') or Params().get_bool('RadarDisableEnabled')
+    ret.radarDisablePossible = Params().get_bool('RadarDisableEnabled')
+    if ret.radarDisablePossible:
+      ret.radarOffCan = True
 
     ret.carName = "hyundai"
     ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy, 0)]
@@ -45,7 +49,9 @@ class CarInterface(CarInterfaceBase):
     tire_stiffness_factor = 1.
     if Params().get_bool('SteerLockout'):
       ret.maxSteeringAngleDeg = 1000
+      ret.SteerLockout = False
     else:
+      ret.SteerLockout = True
       ret.maxSteeringAngleDeg = 90
     UseLQR = Params().get_bool('UseLQR')
     # lateral LQR global hyundai
@@ -425,7 +431,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14.4 * 1.15   # 15% higher at the center seems reasonable - before was 14.44 
       ret.centerToFront = ret.wheelbase * 0.4
       ret.emsType = 1 
-      
+
       if not UseLQR:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [0.]
@@ -479,7 +485,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14 
       tire_stiffness_factor = 0.7
       ret.centerToFront = ret.wheelbase * 0.4
-      ret.emsType = 3 
+      ret.emsType = 3
+      
       if not UseLQR:
         ret.lateralTuning.init('indi')
         ret.lateralTuning.indi.innerLoopGainBP = [0.]
@@ -515,11 +522,9 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.8
     ret.radarTimeStep = 0.05
-    
 
     if ret.centerToFront == 0:
       ret.centerToFront = ret.wheelbase * 0.4
-
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
@@ -561,7 +566,11 @@ class CarInterface(CarInterfaceBase):
     if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled'):
       ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
     return ret
-    
+  
+  @staticmethod
+  def init(CP, logcan, sendcan):
+    if CP.radarDisablePossible:
+      disable_ecu(logcan, sendcan, addr=0x7d0, com_cont_req=b'\x28\x83\x01')
 
   def update(self, c, can_strings):
     self.cp.update_strings(can_strings)
@@ -618,7 +627,7 @@ class CarInterface(CarInterfaceBase):
 
     events = self.create_common_events(ret)
 
-    if self.CC.longcontrol and self.CS.cruise_unavail:
+    if self.CC.longcontrol and self.CS.cruise_unavail and not Params().get_bool('RadarDisableEnabled'):
       events.add(EventName.brakeUnavailable)
     #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
     #  events.add(EventName.steerTempUnavailable)
