@@ -78,6 +78,7 @@ class CarController():
     self.resume_cnt = 0
     self.last_lead_distance = 0
     self.resume_wait_timer = 0
+    self.last_resume_frame = 0
 
     self.turning_signal_timer = 0
     self.cut_timer = 0
