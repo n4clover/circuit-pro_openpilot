@@ -295,31 +295,30 @@ class CarController():
             CS.CP.radarDisableOld and self.radarDisableOverlapTimer >= 30:
       can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))      
 
-      if not lead_visible:
-        self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
-        print("animation speed", self.animationSpeed)
-        self.gapcount += 1 # Dragon-Pilot; Adapted and adjusted by JPR. Searching for lead animation 
-        if self.gapcount > self.animationSpeed and self.gapsettingdance == 2:
-          self.gapsettingdance = 1
-          self.gapcount = 0
-        elif self.gapcount > self.animationSpeed and self.gapsettingdance == 1:
-          self.gapsettingdance = 4
-          self.gapcount = 0
-        elif self.gapcount > self.animationSpeed and self.gapsettingdance == 4:
-          self.gapsettingdance = 3
-          self.gapcount = 0
-        elif self.gapcount > self.animationSpeed and self.gapsettingdance == 3:
-          self.gapsettingdance = 2
-          self.gapcount = 0
-        self.gapsetting = self.gapsettingdance
-      elif 10 > CS.lead_distance > 0: # Set gap to associated distance of lead. - JPR
-        self.gapsetting = 1
-      elif 30 > CS.lead_distance > 15:
-        self.gapsetting = 2
-      elif 55 > CS.lead_distance > 30:
-        self.gapsetting = 3
-      elif CS.lead_distance > 55:
-        self.gapsetting = 4
+    if not lead_visible:
+      self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
+      self.gapcount += 1 # Dragon-Pilot; Adapted and adjusted by JPR. Searching for lead animation 
+      if self.gapcount > self.animationSpeed and self.gapsettingdance == 2:
+        self.gapsettingdance = 1
+        self.gapcount = 0
+      elif self.gapcount > self.animationSpeed and self.gapsettingdance == 1:
+        self.gapsettingdance = 4
+        self.gapcount = 0
+      elif self.gapcount > self.animationSpeed and self.gapsettingdance == 4:
+        self.gapsettingdance = 3
+        self.gapcount = 0
+      elif self.gapcount > self.animationSpeed and self.gapsettingdance == 3:
+        self.gapsettingdance = 2
+        self.gapcount = 0
+      self.gapsetting = self.gapsettingdance
+    elif 10 > CS.lead_distance > 0: # Set gap to associated distance of lead. - JPR
+      self.gapsetting = 1
+    elif 30 > CS.lead_distance > 15:
+      self.gapsetting = 2
+    elif 55 > CS.lead_distance > 30:
+      self.gapsetting = 3
+    elif CS.lead_distance > 55:
+      self.gapsetting = 4
 
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
