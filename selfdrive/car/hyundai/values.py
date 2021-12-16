@@ -360,6 +360,11 @@ EV_CAR = {CAR.IONIQ_EV_LTD, CAR.IONIQ_EV_2020, CAR.KONA_EV, CAR.NIRO_EV}
 
 EV_HYBRID_CAR = EV_CAR | HYBRID_CAR
 
+# these cars require a special panda safety mode due to missing counters and checksums in the messages
+LEGACY_SAFETY_MODE_CAR = set([CAR.GENESIS, CAR.IONIQ_EV_2020, CAR.IONIQ_EV_LTD, CAR.IONIQ_PHEV, CAR.IONIQ, CAR.KONA_EV, CAR.SORENTO, CAR.SONATA_LF_TURBO, CAR.VELOSTER, CAR.STINGER, CAR.GENESIS_G70, CAR.GENESIS_G80, CAR.CEED, CAR.ELANTRA])
+
+
+
 DBC = {
   # genesis
   CAR.GENESIS: dbc_dict('hyundai_kia_generic', None),
