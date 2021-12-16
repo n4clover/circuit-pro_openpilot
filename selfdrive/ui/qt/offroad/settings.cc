@@ -761,11 +761,18 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));  
 
+  toggles.append(new ParamControl("DisableRadar",
+                                            "Comma Radar Disable",
+                                            "openpilot will disable the car's radar and will take over control of gas and brakes. Warning: this disables AEB!",
+                                            "../assets/offroad/icon_road.png",
+                                            this)); 
+
   toggles.append(new ParamControl("RadarDisableEnabled",
-                                            "Radar Disable",
-                                            "warnings: it is beta, be careful!! Openpilot will DISABLE SCC ECU! This means no !!AEB or EMA!!",
+                                            "Community Radar Disable",
+                                            "Leagacy Cars ONLY! : openpilot will disable the car's radar and will take over control of gas and brakes. Warning: this disables AEB!",
                                             "../assets/offroad/icon_road.png",
                                             this));  
+ 
 
   toggles.append(new ParamControl("spasEnabled",
                                             "Enable SPAS.",
