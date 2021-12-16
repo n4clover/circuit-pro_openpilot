@@ -4,7 +4,7 @@ import numpy as np
 from cereal import car
 from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import CAR, Buttons, CarControllerParams
+from selfdrive.car.hyundai.values import CAR, Buttons, CarControllerParams, LEGACY_SAFETY_MODE_CAR
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.lateral_planner import LANE_CHANGE_SPEED_MIN
@@ -42,9 +42,14 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisablePossible = Params().get_bool('RadarDisableEnabled') or Params().get_bool('DisableRadar')
     if ret.radarDisablePossible:
       ret.radarOffCan = True
+    
+    if ret.radarDisablePossible:
+      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
 
     ret.carName = "hyundai"
-    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy, 0)]
+    # these cars require a special panda safety mode due to missing counters and checksums in the messages
+    if candidate in LEGACY_SAFETY_MODE_CAR:
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy)]
 
     ret.communityFeature = True
 
