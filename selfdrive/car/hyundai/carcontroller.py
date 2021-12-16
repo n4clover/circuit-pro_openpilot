@@ -360,8 +360,7 @@ class CarController():
                                       CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill,
                                       self.car_fingerprint))
 
-        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.scc_live, CS.scc11,
-                                      self.scc_smoother.active_cam, stock_cam))
+        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, self.sendaccmode, CS.out.standstill, CS.lead_distance))
 
         if frame % 20 == 0 and CS.has_scc13:
           can_sends.append(create_scc13(self.packer, CS.scc13))
