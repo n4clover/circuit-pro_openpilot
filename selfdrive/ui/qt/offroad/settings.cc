@@ -220,7 +220,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   QObject::connect(recover_panda_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to kill openpilot and attempt panda recover?", this)) {
       if (Hardware::TICI()) {
-        std::system("pkill -f openpilot && cd panda/board && ./recover.sh ** sudo reboot");
+        std::system("pkill -f openpilot && cd panda/board && ./recover.sh && sudo reboot");
         emit closeSettings();
       }
       else if (Hardware::EON()) {
