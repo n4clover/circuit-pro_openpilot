@@ -150,7 +150,7 @@ class CarController():
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-      spas_active = CS.spas_enabled and enabled and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 4. and CS.out.vEgo < 26.82 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active)
+      spas_active = CS.spas_enabled and enabled and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.8 and CS.out.vEgo < 26.82 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active)
       lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
     else:
       lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
@@ -165,7 +165,7 @@ class CarController():
       else:
         if CS.out.steeringPressed:
             self.cut_timer = 0
-        if CS.out.steeringPressed or self.cut_timer <= 80: # Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+        if CS.out.steeringPressed or self.cut_timer <= 55: # Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
           spas_active = False
           lkas_active = True
           self.cut_timer += 1
