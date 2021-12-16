@@ -9,7 +9,7 @@ from common.numpy_fast import clip, interp
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_acc_opt, create_frt_radar_opt, create_acc_commands, create_scc7d0, \
-  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
+  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11, create_scc11, create_scc12, create_scc13, create_scc14
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams
 from opendbc.can.packer import CANPacker
@@ -323,7 +323,66 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if frame % 2 == 0 and (CS.CP.openpilotLongitudinalControl or CS.CP.radarDisablePossible):
+    if self.longcontrol and CS.cruiseState_enabled and not CS.CP.radarDisablePossible and (CS.scc_bus or not self.scc_live):
+
+      if frame % 2 == 0:
+        
+        stopping = controls.LoC.long_control_state == LongCtrlState.stopping
+        apply_accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+        apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
+
+        controls.apply_accel = apply_accel
+        aReqValue = CS.scc12["aReqValue"]
+        controls.aReqValue = aReqValue
+
+        if aReqValue < controls.aReqValueMin:
+          controls.aReqValueMin = controls.aReqValue
+
+        if aReqValue > controls.aReqValueMax:
+          controls.aReqValueMax = controls.aReqValue
+
+        if self.stock_navi_decel_enabled:
+          controls.sccStockCamAct = CS.scc11["Navi_SCC_Camera_Act"]
+          controls.sccStockCamStatus = CS.scc11["Navi_SCC_Camera_Status"]
+          apply_accel, stock_cam = self.scc_smoother.get_stock_cam_accel(apply_accel, aReqValue, CS.scc11)
+        else:
+          controls.sccStockCamAct = 0
+          controls.sccStockCamStatus = 0
+          stock_cam = False
+
+        if self.scc12_cnt < 0:
+          self.scc12_cnt = CS.scc12["CR_VSM_Alive"] if not CS.no_radar else 0
+
+        self.scc12_cnt += 1
+        self.scc12_cnt %= 0xF
+
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, self.scc12_cnt, self.scc_live, CS.scc12,
+                                      CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill,
+                                      self.car_fingerprint))
+
+        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.scc_live, CS.scc11,
+                                      self.scc_smoother.active_cam, stock_cam))
+
+        if frame % 20 == 0 and CS.has_scc13:
+          can_sends.append(create_scc13(self.packer, CS.scc13))
+          
+        if CS.has_scc14:
+          acc_standstill = stopping if CS.out.vEgo < 2. else False
+
+          lead = self.scc_smoother.get_lead(controls.sm)
+
+          if lead is not None:
+            d = lead.dRel
+            obj_gap = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4 if d < 80 else 5
+          else:
+            obj_gap = 0
+
+          can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, acc_standstill, apply_accel, CS.out.gasPressed,
+                                        obj_gap, CS.scc14))
+    else:
+      self.scc12_cnt = -1
+
+    if frame % 2 == 0 and CS.CP.radarDisablePossible:
       lead_visible = False
       accel = actuators.accel if enabled else 0
 
