@@ -72,9 +72,6 @@ class CarController():
     self.radarDisableActivated = False
     self.radarDisableResetTimer = 0
     self.radarDisableOverlapTimer = 0
-    self.radarDisableActivated = False
-    self.radarDisableResetTimer = 0
-    self.radarDisableOverlapTimer = 0
     self.sendaccmode = not CP.radarDisablePossible
 
     self.pcm_cnt = 0
@@ -263,7 +260,9 @@ class CarController():
     if self.pcm_cnt == 20:
       self.pcm_cnt = 0 
 
-    if CS.CP.radarDisablePossible:
+    if self.longcontrol:
+
+      if CS.CP.radarDisableOld:
         self.radarDisableOverlapTimer += 1
         self.radarDisableResetTimer = 0
         if self.radarDisableOverlapTimer >= 30:
@@ -293,11 +292,9 @@ class CarController():
         self.radarDisableResetTimer = 0
 
     if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
-            CS.CP.radarDisablePossible and self.radarDisableOverlapTimer >= 30:
-      can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
+            CS.CP.radarDisableOld and self.radarDisableOverlapTimer >= 30:
+      can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))      
 
-
-    if self.longcontrol:
       if not lead_visible:
         self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
         print("animation speed", self.animationSpeed)
