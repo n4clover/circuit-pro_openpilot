@@ -72,6 +72,9 @@ class CarController():
     self.radarDisableActivated = False
     self.radarDisableResetTimer = 0
     self.radarDisableOverlapTimer = 0
+    self.radarDisableActivated = False
+    self.radarDisableResetTimer = 0
+    self.radarDisableOverlapTimer = 0
     self.sendaccmode = not CP.radarDisablePossible
 
     self.pcm_cnt = 0
