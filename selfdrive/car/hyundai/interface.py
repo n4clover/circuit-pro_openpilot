@@ -41,6 +41,7 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisable = Params().get_bool('DisableRadar')
     ret.radarDisableOld = Params().get_bool('RadarDisableEnabled')
     ret.radarDisablePossible = Params().get_bool('RadarDisableEnabled') or Params().get_bool('DisableRadar')
+    
     if ret.radarDisablePossible:
       ret.radarOffCan = True
     
