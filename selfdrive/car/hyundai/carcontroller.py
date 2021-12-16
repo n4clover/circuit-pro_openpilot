@@ -8,7 +8,7 @@ from common.realtime import DT_CTRL
 from common.numpy_fast import clip, interp
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
-  create_acc_opt, create_frt_radar_opt, create_acc_commands, \
+  create_acc_opt, create_frt_radar_opt, create_acc_commands, create_scc7d0, \
   create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams
