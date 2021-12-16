@@ -37,7 +37,7 @@ class CarInterface(CarInterfaceBase):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
 
     ret.openpilotLongitudinalControl = Params().get_bool('LongControlEnabled') or Params().get_bool('RadarDisableEnabled') or Params().get_bool('RadarDisable')
-    ret.radarDisable = Params().get_bool('DisableRadar') and (candidate not in LEGACY_SAFETY_MODE_CAR)
+    ret.radarDisable = Params().get_bool('DisableRadar')
     ret.radarDisableOld = Params().get_bool('RadarDisableEnabled')
     ret.radarDisablePossible = Params().get_bool('RadarDisableEnabled') or Params().get_bool('DisableRadar')
     if ret.radarDisablePossible:
