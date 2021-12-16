@@ -393,7 +393,10 @@ class CarController():
       accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
       stopping = (actuators.longControlState == LongCtrlState.stopping)
-      can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
+      if Params().get_bool('MadModeEnabled'):
+        can_sends.extend(create_acc_commands(self.packer, CS.out.cruiseState.enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
+      else:
+        can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
 
     # 5 Hz ACC options
     if frame % 20 == 0 and CS.CP.radarDisablePossible:
