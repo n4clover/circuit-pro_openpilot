@@ -250,36 +250,15 @@ class CarController():
     else:
       self.pcm_cnt += 1
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
+      if CS.out.cruiseState.standstill:
+        # send resume at a max freq of 10Hz
+        if (frame - self.last_resume_frame) * DT_CTRL > 0.1:
+          # send 25 messages at a time to increases the likelihood of resume being accepted
+          can_sends.extend([create_clu11(self.packer, frame, CS.clu11, Buttons.RES_ACCEL)] * 25)
+          self.last_resume_frame = frame
     
     if self.pcm_cnt == 20:
       self.pcm_cnt = 0 
-
-    # fix auto resume - by neokii
-    if CS.out.cruiseState.standstill and not CS.out.gasPressed:
-
-      if self.last_lead_distance == 0:
-        self.last_lead_distance = CS.lead_distance
-        self.resume_cnt = 0
-        self.resume_wait_timer = 0
-
-      # scc smoother
-      elif self.scc_smoother.is_active(frame):
-        pass
-
-      elif self.resume_wait_timer > 0:
-        self.resume_wait_timer -= 1
-
-      elif abs(CS.lead_distance - self.last_lead_distance) > 0.1:
-        can_sends.append(create_clu11(self.packer, self.resume_cnt, CS.scc_bus, CS.clu11, Buttons.RES_ACCEL, clu11_speed))
-        self.resume_cnt += 1
-
-        if self.resume_cnt >= randint(6, 8):
-          self.resume_cnt = 0
-          self.resume_wait_timer = randint(30, 36)
-
-    # reset lead distnce after the car starts moving
-    elif self.last_lead_distance != 0:
-      self.last_lead_distance = 0
 
     if self.longcontrol:
       if not lead_visible:
