@@ -261,7 +261,6 @@ class CarController():
       self.pcm_cnt = 0 
 
     if self.longcontrol:
-
       if CS.CP.radarDisableOld:
         self.radarDisableOverlapTimer += 1
         self.radarDisableResetTimer = 0

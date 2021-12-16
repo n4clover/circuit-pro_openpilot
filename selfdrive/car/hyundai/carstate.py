@@ -245,9 +245,8 @@ class CarState(CarStateBase):
 
     return ret
 
-    @staticmethod
+  @staticmethod
   def get_can_parser(CP):
-
     signals = [
       # sig_name, sig_address, default
       ("WHL_SPD_FL", "WHL_SPD11", 0),
