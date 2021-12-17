@@ -45,8 +45,8 @@ class CarInterface(CarInterfaceBase):
     if ret.radarDisablePossible:
       ret.radarOffCan = True
     
-    if ret.radarDisablePossible:
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
+    #if ret.radarDisablePossible:
+      #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
 
     ret.carName = "hyundai"
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
