@@ -381,7 +381,7 @@ class CarController():
     else:
       self.scc12_cnt = -1
 
-    if frame % 2 == 0 and CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
+    if frame % 2 == 0 and (CS.CP.radarDisable or self.radarDisableActivated and self.counter_init):
       lead_visible = False
       accel = actuators.accel if enabled else 0
 
@@ -398,11 +398,11 @@ class CarController():
       self.counter_init = True
 
     # 5 Hz ACC options
-    if frame % 20 == 0 and CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
+    if frame % 20 == 0 and (CS.CP.radarDisable or self.radarDisableActivated and self.counter_init):
       can_sends.extend(create_acc_opt(self.packer))
 
     # 2 Hz front radar options
-    if frame % 50 == 0 and CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
+    if frame % 50 == 0 and CS.CP.radarDisable or (self.radarDisableActivated and self.counter_init):
       can_sends.append(create_frt_radar_opt(self.packer))
 
     # 20 Hz LFA MFA message
