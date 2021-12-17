@@ -381,7 +381,7 @@ class CarController():
     else:
       self.scc12_cnt = -1
 
-    if frame % 2 == 0 and CS.CP.radarDisablePossible:
+    if frame % 2 == 0 and CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
       lead_visible = False
       accel = actuators.accel if enabled else 0
 
@@ -394,6 +394,8 @@ class CarController():
 
       stopping = (actuators.longControlState == LongCtrlState.stopping)
       can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
+    else:
+      self.counter_init = True
 
     # 5 Hz ACC options
     if frame % 20 == 0 and CS.CP.radarDisablePossible:
