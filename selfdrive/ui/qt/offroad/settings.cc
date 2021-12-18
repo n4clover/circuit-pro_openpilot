@@ -193,7 +193,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   QHBoxLayout *custom2_layout = new QHBoxLayout();
   custom2_layout->setSpacing(30);
 
-  QPushButton *delete_logs_btn = new QPushButton("Delete All Logs To Be Uploaded");
+  QPushButton *delete_logs_btn = new QPushButton("Delete Logs To Be Uploaded");
   delete_logs_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   custom2_layout->addWidget(delete_logs_btn);
   QObject::connect(delete_logs_btn, &QPushButton::released, [=]() {
