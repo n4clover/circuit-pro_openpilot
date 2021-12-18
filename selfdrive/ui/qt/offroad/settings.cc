@@ -193,7 +193,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   QHBoxLayout *custom2_layout = new QHBoxLayout();
   custom2_layout->setSpacing(30);
 
-  QPushButton *delete_logs_btn = new QPushButton("Delete All Logs To Be Uploaded");
+  QPushButton *delete_logs_btn = new QPushButton("Delete Logs To Be Uploaded");
   delete_logs_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   custom2_layout->addWidget(delete_logs_btn);
   QObject::connect(delete_logs_btn, &QPushButton::released, [=]() {
@@ -219,7 +219,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   custom2_layout->addWidget(recover_panda_btn);
   QObject::connect(recover_panda_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to kill openpilot and attempt panda recover?", this)) {
-      std::system("cd /data/openpilot/selfdrive/scripts; sudo chmod u+x recover_panda.sh; ./recover_panda.sh");
+      std::system("cd /data/openpilot/scripts; sudo chmod u+x recover_panda.sh; ./recover_panda.sh");
       emit closeSettings();
     }
   });
