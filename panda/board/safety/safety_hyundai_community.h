@@ -162,8 +162,8 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
   bool violation = 0;
 
   if (!msg_allowed(to_send, HYUNDAI_COMMUNITY_TX_MSGS, sizeof(HYUNDAI_COMMUNITY_TX_MSGS)/sizeof(HYUNDAI_COMMUNITY_TX_MSGS[0]))) {
-    //tx = 0; YOLO
-    puts("  DISABLED YOLO CAN TX not allowed: "); puth(addr); puts(", "); puth(bus); puts("\n");
+    tx = 0;
+    puts("  CAN TX not allowed: "); puth(addr); puts(", "); puth(bus); puts("\n");
   }
 
   if (relay_malfunction) {
