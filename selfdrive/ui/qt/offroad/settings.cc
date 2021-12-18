@@ -219,18 +219,8 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   custom2_layout->addWidget(recover_panda_btn);
   QObject::connect(recover_panda_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to kill openpilot and attempt panda recover?", this)) {
-      if (Hardware::TICI()) {
-        std::system("pkill -f openpilot && cd panda/board && ./recover.sh && sudo reboot");
-        emit closeSettings();
-      }
-      else if (Hardware::EON()) {
-        std::system("pkill -f openpilot && cd panda/board && ./recover.sh && reboot");
-        emit closeSettings();
-      }
-      else {
-        ConfirmationDialog::alert("You have NOT successfully attempted panda recover!: Unknown location : Unknown Device", this);
-        emit closeSettings();
-      }
+      std::system("cd selfdrive/debug; ./recover_panda.sh");
+      emit closeSettings();
     }
   });
   addItem(custom2_layout);
