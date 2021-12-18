@@ -91,6 +91,7 @@ class CarController():
     self.gapsettingdance = 2
     self.gapsetting = 0
     self.gapcount = 0
+    self.DTQL = 0
 
     if CP.spasEnabled:
       self.last_apply_angle = 0.0
@@ -327,7 +328,6 @@ class CarController():
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
     if self.longcontrol and CS.cruiseState_enabled and CS.scc_bus and not CS.CP.radarDisablePossible:
-
       if frame % 2 == 0:
         
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
@@ -384,7 +384,7 @@ class CarController():
     else:
       self.scc12_cnt = -1
 
-    if CS.CP.radarDisablePossible: #CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
+    if CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
       if frame % 2 == 0:
         lead_visible = self.scc_smoother.get_lead(controls.sm)
         accel = actuators.accel if enabled else 0
