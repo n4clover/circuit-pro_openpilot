@@ -384,21 +384,16 @@ class CarController():
     else:
       self.scc12_cnt = -1
 
-    if CS.CP.radarDisablePossible:
+    if CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
       if frame % 2 == 0:
-        if CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
-          lead_visible = self.scc_smoother.get_lead(controls.sm)
-          accel = actuators.accel if enabled else 0
-
-          jerk = clip(2.0 * (accel - CS.out.aEgo), -12.7, 12.7)
-
-          if accel < 0:
-            accel = interp(accel - CS.out.aEgo, [-1.0, -0.5], [2 * accel, accel])
-
-          accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-
-          stopping = (actuators.longControlState == LongCtrlState.stopping)
-          can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
+        lead_visible = self.scc_smoother.get_lead(controls.sm)
+        accel = actuators.accel if enabled else 0
+        jerk = clip(2.0 * (accel - CS.out.aEgo), -12.7, 12.7)
+        if accel < 0:
+          accel = interp(accel - CS.out.aEgo, [-1.0, -0.5], [2 * accel, accel])
+        accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+        stopping = (actuators.longControlState == LongCtrlState.stopping)
+        can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
 
       # 5 Hz ACC options
       if frame % 20 == 0 and CS.CP.radarDisablePossible:
@@ -407,7 +402,6 @@ class CarController():
       # 2 Hz front radar options
       if frame % 50 == 0 and CS.CP.radarDisablePossible:
         can_sends.append(create_frt_radar_opt(self.packer))
-        
     else:
       self.counter_init = True
 
