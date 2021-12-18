@@ -99,8 +99,6 @@ class CarController():
       self.lkas_active = False
       self.spas_active = False
       self.spas_active_last = 0
-      self.DTQL = 0
-      self.assist = False
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
       self.ratelimit = 2.8 # Starting point - JPR
@@ -267,39 +265,38 @@ class CarController():
     if self.pcm_cnt == 20:
       self.pcm_cnt = 0 
 
-    if self.longcontrol:
-      if CS.CP.radarDisableOld:
-        self.radarDisableOverlapTimer += 1
-        self.radarDisableResetTimer = 0
-        if self.radarDisableOverlapTimer >= 30:
-          self.radarDisableActivated = True
-          if 200 > self.radarDisableOverlapTimer > 36:
-            if frame % 41 == 0 or self.radarDisableOverlapTimer == 37:
-              can_sends.append(create_scc7d0(b'\x02\x10\x03\x00\x00\x00\x00\x00'))
-            elif frame % 43 == 0 or self.radarDisableOverlapTimer == 37:
-              can_sends.append(create_scc7d0(b'\x03\x28\x03\x01\x00\x00\x00\x00'))
-            elif frame % 19 == 0 or self.radarDisableOverlapTimer == 37:
-              can_sends.append(create_scc7d0(b'\x02\x10\x85\x00\x00\x00\x00\x00'))  # this disables RADAR for
-        else:
-          self.counter_init = False
-          can_sends.append(create_scc7d0(b'\x02\x10\x90\x00\x00\x00\x00\x00'))  # this enables RADAR
-          can_sends.append(create_scc7d0(b'\x03\x29\x03\x01\x00\x00\x00\x00'))
-      elif self.radarDisableActivated:
+    if CS.CP.radarDisableOld:
+      self.radarDisableOverlapTimer += 1
+      self.radarDisableResetTimer = 0
+      if self.radarDisableOverlapTimer >= 30:
+        self.radarDisableActivated = True
+        if 200 > self.radarDisableOverlapTimer > 36:
+          if frame % 41 == 0 or self.radarDisableOverlapTimer == 37:
+            can_sends.append(create_scc7d0(b'\x02\x10\x03\x00\x00\x00\x00\x00'))
+          elif frame % 43 == 0 or self.radarDisableOverlapTimer == 37:
+            can_sends.append(create_scc7d0(b'\x03\x28\x03\x01\x00\x00\x00\x00'))
+          elif frame % 19 == 0 or self.radarDisableOverlapTimer == 37:
+            can_sends.append(create_scc7d0(b'\x02\x10\x85\x00\x00\x00\x00\x00'))  # this disables RADAR for
+      else:
+        self.counter_init = False
         can_sends.append(create_scc7d0(b'\x02\x10\x90\x00\x00\x00\x00\x00'))  # this enables RADAR
         can_sends.append(create_scc7d0(b'\x03\x29\x03\x01\x00\x00\x00\x00'))
-        self.radarDisableOverlapTimer = 0
-        if frame % 50 == 0:
-          self.radarDisableResetTimer += 1
-          if self.radarDisableResetTimer > 2:
-            self.radarDisableActivated = False
-            self.counter_init = True
-      else:
-        self.radarDisableOverlapTimer = 0
-        self.radarDisableResetTimer = 0
+    elif self.radarDisableActivated:
+      can_sends.append(create_scc7d0(b'\x02\x10\x90\x00\x00\x00\x00\x00'))  # this enables RADAR
+      can_sends.append(create_scc7d0(b'\x03\x29\x03\x01\x00\x00\x00\x00'))
+      self.radarDisableOverlapTimer = 0
+      if frame % 50 == 0:
+        self.radarDisableResetTimer += 1
+        if self.radarDisableResetTimer > 2:
+          self.radarDisableActivated = False
+          self.counter_init = True
+    else:
+      self.radarDisableOverlapTimer = 0
+      self.radarDisableResetTimer = 0
 
-      if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
+    if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
             CS.CP.radarDisableOld and self.radarDisableOverlapTimer >= 30:
-        can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
+      can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
 
     if not lead_visible:
       self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
@@ -387,19 +384,30 @@ class CarController():
     else:
       self.scc12_cnt = -1
 
-    if frame % 2 == 0 and (CS.CP.radarDisable or self.radarDisableActivated and self.counter_init):
-      lead_visible = self.scc_smoother.get_lead(controls.sm)
-      accel = actuators.accel if enabled else 0
+    if CS.CP.radarDisablePossible:
+      if frame % 2 == 0:
+        if CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
+          lead_visible = self.scc_smoother.get_lead(controls.sm)
+          accel = actuators.accel if enabled else 0
 
-      jerk = clip(2.0 * (accel - CS.out.aEgo), -12.7, 12.7)
+          jerk = clip(2.0 * (accel - CS.out.aEgo), -12.7, 12.7)
 
-      if accel < 0:
-        accel = interp(accel - CS.out.aEgo, [-1.0, -0.5], [2 * accel, accel])
+          if accel < 0:
+            accel = interp(accel - CS.out.aEgo, [-1.0, -0.5], [2 * accel, accel])
 
-      accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+          accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
-      stopping = (actuators.longControlState == LongCtrlState.stopping)
-      can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
+          stopping = (actuators.longControlState == LongCtrlState.stopping)
+          can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
+
+      # 5 Hz ACC options
+      if frame % 20 == 0 and CS.CP.radarDisablePossible:
+        can_sends.extend(create_acc_opt(self.packer))
+
+      # 2 Hz front radar options
+      if frame % 50 == 0 and CS.CP.radarDisablePossible:
+        can_sends.append(create_frt_radar_opt(self.packer))
+        
     else:
       self.counter_init = True
 
@@ -412,14 +420,6 @@ class CarController():
       elif CS.mdps_bus == 0:
         state = 2 if self.car_fingerprint in FEATURES["send_hda_state_2"] else 1
         can_sends.append(create_hda_mfc(self.packer, activated_hda, state))
-
-    # 5 Hz ACC options
-    if frame % 20 == 0 and (CS.CP.radarDisable or self.radarDisableActivated and self.counter_init):
-      can_sends.extend(create_acc_opt(self.packer))
-
-    # 2 Hz front radar options
-    if frame % 50 == 0 and CS.CP.radarDisable or (self.radarDisableActivated and self.counter_init):
-      can_sends.append(create_frt_radar_opt(self.packer))
 
 ############### SPAS STATES ############## JPR
 # State 1 : Start
