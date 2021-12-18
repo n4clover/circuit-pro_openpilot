@@ -394,14 +394,6 @@ class CarController():
         accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
         stopping = (actuators.longControlState == LongCtrlState.stopping)
         can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
-
-      # 5 Hz ACC options
-      if frame % 20 == 0 and CS.CP.radarDisablePossible:
-        can_sends.extend(create_acc_opt(self.packer))
-
-      # 2 Hz front radar options
-      if frame % 50 == 0 and CS.CP.radarDisablePossible:
-        can_sends.append(create_frt_radar_opt(self.packer))
     else:
       self.counter_init = True
 
@@ -492,5 +484,13 @@ class CarController():
         can_sends.append(create_spas12(CS.mdps_bus))
       self.spas_active_last = spas_active
       self.DTQL = abs(CS.out.steeringWheelTorque)
+
+      # 5 Hz ACC options
+      if frame % 20 == 0 and CS.CP.radarDisablePossible:
+        can_sends.extend(create_acc_opt(self.packer))
+
+      # 2 Hz front radar options
+      if frame % 50 == 0 and CS.CP.radarDisablePossible:
+        can_sends.append(create_frt_radar_opt(self.packer))
 
     return can_sends
