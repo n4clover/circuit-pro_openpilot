@@ -233,7 +233,7 @@ class CarController():
     can_sends = []
 
     # tester present - w/ no response (keeps radar disabled)
-    if CS.CP.radarDisablePossible:
+    if CS.CP.radarDisable:
       if (frame % 100) == 0:
         can_sends.append([0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0])
 
