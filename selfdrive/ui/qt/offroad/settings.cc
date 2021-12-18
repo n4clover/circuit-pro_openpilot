@@ -219,7 +219,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   custom2_layout->addWidget(recover_panda_btn);
   QObject::connect(recover_panda_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to kill openpilot and attempt panda recover?", this)) {
-      std::system("sudo chmod u+x scripts/recover_panda.sh; ./scripts/recover_panda.sh");
+      std::system("sudo chmod u+x /data/openpilot/selfdrive/scripts/recover_panda.sh; ./scripts/recover_panda.sh");
       emit closeSettings();
     }
   });
