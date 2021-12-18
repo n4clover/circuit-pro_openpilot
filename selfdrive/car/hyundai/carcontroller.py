@@ -233,6 +233,12 @@ class CarController():
     self.lkas11_cnt = (self.lkas11_cnt + 1) % 0x10
 
     can_sends = []
+
+    # tester present - w/ no response (keeps radar disabled)
+    if CS.CP.radarDisablePossible:
+      if (frame % 100) == 0:
+        can_sends.append([0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0])
+
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 0, self.ldws_opt))
@@ -291,9 +297,9 @@ class CarController():
         self.radarDisableOverlapTimer = 0
         self.radarDisableResetTimer = 0
 
-    if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
+      if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
             CS.CP.radarDisableOld and self.radarDisableOverlapTimer >= 30:
-      can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))      
+        can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
 
     if not lead_visible:
       self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
@@ -323,7 +329,7 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol and CS.cruiseState_enabled and not CS.CP.radarDisablePossible and (CS.scc_bus or not self.scc_live):
+    if self.longcontrol and CS.cruiseState_enabled and not CS.CP.radarDisablePossible and CS.scc_bus:
 
       if frame % 2 == 0:
         
@@ -382,7 +388,7 @@ class CarController():
       self.scc12_cnt = -1
 
     if frame % 2 == 0 and (CS.CP.radarDisable or self.radarDisableActivated and self.counter_init):
-      lead_visible = False
+      lead_visible = self.scc_smoother.get_lead(controls.sm)
       accel = actuators.accel if enabled else 0
 
       jerk = clip(2.0 * (accel - CS.out.aEgo), -12.7, 12.7)
@@ -397,14 +403,6 @@ class CarController():
     else:
       self.counter_init = True
 
-    # 5 Hz ACC options
-    if frame % 20 == 0 and (CS.CP.radarDisable or self.radarDisableActivated and self.counter_init):
-      can_sends.extend(create_acc_opt(self.packer))
-
-    # 2 Hz front radar options
-    if frame % 50 == 0 and CS.CP.radarDisable or (self.radarDisableActivated and self.counter_init):
-      can_sends.append(create_frt_radar_opt(self.packer))
-
     # 20 Hz LFA MFA message
     if frame % 5 == 0:
       activated_hda = road_speed_limiter_get_active()
@@ -414,6 +412,14 @@ class CarController():
       elif CS.mdps_bus == 0:
         state = 2 if self.car_fingerprint in FEATURES["send_hda_state_2"] else 1
         can_sends.append(create_hda_mfc(self.packer, activated_hda, state))
+
+    # 5 Hz ACC options
+    if frame % 20 == 0 and (CS.CP.radarDisable or self.radarDisableActivated and self.counter_init):
+      can_sends.extend(create_acc_opt(self.packer))
+
+    # 2 Hz front radar options
+    if frame % 50 == 0 and CS.CP.radarDisable or (self.radarDisableActivated and self.counter_init):
+      can_sends.append(create_frt_radar_opt(self.packer))
 
 ############### SPAS STATES ############## JPR
 # State 1 : Start

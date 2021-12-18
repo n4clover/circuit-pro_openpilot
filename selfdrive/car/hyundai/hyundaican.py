@@ -155,6 +155,7 @@ def create_acc_opt(packer):
   commands.append(packer.make_can_msg("SCC13", 0, scc13_values))
 
   fca12_values = {
+    "FCA_USM": 3,
     "FCA_DrvSetState": 2,
     "FCA_USM": 1, # AEB disabled
   }
