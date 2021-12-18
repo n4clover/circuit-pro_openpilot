@@ -5,3 +5,4 @@ cd panda/board
 ./recover.sh
 echo "Recovering Panda; If no reboot in 5 min try again.."
 sudo reboot
+reboot
