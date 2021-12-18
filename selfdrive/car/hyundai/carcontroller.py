@@ -232,6 +232,11 @@ class CarController():
 
     can_sends = []
 
+    # tester present - w/ no response (keeps radar disabled)
+    if CS.CP.radarDisable:
+      if (frame % 100) == 0:
+        can_sends.append([0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0])
+
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 0, self.ldws_opt))
@@ -289,14 +294,9 @@ class CarController():
       self.radarDisableOverlapTimer = 0
       self.radarDisableResetTimer = 0
 
-    #if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
-    #        CS.CP.radarDisableOld and self.radarDisableOverlapTimer >= 30:
-    #  can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
-    
-    # tester present - w/ no response (keeps radar disabled)
-    if CS.CP.radarDisablePossible:
-      if (frame % 100) == 0:
-        can_sends.append([0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0])
+    if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
+            CS.CP.radarDisableOld and self.radarDisableOverlapTimer >= 30:
+      can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
 
     if not lead_visible:
       self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
