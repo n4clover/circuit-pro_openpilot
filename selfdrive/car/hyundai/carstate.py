@@ -129,7 +129,7 @@ class CarState(CarStateBase):
       ret.autoHold = cp.vl["ESP11"]["AVH_STAT"]
 
     # cruise state
-    if self.CP.openpilotLongitudinalControl:
+    if self.CP.radarDisablePossible:
       # These are not used for engage/disengage since openpilot keeps track of state using the buttons
       ret.cruiseState.available = cp.vl["TCS13"]["ACCEnable"] == 0
       ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
@@ -141,7 +141,7 @@ class CarState(CarStateBase):
                                       cp.vl["EMS16"]["CRUISE_LAMP_M"] != 0
       ret.cruiseState.standstill = cp_scc.vl["SCC11"]["SCCInfoDisplay"] == 4. if not self.no_radar else False
 
-      ret.cruiseState.enabledAcc = ret.cruiseState.enabled
+    ret.cruiseState.enabledAcc = ret.cruiseState.enabled
 
     if ret.cruiseState.enabled:
       ret.cruiseState.speed = cp_scc.vl["SCC11"]["VSetDis"] * self.speed_conv_to_ms if not self.no_radar else \
