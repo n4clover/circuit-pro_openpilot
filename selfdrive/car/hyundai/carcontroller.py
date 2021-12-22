@@ -323,7 +323,7 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol and CS.cruiseState_enabled and CS.scc_bus and CS.CP.radarDisablePossible and self.counter_init:
+    if self.longcontrol and (CS.cruiseState_enabled and CS.scc_bus or CS.CP.radarDisablePossible or self.radarDisableActivated and self.counter_init):
       if frame % 2 == 0:
         
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
