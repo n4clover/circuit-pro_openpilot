@@ -89,7 +89,7 @@ def create_lfahda_mfc(packer, enabled, active):
   # VAL_ 1157 HDA_SysWarning 0 "no_message" 1 "driving_convenience_systems_cancelled" 2 "highway_drive_assist_system_cancelled";
 
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
-  
+
 def create_acc_opt(packer, idx):
   commands = []
   
@@ -196,7 +196,8 @@ def create_scc12(packer, apply_accel, enabled, scc12, gaspressed, brakepressed,
   values["aReqValue"] = apply_accel if enabled else 0  # aReqMin
 
   values["CR_VSM_Alive"] = idx % 0xF
-
+  values["CR_VSM_ChkSum"] = 0
+  
   dat = packer.make_can_msg("SCC12", 0, values)[2]
   values["CR_VSM_ChkSum"] = 16 - sum([sum(divmod(i, 16)) for i in dat]) % 16
   return packer.make_can_msg("SCC12", 0, values)
