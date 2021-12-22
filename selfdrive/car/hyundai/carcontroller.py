@@ -375,7 +375,7 @@ class CarController():
             obj_gap = 0
 
           can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, acc_standstill, apply_accel, CS.out.gasPressed,
-                                        lead_visible, CS.scc14))
+                                        obj_gap, CS.scc14))
           if CS.CP.radarDisablePossible:
             can_sends.append(create_fca11(self.packer, int(frame / 2)))
     else:
