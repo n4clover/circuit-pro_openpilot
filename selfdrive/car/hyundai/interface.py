@@ -566,7 +566,7 @@ class CarInterface(CarInterfaceBase):
     ret.hasEms = 608 in fingerprint[0] and 809 in fingerprint[0]
 
     ret.radarOffCan = ret.sccBus == -1
-    ret.pcmCruise = not ret.radarOffCan
+    ret.pcmCruise = not ret.radarOffCan or not ret.radarDisablePossible
 
     # SPAS
     ret.spasEnabled = Params().get_bool('spasEnabled')
