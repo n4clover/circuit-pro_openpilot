@@ -230,6 +230,21 @@ def create_scc14(packer, enabled, e_vgo, standstill, accel, gaspressed, objgap, 
 
   return packer.make_can_msg("SCC14", 0, values)
 
+def create_fca11(packer, idx):
+  values = {
+    # seems to count 2,1,0,3,2,1,0,3,2,1,0,3,2,1,0,repeat...
+    # (where first value is aligned to Supplemental_Counter == 0)
+    # test: [(idx % 0xF, -((idx % 0xF) + 2) % 4) for idx in range(0x14)]
+    "CR_FCA_Alive": ((-((idx % 0xF) + 2) % 4) << 2) + 1,
+    "Supplemental_Counter": idx % 0xF,
+    "PAINT1_Status": 1,
+    "FCA_DrvSetStatus": 1,
+    "FCA_Status": 1, # AEB disabled
+  }
+  fca11_dat = packer.make_can_msg("FCA11", 0, values)[2]
+  values["CR_FCA_ChkSum"] = 0x10 - sum(sum(divmod(i, 16)) for i in fca11_dat) % 0x10
+  return packer.make_can_msg("FCA11", 0, values)
+
 def create_spas11(packer, car_fingerprint, frame, en_spas, apply_steer, bus):
   values = {
     "CF_Spas_Stat": en_spas,
