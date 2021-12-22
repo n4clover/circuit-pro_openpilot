@@ -684,7 +684,7 @@ class CarInterface(CarInterfaceBase):
           if b.type == ButtonType.decelCruise and not b.pressed:
             events.add(EventName.buttonEnable)
 
-    if self.CS.cruise_unavail:
+    if self.CC.longcontrol and self.CS.cruise_unavail:
       print("cruise error")
       events.add(EventName.brakeUnavailable)
     if self.CS.park_brake:
