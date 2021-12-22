@@ -72,7 +72,6 @@ class CarController():
     self.radarDisableActivated = False
     self.radarDisableResetTimer = 0
     self.radarDisableOverlapTimer = 0
-    self.sendaccmode = not CP.radarDisablePossible
 
     self.pcm_cnt = 0
     self.resume_cnt = 0
@@ -83,7 +82,7 @@ class CarController():
     self.turning_signal_timer = 0
     self.cut_timer = 0
     self.longcontrol = CP.openpilotLongitudinalControl
-    self.scc_live = not CP.radarOffCan
+    self.scc_live = not CP.radarOffCan 
 
     self.turning_indicator_alert = False
     self.emsType = CP.emsType
@@ -120,9 +119,6 @@ class CarController():
 
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
-
-    if enabled:
-      self.sendaccmode = enabled
 
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
@@ -359,11 +355,10 @@ class CarController():
         self.scc12_cnt += 1
         self.scc12_cnt %= 0xF
 
-        can_sends.append(create_scc12(self.packer, apply_accel, enabled, self.scc12_cnt, self.scc_live, CS.scc12,
-                                      CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill,
-                                      self.car_fingerprint))
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, CS.scc12,
+                                      CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill, int(frame / 2)))
 
-        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, self.sendaccmode, CS.out.standstill, CS.lead_distance))
+        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, CS.out.standstill, CS.lead_distance))
 
         if frame % 20 == 0 and CS.has_scc13:
           can_sends.append(create_scc13(self.packer, CS.scc13))
