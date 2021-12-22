@@ -684,8 +684,8 @@ class CarInterface(CarInterfaceBase):
           if b.type == ButtonType.decelCruise and not b.pressed:
             events.add(EventName.buttonEnable)
 
-    if self.CS.brake_error:
-      print("brake error")
+    if self.CS.cruise_unavail:
+      print("cruise error")
       events.add(EventName.brakeUnavailable)
     if self.CS.park_brake:
       events.add(EventName.parkBrake)
@@ -708,8 +708,6 @@ class CarInterface(CarInterfaceBase):
 
       if self.CS.mdps11_stat == 6 or self.CS.mdps11_stat == 8:
         events.add(EventName.steerTempUnavailable)
-
-
 
     # scc smoother
     if self.CC.scc_smoother is not None:
