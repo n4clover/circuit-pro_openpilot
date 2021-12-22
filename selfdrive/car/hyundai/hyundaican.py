@@ -99,20 +99,6 @@ def create_acc_opt(packer, idx):
     "Lead_Veh_Dep_Alert_USM": 2,
   }
   commands.append(packer.make_can_msg("SCC13", 0, scc13_values))
-
-  fca11_values = {
-    # seems to count 2,1,0,3,2,1,0,3,2,1,0,3,2,1,0,repeat...
-    # (where first value is aligned to Supplemental_Counter == 0)
-    # test: [(idx % 0xF, -((idx % 0xF) + 2) % 4) for idx in range(0x14)]
-    "CR_FCA_Alive": ((-((idx % 0xF) + 2) % 4) << 2) + 1,
-    "Supplemental_Counter": idx % 0xF,
-    "PAINT1_Status": 1,
-    "FCA_DrvSetStatus": 1,
-    "FCA_Status": 1, # AEB disabled
-  }
-  fca11_dat = packer.make_can_msg("FCA11", 0, fca11_values)[2]
-  fca11_values["CR_FCA_ChkSum"] = 0x10 - sum(sum(divmod(i, 16)) for i in fca11_dat) % 0x10
-  commands.append(packer.make_can_msg("FCA11", 0, fca11_values))
   
   fca12_values = {
     "FCA_USM": 3,
@@ -206,27 +192,29 @@ def create_scc13(packer, scc13):
   values = copy.copy(scc13)
   return packer.make_can_msg("SCC13", 0, values)
 
-def create_scc14(packer, enabled, e_vgo, standstill, accel, gaspressed, objgap, scc14):
+def create_scc14(packer, enabled, e_vgo, standstill, accel, gaspressed, lead_visible, scc14):
   values = copy.copy(scc14)
   # from xps-genesis
   if enabled:
     values["ACCMode"] = 2 if gaspressed and (accel > -0.2) else 1
-    values["ObjGap"] = objgap
-    if standstill:
-      values["JerkUpperLimit"] = 0.5
-      values["JerkLowerLimit"] = 10.
-      values["ComfortBandUpper"] = 0.
-      values["ComfortBandLower"] = 0.
-      if e_vgo > 0.27:
-        values["ComfortBandUpper"] = 2.
-        values["ComfortBandLower"] = 0.
-    else:
-      values["JerkUpperLimit"] = 50.
-      values["JerkLowerLimit"] = 50.
-      values["ComfortBandUpper"] = 50.
-      values["ComfortBandLower"] = 50.
+    
   else:
     values["ACCMode"] = 2
+  values["ObjGap"] = 2 if lead_visible else 0
+  if standstill:
+    values["JerkUpperLimit"] = 0.5
+    values["JerkLowerLimit"] = 10.
+    values["ComfortBandUpper"] = 0.
+    values["ComfortBandLower"] = 0.
+    if e_vgo > 0.27:
+      values["ComfortBandUpper"] = 2.
+      values["ComfortBandLower"] = 0.
+  else:
+    values["JerkUpperLimit"] = 50.
+    values["JerkLowerLimit"] = 50.
+    values["ComfortBandUpper"] = 50.
+    values["ComfortBandLower"] = 50.
+
 
   return packer.make_can_msg("SCC14", 0, values)
 
