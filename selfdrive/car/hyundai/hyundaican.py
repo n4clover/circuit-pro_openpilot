@@ -279,6 +279,8 @@ def create_scc14(packer, enabled, e_vgo, standstill, accel, gaspressed, objgap, 
       values["JerkLowerLimit"] = 50.
       values["ComfortBandUpper"] = 50.
       values["ComfortBandLower"] = 50.
+  else:
+    values["ACCMode"] = 2
 
   return packer.make_can_msg("SCC14", 0, values)
 

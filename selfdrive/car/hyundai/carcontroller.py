@@ -360,7 +360,7 @@ class CarController():
 
         can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, CS.out.standstill, CS.lead_distance))
 
-        if frame % 20 == 0 and CS.has_scc13:
+        if frame % 20 == 0 and CS.has_scc13 and not CS.CP.radarDisablePossible:
           can_sends.append(create_scc13(self.packer, CS.scc13))
           
         if CS.has_scc14:
@@ -462,7 +462,7 @@ class CarController():
           print("driver torque:", CS.out.steeringWheelTorque)
         if self.emsType == 0:
           print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
-          
+
       # SPAS12 20Hz
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
