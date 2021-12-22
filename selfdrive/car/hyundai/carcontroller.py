@@ -323,7 +323,7 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol and CS.cruiseState_enabled and CS.scc_bus and not CS.CP.radarDisablePossible:
+    if self.longcontrol and CS.cruiseState_enabled and CS.scc_bus and CS.CP.radarDisablePossible and self.counter_init:
       if frame % 2 == 0:
         
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
@@ -378,18 +378,6 @@ class CarController():
                                         obj_gap, CS.scc14))
     else:
       self.scc12_cnt = -1
-
-    if CS.CP.radarDisable or self.radarDisableActivated and self.counter_init:
-      if frame % 2 == 0:
-        lead_visible = self.scc_smoother.get_lead(controls.sm)
-        accel = actuators.accel if enabled else 0
-        jerk = clip(2.0 * (accel - CS.out.aEgo), -12.7, 12.7)
-        if accel < 0:
-          accel = interp(accel - CS.out.aEgo, [-1.0, -0.5], [2 * accel, accel])
-        accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-        stopping = (actuators.longControlState == LongCtrlState.stopping)
-        can_sends.extend(create_acc_commands(self.packer, enabled, accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting))
-    else:
       self.counter_init = True
 
     # 20 Hz LFA MFA message
@@ -482,7 +470,7 @@ class CarController():
 
       # 5 Hz ACC options
       if frame % 20 == 0 and CS.CP.radarDisablePossible:
-        can_sends.extend(create_acc_opt(self.packer))
+        can_sends.extend(create_acc_opt(self.packer, int(frame / 2)))
 
       # 2 Hz front radar options
       if frame % 50 == 0 and CS.CP.radarDisablePossible:
