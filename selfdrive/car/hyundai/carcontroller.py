@@ -23,8 +23,8 @@ min_set_speed = 0 * CV.KPH_TO_MS
 ###### SPAS ######
 STEER_ANG_MAX = 450 # SPAS Max Angle
 ANGLE_DELTA_BP = [0., 10., 20.]
-ANGLE_DELTA_V = [1.2, 1.15, 1.1]    # windup limit
-ANGLE_DELTA_VU = [1.3, 1.2, 1.15]   # unwind limit
+ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
+ANGLE_DELTA_VU = [1.29, 1.19, 1.14]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
 SPAS_SWITCH = 30 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRatio
 ###### SPAS #######
