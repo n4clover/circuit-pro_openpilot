@@ -12,7 +12,8 @@ from selfdrive.controls.lib.lane_planner import TRAJECTORY_SIZE
 from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import AUTO_TR_CRUISE_GAP
 
 from selfdrive.ntune import ntune_scc_get
-from selfdrive.road_speed_limiter import road_speed_limiter_get_max_speed, road_speed_limiter_get_active
+from selfdrive.road_speed_limiter import road_speed_limiter_get_max_speed, road_speed_limiter_get_active, \
+  get_road_speed_limiter
 
 SYNC_MARGIN = 3.
 
@@ -126,8 +127,10 @@ class SccSmoother:
   def cal_max_speed(self, frame, CC, CS, sm, clu11_speed, controls):
 
     # kph
+
+    road_speed_limiter = get_road_speed_limiter()
     apply_limit_speed, road_limit_speed, left_dist, first_started, max_speed_log = \
-      road_speed_limiter_get_max_speed(clu11_speed, self.is_metric)
+      road_speed_limiter.get_max_speed(clu11_speed, self.is_metric)
 
     self.cal_curve_speed(sm, CS.out.vEgo, frame)
     if self.slow_on_curves and self.curve_speed_ms >= MIN_CURVE_SPEED:
@@ -136,7 +139,13 @@ class SccSmoother:
       max_speed_clu = self.kph_to_clu(controls.v_cruise_kph)
 
     self.active_cam = road_limit_speed > 0
-    self.over_speed_limit = 0 < road_limit_speed < clu11_speed + 2
+
+    if road_speed_limiter.roadLimitSpeed is not None:
+      camSpeedFactor = clip(road_speed_limiter.roadLimitSpeed.camSpeedFactor, 1.0, 1.1)
+      self.over_speed_limit = road_speed_limiter.roadLimitSpeed.camLimitSpeedLeftDist > 0 and \
+                              0 < road_limit_speed * camSpeedFactor < clu11_speed + 2
+    else:
+      self.over_speed_limit = False
 
     #max_speed_log = "{:.1f}/{:.1f}/{:.1f}".format(float(limit_speed),
     #                                              float(self.curve_speed_ms*self.speed_conv_to_clu),
@@ -188,10 +197,6 @@ class SccSmoother:
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
 
     road_limit_speed, left_dist, max_speed_log = self.cal_max_speed(frame, CC, CS, controls.sm, clu11_speed, controls)
-
-    CC.sccSmoother.roadLimitSpeedActive = road_speed_limiter_get_active()
-    CC.sccSmoother.roadLimitSpeed = road_limit_speed
-    CC.sccSmoother.roadLimitSpeedLeftDist = left_dist
 
     # kph
     controls.applyMaxSpeed = float(clip(CS.cruiseState_speed * CV.MS_TO_KPH, MIN_SET_SPEED_KPH,
@@ -274,7 +279,7 @@ class SccSmoother:
         if 0. < d < -lead.vRel * (9. + 3.) * 2. and lead.vRel < -1.:
           t = d / lead.vRel
           accel = -(lead.vRel / t) * self.speed_conv_to_clu
-          accel *= 1.4
+          accel *= 1.2
 
           if accel < 0.:
             target_speed = clu11_speed + accel
@@ -343,10 +348,10 @@ class SccSmoother:
     gas_factor = ntune_scc_get("sccGasFactor")
     brake_factor = ntune_scc_get("sccBrakeFactor")
 
-    lead = self.get_lead(sm)
-    if lead is not None:
-      if not lead.radar:
-        brake_factor *= 0.95
+    #lead = self.get_lead(sm)
+    #if lead is not None:
+    #  if not lead.radar:
+    #    brake_factor *= 0.975
 
     if accel > 0:
       accel *= gas_factor

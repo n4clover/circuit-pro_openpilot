@@ -44,8 +44,6 @@ const int SEGMENT_LENGTH = LOGGERD_TEST ? atoi(getenv("LOGGERD_SEGMENT_LENGTH"))
 struct LogCameraInfo {
   CameraType type;
   const char *filename;
-  const char *frame_packet_name;
-  const char *encode_idx_name;
   VisionStreamType stream_type;
   int frame_width, frame_height;
   int fps;
@@ -63,7 +61,6 @@ const LogCameraInfo cameras_logged[] = {
     .type = RoadCam,
     .stream_type = VISION_STREAM_ROAD,
     .filename = "fcamera.hevc",
-    .frame_packet_name = "roadCameraState",
     .fps = MAIN_FPS,
     .bitrate = MAIN_BITRATE,
     .is_h265 = true,
@@ -77,21 +74,19 @@ const LogCameraInfo cameras_logged[] = {
     .type = DriverCam,
     .stream_type = VISION_STREAM_DRIVER,
     .filename = "dcamera.hevc",
-    .frame_packet_name = "driverCameraState",
     .fps = MAIN_FPS, // on EONs, more compressed this way
     .bitrate = DCAM_BITRATE,
     .is_h265 = true,
     .downscale = false,
     .has_qcamera = false,
     .trigger_rotate = Hardware::TICI(),
-    .enable = !Hardware::PC(),
+    .enable = true,
     .record = Params().getBool("RecordFront"),
   },
   {
     .type = WideRoadCam,
     .stream_type = VISION_STREAM_WIDE_ROAD,
     .filename = "ecamera.hevc",
-    .frame_packet_name = "wideRoadCameraState",
     .fps = MAIN_FPS,
     .bitrate = MAIN_BITRATE,
     .is_h265 = true,
@@ -113,7 +108,6 @@ const LogCameraInfo qcam_info = {
 };
 
 struct LoggerdState {
-  Context *ctx;
   LoggerState logger = {};
   char segment_path[4096];
   std::mutex rotate_lock;

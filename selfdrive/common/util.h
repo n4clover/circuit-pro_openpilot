@@ -37,12 +37,11 @@ const double MS_TO_MPH = MS_TO_KPH * KM_TO_MILE;
 const double METER_TO_MILE = KM_TO_MILE / 1000.0;
 const double METER_TO_FOOT = 3.28084;
 
-void set_thread_name(const char* name);
+namespace util {
 
+void set_thread_name(const char* name);
 int set_realtime_priority(int level);
 int set_core_affinity(std::vector<int> cores);
-
-namespace util {
 
 // ***** Time helpers *****
 struct tm get_time();
@@ -92,7 +91,9 @@ bool create_directories(const std::string &dir, mode_t mode);
 std::string check_output(const std::string& command);
 
 inline void sleep_for(const int milliseconds) {
-  std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+  if (milliseconds > 0) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+  }
 }
 
 }  // namespace util

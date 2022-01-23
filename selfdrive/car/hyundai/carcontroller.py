@@ -32,13 +32,13 @@ SPAS_SWITCH = 35 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRa
 CLUSTER_ANIMATION_BP = [0., 1., 10., 20., 30., 40., 50.]
 CLUSTER_ANIMATION_SPEED= [0., 100., 40., 30., 20., 10., 3.]
 
-SP_CARS = [CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
-           CAR.GENESIS_EQ900, CAR.GENESIS_EQ900_L, CAR.K9, CAR.GENESIS_G90]
+SP_CARS = (CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
+           CAR.GENESIS_EQ900, CAR.GENESIS_EQ900_L, CAR.K9, CAR.GENESIS_G90)
 
 def process_hud_alert(enabled, fingerprint, visual_alert, left_lane, right_lane,
                       left_lane_depart, right_lane_depart):
 
-  sys_warning = (visual_alert in [VisualAlert.steerRequired, VisualAlert.ldw])
+  sys_warning = (visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
   # initialize to no line visible
   sys_state = 1
@@ -65,7 +65,7 @@ class CarController():
     self.car_fingerprint = CP.carFingerprint
     self.packer = CANPacker(dbc_name)
     self.apply_steer_last = 0
-    self.steer_rate_limited = False
+    self.accel = 0
     self.lkas11_cnt = 0
     self.scc12_cnt = -1
     self.counter_init = False
@@ -112,8 +112,6 @@ class CarController():
     self.warning_over_speed_limit = param.get_bool('WarningOverSpeedLimit')
     self.NoMinLaneChangeSpeed = param.get_bool('NoMinLaneChangeSpeed')
 
-    # gas_factor, brake_factor
-    # Adjust it in the range of 0.7 to 1.3
     self.scc_smoother = SccSmoother()
     self.last_blinker_frame = 0
 
@@ -329,6 +327,7 @@ class CarController():
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
         apply_accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
         apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
+        self.accel = apply_accel
 
         controls.apply_accel = apply_accel
         aReqValue = CS.scc12["aReqValue"]
@@ -479,4 +478,8 @@ class CarController():
 
       self.spas_active_last = spas_active
       self.DTQL = abs(CS.out.steeringWheelTorque)
-    return can_sends
+
+    new_actuators = actuators.copy()
+    new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
+    new_actuators.accel = self.accel
+    return new_actuators, can_sends

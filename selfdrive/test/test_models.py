@@ -10,9 +10,6 @@ from cereal import log, car
 from common.params import Params
 from selfdrive.car.fingerprints import all_known_cars
 from selfdrive.car.car_helpers import interfaces
-from selfdrive.car.gm.values import CAR as GM
-from selfdrive.car.honda.values import HONDA_BOSCH, CAR as HONDA
-from selfdrive.car.chrysler.values import CAR as CHRYSLER
 from selfdrive.car.hyundai.values import CAR as HYUNDAI
 from selfdrive.test.test_routes import routes, non_tested_cars
 from selfdrive.test.openpilotci import get_url
@@ -30,17 +27,16 @@ ROUTES = {rt.car_fingerprint: rt.route for rt in routes}
 
 # TODO: get updated routes for these cars
 ignore_can_valid = [
-  HYUNDAI.SANTA_FE,
+  HYUNDAI.GRANDEUR_IG,
 ]
 
 ignore_carstate_check = [
   # TODO: chrysler gas state in panda also checks wheel speed, refactor so it's only gas
-  CHRYSLER.PACIFICA_2017_HYBRID,
+  HYUNDAI.GRANDEUR_IG,
 ]
 
 ignore_addr_checks_valid = [
-  GM.BUICK_REGAL,
-  HYUNDAI.GENESIS_G70_2020,
+  HYUNDAI.GRANDEUR_IG,
 ]
 
 @parameterized_class(('car_model'), [(car,) for i, car in enumerate(sorted(all_known_cars())) if i % NUM_JOBS == JOB_ID])
@@ -134,7 +130,7 @@ class TestCarModel(unittest.TestCase):
 
   def test_radar_interface(self):
     os.environ['NO_RADAR_SLEEP'] = "1"
-    RadarInterface = importlib.import_module('selfdrive.car.%s.radar_interface' % self.CP.carName).RadarInterface
+    RadarInterface = importlib.import_module(f'selfdrive.car.{self.CP.carName}.radar_interface').RadarInterface
     RI = RadarInterface(self.CP)
     assert RI
 
@@ -179,8 +175,6 @@ class TestCarModel(unittest.TestCase):
     """
     if self.CP.dashcamOnly:
       self.skipTest("no need to check panda safety for dashcamOnly")
-    if self.car_model in ignore_carstate_check:
-      self.skipTest("see comments in test_models.py")
 
     checks = defaultdict(lambda: 0)
     CC = car.CarControl.new_message()
@@ -221,7 +215,7 @@ class TestCarModel(unittest.TestCase):
 
     # TODO: use the same signal in panda and carState
     # tolerate a small delay between the button press and PCM entering a cruise state
-    if self.car_model == HONDA.ACCORD_2021:
+    if self.car_model == HONDA.ACCORD:
       if failed_checks['controlsAllowed'] < 500:
         del failed_checks['controlsAllowed']
 
