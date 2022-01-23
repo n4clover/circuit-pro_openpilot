@@ -34,7 +34,7 @@ from selfdrive.swaglog import cloudlog, SWAGLOG_DIR
 from selfdrive.version import get_version, get_origin, get_short_branch, get_commit
 from selfdrive.statsd import STATS_DIR
 
-ATHENA_HOST = os.getenv('ATHENA_HOST', 'wss://athena.comma.ai')
+ATHENA_HOST = os.getenv('ATHENA_HOST', 'wss://athena.api.retropilot.org')
 HANDLER_THREADS = int(os.getenv('HANDLER_THREADS', "4"))
 LOCAL_PORT_WHITELIST = {8022}
 
