@@ -84,7 +84,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 2.5
     ret.steerRateCost = 0.4
     ret.steerMaxBP = [0.]
-    ret.steerMaxV = [1.5]
+    ret.steerMaxV = [2.]
     ret.emsType = 0
 
    #Longitudinal Tune and logic for car tune
@@ -112,10 +112,9 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalActuatorDelayUpperBound = 0.2
 
     ret.stopAccel = -2.5
-    ret.startingAccelRate = 5.0  # brake_travel/s while releasing on restart
     ret.stoppingDecelRate = 0.73  # brake_travel/s while trying to stop
     ret.vEgoStopping = 0.8
-    ret.vEgoStarting = 0.5
+    ret.vEgoStarting = 0.5  # needs to be >= vEgoStopping to avoid state transition oscillation
 
     # genesis
     if candidate == CAR.GENESIS:
