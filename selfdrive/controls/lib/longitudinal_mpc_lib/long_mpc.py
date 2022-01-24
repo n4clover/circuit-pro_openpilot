@@ -49,8 +49,6 @@ AUTO_TR_V = [1., 1.2, 1.35, 1.45]
 
 AUTO_TR_CRUISE_GAP = 4
 
-
-
 # Fewer timestamps don't hurt performance and lead to
 # much better convergence of the MPC with low iterations
 N = 12
@@ -59,7 +57,7 @@ T_IDXS_LST = [index_function(idx, max_val=MAX_T, max_idx=N+1) for idx in range(N
 
 T_IDXS = np.array(T_IDXS_LST)
 T_DIFFS = np.diff(T_IDXS, prepend=[0.])
-MIN_ACCEL = -5.5
+MIN_ACCEL = -6.0
 T_FOLLOW = 1.45
 COMFORT_BRAKE = 2.5
 STOP_DISTANCE = 6.0
