@@ -422,7 +422,7 @@ DBC = {
   CAR.K9: dbc_dict('hyundai_kia_generic', None),
 }
 
-STEER_THRESHOLD = 165
+STEER_THRESHOLD = 150
 
 
 
