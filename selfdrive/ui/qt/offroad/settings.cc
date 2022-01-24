@@ -889,3 +889,4 @@ SelectCar::SelectCar(QWidget* parent): QWidget(parent) {
 
   main_layout->addWidget(list);
 }
+}
