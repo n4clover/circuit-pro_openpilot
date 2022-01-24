@@ -753,7 +753,8 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "Use SMDPS Harness",
                                             "Use of MDPS Harness to enable openpilot steering down to 0 MPH",
                                             "../assets/offroad/icon_road.png",
-                                            this));            
+                                            this));  
+                                                      
   toggles.append(new ParamControl("KeepSteeringTurnSignals",
                                             "Keep steering while turn signals",
                                             "",

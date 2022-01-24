@@ -112,33 +112,6 @@ static void update_state(UIState *s) {
   SubMaster &sm = *(s->sm);
   UIScene &scene = s->scene;
 
-  // update engageability and DM icons at 2Hz
-  if (sm.frame % (UI_FREQ / 2) == 0) {
-    auto cs = sm["controlsState"].getControlsState();
-    scene.engageable = cs.getEngageable() || cs.getEnabled();
-    scene.dm_active = sm["driverMonitoringState"].getDriverMonitoringState().getIsActiveMode();
-  }
-  if (scene.started && sm.updated("controlsState")) {
-    scene.controls_state = sm["controlsState"].getControlsState();
-  }
-  if (sm.updated("carState")) {
-    scene.car_state = sm["carState"].getCarState();
-    if(scene.leftBlinker!=scene.car_state.getLeftBlinker() || scene.rightBlinker!=scene.car_state.getRightBlinker()){
-      scene.blinkingrate = 120;
-    }
-    scene.leftBlinker = scene.car_state.getLeftBlinker();
-    scene.rightBlinker = scene.car_state.getRightBlinker();
-  }
-  if (sm.updated("modelV2") && s->vg) {
-    update_model(s, sm["modelV2"].getModelV2());
-  }
-  if (sm.updated("radarState") && s->vg) {
-    std::optional<cereal::ModelDataV2::XYZTData::Reader> line;
-    if (sm.rcv_frame("modelV2") > 0) {
-      line = sm["modelV2"].getModelV2().getPosition();
-    }
-    update_leads(s, sm["radarState"].getRadarState(), line);
-  }
   if (sm.updated("liveCalibration")) {
     auto rpy_list = sm["liveCalibration"].getLiveCalibration().getRpyCalib();
     Eigen::Vector3d rpy;
