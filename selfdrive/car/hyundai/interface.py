@@ -531,6 +531,10 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 3.15
       ret.centerToFront = ret.wheelbase * 0.4
       tire_stiffness_factor = 0.8
+      ret.lateralTuning.lqr.scale = 1650.
+      ret.lateralTuning.lqr.ki = 0.01
+      ret.lateralTuning.lqr.dcGain = 0.0027
+
     ret.radarTimeStep = 0.05
 
     if ret.centerToFront == 0:
@@ -613,8 +617,6 @@ class CarInterface(CarInterfaceBase):
       self.CC.low_speed_alert = False
 
     buttonEvents = []
-    events = self.create_common_events(ret)
-
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
       be = car.CarState.ButtonEvent.new_message()
       be.pressed = self.CS.cruise_buttons != 0
@@ -636,6 +638,19 @@ class CarInterface(CarInterfaceBase):
       be.pressed = bool(self.CS.cruise_main_button)
       buttonEvents.append(be)
     ret.buttonEvents = buttonEvents
+
+    events = self.create_common_events(ret)
+
+    if self.CC.longcontrol and self.CS.cruise_unavail:
+      events.add(EventName.brakeUnavailable)
+    #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
+    #  events.add(EventName.steerTempUnavailable)
+    if self.low_speed_alert and not self.CS.mdps_bus:
+      events.add(EventName.belowSteerSpeed)
+    if self.CC.turning_indicator_alert:
+      events.add(EventName.turningIndicatorOn)
+    if self.mad_mode_enabled and EventName.pedalPressed in events.events:
+      events.events.remove(EventName.pedalPressed)
 
   # handle button presses
     for b in ret.buttonEvents:
