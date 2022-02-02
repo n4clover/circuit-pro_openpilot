@@ -426,6 +426,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.75
       ret.centerToFront = ret.wheelbase * 0.4
     elif candidate in [CAR.K5_2021]:
+      os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Kia.png img_spinner_comma.png")
       ret.mass = 3228. * CV.LB_TO_KG
       ret.wheelbase = 2.85
       tire_stiffness_factor = 0.7
@@ -614,7 +615,7 @@ class CarInterface(CarInterfaceBase):
       self.CC.low_speed_alert = False
 
     events = self.create_common_events(ret)
-    
+
     if not self.CP.radarDisablePossible:
       buttonEvents = []
       if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
