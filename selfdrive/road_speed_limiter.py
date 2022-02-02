@@ -8,8 +8,7 @@ import fcntl
 import struct
 from threading import Thread
 from cereal import messaging
-from common.params import Params
-from common.numpy_fast import clip, mean
+from common.numpy_fast import clip
 from common.realtime import sec_since_boot
 from selfdrive.config import Conversions as CV
 
@@ -292,6 +291,9 @@ class RoadSpeedLimiter:
         MIN_LIMIT = 30
         MAX_LIMIT = 120
 
+      if cam_type == 22:  # speed bump
+        MIN_LIMIT = 10
+
       if cam_limit_speed_left_dist is not None and cam_limit_speed is not None and cam_limit_speed_left_dist > 0:
 
         v_ego = cluster_speed * (CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS)
@@ -299,7 +301,11 @@ class RoadSpeedLimiter:
         #cam_limit_speed_ms = cam_limit_speed * (CV.KPH_TO_MS if is_metric else CV.MPH_TO_MS)
 
         starting_dist = v_ego * 30.
-        safe_dist = v_ego * 6.
+
+        if cam_type == 22:
+          safe_dist = v_ego * 4.
+        else:
+          safe_dist = v_ego * 6.
 
         if MIN_LIMIT <= cam_limit_speed <= MAX_LIMIT and (self.slowing_down or cam_limit_speed_left_dist < starting_dist):
           if not self.slowing_down:
