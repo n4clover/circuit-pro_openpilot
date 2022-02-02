@@ -186,12 +186,13 @@ class CarState(CarStateBase):
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
-    if self.CP.carFingerprint in FEATURES["use_fca"]:
-      ret.stockAeb = cp.vl["FCA11"]["FCA_CmdAct"] != 0
-      ret.stockFcw = cp.vl["FCA11"]["CF_VSM_Warn"] == 2
-    else:
-      ret.stockAeb = cp.vl["SCC12"]["AEB_CmdAct"] != 0
-      ret.stockFcw = cp.vl["SCC12"]["CF_VSM_Warn"] == 2
+    if not self.CP.radarDisablePossible:
+      if self.CP.carFingerprint in FEATURES["use_fca"]:
+        ret.stockAeb = cp.vl["FCA11"]["FCA_CmdAct"] != 0
+        ret.stockFcw = cp.vl["FCA11"]["CF_VSM_Warn"] == 2
+      else:
+        ret.stockAeb = cp.vl["SCC12"]["AEB_CmdAct"] != 0
+        ret.stockFcw = cp.vl["SCC12"]["CF_VSM_Warn"] == 2
 
     # Blind Spot Detection and Lane Change Assist signals
     if self.CP.enableBsm:
@@ -356,6 +357,12 @@ class CarState(CarStateBase):
         ("SCCMode2", "SCC14", 0),
         ("ComfortBandUpper", "SCC14", 0),
         ("ComfortBandLower", "SCC14", 0),
+
+        ("UNIT", "TPMS11"),
+        ("PRESSURE_FL", "TPMS11"),
+        ("PRESSURE_FR", "TPMS11"),
+        ("PRESSURE_RL", "TPMS11"),
+        ("PRESSURE_RR", "TPMS11"),
       ]
 
     checks = [
