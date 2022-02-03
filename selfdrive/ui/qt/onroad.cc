@@ -542,32 +542,6 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
     drawText2(p, center_x+marginX, center_y+marginY, Qt::AlignLeft, get_tpms_text(rr), get_tpms_color(rr));
   }
 
-  // cruise gap
-  int gap = car_state.getCruiseGap();
-  bool longControl = scc_smoother.getLongControl();
-  int autoTrGap = scc_smoother.getAutoTrGap();
-
-  p.setPen(Qt::NoPen);
-  p.setBrush(QBrush(QColor(0, 0, 0, 255 * .1f)));
-  p.drawEllipse(x - radius / 2, y - radius / 2, radius, radius);
-
-  QString str;
-  float textSize = 50.f;
-  QColor textColor = QColor(255, 255, 255, 200);
-
-  if(gap <= 0) {
-    str = "N/A";
-  }
-  else if(longControl && gap == autoTrGap) {
-    str = "AUTO";
-    textColor = QColor(120, 255, 120, 200);
-  }
-  else {
-    str.sprintf("%d", (int)gap);
-    textColor = QColor(120, 255, 120, 200);
-    textSize = 70.f;
-  }
-
   configFont(p, "Open Sans", 35, "Bold");
   drawText(p, x, y-20, "GAP", 200);
 
