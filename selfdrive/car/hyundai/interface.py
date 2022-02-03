@@ -611,7 +611,8 @@ class CarInterface(CarInterfaceBase):
     if ret.vEgo > (self.CP.minSteerSpeed + 0.7):
       self.CC.low_speed_alert = False
 
-    events = self.create_common_events(ret)
+    events = self.create_common_events(ret, pcm_enable=self.CS.CP.pcmCruise)
+    
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
       be = car.CarState.ButtonEvent.new_message()
