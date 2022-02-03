@@ -771,7 +771,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));   
 
   toggles.append(new ParamControl("DynamicSpas",
-                                            "Dynamic SPAS/LKAS Switch - !ALPHA!",
+                                            "Dynamic SPAS/LKAS Switch - ALPHA",
                                             "Enable Send Parking Assist Messages depending on situation and factors. Will not switch to SPAS above 60mph; Will only hold SPAS above this speed if wheel is above an angle of |3|.  Warning: It is !ALPHA!, be careful!!",
                                             "../assets/offroad/icon_road.png",
                                             this));   
