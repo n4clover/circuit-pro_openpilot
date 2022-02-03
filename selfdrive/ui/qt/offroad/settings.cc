@@ -693,13 +693,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));
 
   toggles.append(new ParamControl("NoMinLaneChangeSpeed",
-                                            "Enable Auto Lane Change at any speed.",
+                                            "Auto Lane Change At Any Speed",
                                             "warnings: it is beta, be careful!!",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
   toggles.append(new ParamControl("KeepSteeringTurnSignals",
-                                            "Keep steering while turn signals.",
+                                            "Keep Steering While Turn Signals",
                                             "",
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
@@ -711,7 +711,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));
 */
   toggles.append(new ParamControl("CustomLeadMark",
-                                            "Use custom lead mark",
+                                            "Use Custom Lead Mark",
                                             "",
                                             "../assets/offroad/icon_road.png",
                                             this));
@@ -723,13 +723,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));
 
   toggles.append(new ParamControl("SccSmootherSyncGasPressed",
-                                            "Sync set speed on gas pressed",
+                                            "Sync Set Speed On Gas Pressed",
                                             "",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
   toggles.append(new ParamControl("StockNaviDecelEnabled",
-                                            "Stock Navi based deceleration",
+                                            "Stock Navi Based Deceleration",
                                             "Use the stock navi based deceleration for longcontrol",
                                             "../assets/offroad/icon_road.png",
                                             this));
@@ -740,14 +740,8 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));  
 
-  toggles.append(new ParamControl("KeepSteeringTurnSignals",
-                                            "Keep steering while turn signals",
-                                            "",
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
-
   toggles.append(new ParamControl("WarningOverSpeedLimit",
-                                            "Warning when speeding",
+                                            "Warning When Speeding",
                                             "Warning when the current speed exceeds the speed limit.",
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
@@ -777,13 +771,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));   
 
   toggles.append(new ParamControl("DynamicSpas",
-                                            "Dynamic SPAS - LKAS switch - !ALPHA!",
+                                            "Dynamic SPAS/LKAS Switch - !ALPHA!",
                                             "Enable Send Parking Assist Messages depending on situation and factors. Will not switch to SPAS above 60mph; Will only hold SPAS above this speed if wheel is above an angle of |3|.  Warning: It is !ALPHA!, be careful!!",
                                             "../assets/offroad/icon_road.png",
                                             this));   
 
   toggles.append(new ParamControl("SpasMode",
-                                            "LKAS or Disengage on SPAS override",
+                                            "LKAS or Disengage on SPAS Override",
                                             "Switch to LKAS on Steering Pressed or Disengage on override torque. !ALPHA!",
                                             "../assets/offroad/icon_road.png",
                                             this));  
@@ -812,12 +806,6 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "This outputs OP SPAS State: (The state that op is calling MDPS to) and MDPS SPAS State: (The state MDPS is actually in)",
                                             "../assets/offroad/icon_road.png",
                                             this));
-  toggles.append(new ParamControl("CreepDebug",
-                                            "Enable Creep / Stopping State Debugging.",
-                                            "This outputs relevent information.",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-
 
   for(ParamControl *toggle : toggles) {
     if(main_layout->count() != 0) {

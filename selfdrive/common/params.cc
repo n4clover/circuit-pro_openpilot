@@ -216,7 +216,6 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"DynamicSpas", PERSISTENT},
     {"SpasMode", PERSISTENT},
     {"SPASDebug", PERSISTENT},
-    {"CreepDebug", PERSISTENT},
 };
 
 } // namespace

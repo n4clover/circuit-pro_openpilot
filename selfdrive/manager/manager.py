@@ -81,7 +81,6 @@ def manager_init() -> None:
     ("DynamicSpas", "0"),
     ("SpasMode", "0"),
     ("SPASDebug", "0"),
-    ("CreepDebug", "0"),
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
