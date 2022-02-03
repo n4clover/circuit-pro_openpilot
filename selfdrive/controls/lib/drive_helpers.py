@@ -5,17 +5,15 @@ from common.realtime import DT_MDL
 from selfdrive.config import Conversions as CV
 from selfdrive.modeld.constants import T_IDXS
 from selfdrive.ntune import ntune_common_get
-from common.params import Params
-
 # WARNING: this value was determined based on the model's training distribution,
 #          model predictions above this speed can be unpredictable
 
 # kph
 V_CRUISE_MAX = 145
-V_CRUISE_MIN = 0 if Params().get_bool('LongControlEnabled') else 30
+V_CRUISE_MIN = 30
 V_CRUISE_DELTA_MI = 5 * CV.MPH_TO_KPH
 V_CRUISE_DELTA_KM = 10
-V_CRUISE_ENABLE_MIN = 0 if Params().get_bool('LongControlEnabled') else 30
+V_CRUISE_ENABLE_MIN = 30
 LAT_MPC_N = 16
 LON_MPC_N = 32
 CONTROL_N = 17
