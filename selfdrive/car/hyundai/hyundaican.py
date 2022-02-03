@@ -164,11 +164,15 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, sc
 
   return packer.make_can_msg("SCC11", 0, values)
 
-def create_scc12(packer, apply_accel, enabled, scc12, stopping, idx):
+def create_scc12(packer, apply_accel, enabled, scc12, stopping, idx, gaspressed):
   values = copy.copy(scc12)
 
-  values["ACCMode"] = 1 if enabled else 0
-  values["StopReq"] = 1 if enabled and stopping else 0
+  if enabled:
+    values["ACCMode"] = 2 if gaspressed else 1
+  else:
+    values["ACCMode"] = 0
+
+  values["StopReq"] = 1 if enabled and stopping and not gaspressed else 0
   values["aReqRaw"] = apply_accel if enabled else 0  # aReqMax
   values["aReqValue"] = apply_accel if enabled else 0  # aReqMin
   values["CR_VSM_Alive"] = idx % 0xF
