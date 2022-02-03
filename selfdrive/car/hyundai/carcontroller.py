@@ -152,7 +152,7 @@ class CarController():
       if Params().get_bool("SpasMode"):
         if abs(CS.out.steeringWheelTorque) > TQ  and self.DTQL > TQ and spas_active and not lkas_active:
           self.override = True
-          print("OVERRIDE")
+          #print("OVERRIDE")
         else:
           self.override = False
       else:
@@ -164,9 +164,9 @@ class CarController():
           self.cut_timer += 1
 
     # Disable steering while turning blinker on and speed below min lane chnage speed
-    if (CS.out.leftBlinker or CS.out.rightBlinker):
+    if (CS.out.leftBlinker or CS.out.rightBlinker) and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed:
       self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
-    if self.turning_indicator_alert and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed: # set and clear by interface...)
+    if self.turning_indicator_alert: # set and clear by interface...)
       lkas_active = False
       if CS.spas_enabled:
         spas_active = False
