@@ -115,8 +115,8 @@ class CarController():
     self.scc_smoother = SccSmoother()
     self.last_blinker_frame = 0
 
-  def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert, hud_speed,
-             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
+  def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
+             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls, hud_speed):
 
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))

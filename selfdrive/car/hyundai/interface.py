@@ -612,7 +612,7 @@ class CarInterface(CarInterfaceBase):
       self.CC.low_speed_alert = False
 
     events = self.create_common_events(ret, pcm_enable=self.CS.CP.pcmCruise)
-    
+
     buttonEvents = []
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons:
       be = car.CarState.ButtonEvent.new_message()
@@ -718,6 +718,6 @@ class CarInterface(CarInterfaceBase):
     ret = self.CC.update(c, c.enabled, self.CS, self.frame, c, c.actuators,
                                c.cruiseControl.cancel, c.hudControl.visualAlert, c.hudControl.leftLaneVisible,
                                c.hudControl.rightLaneVisible, c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart,
-                               c.hudControl.setSpeed, c.hudControl.leadVisible, controls)
+                               c.hudControl.setSpeed, c.hudControl.leadVisible, controls, c.hud_control.setSpeed)
     self.frame += 1
     return ret
