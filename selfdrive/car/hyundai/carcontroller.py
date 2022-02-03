@@ -356,8 +356,7 @@ class CarController():
         self.scc12_cnt += 1
         self.scc12_cnt %= 0xF
 
-        can_sends.append(create_scc12(self.packer, apply_accel, enabled, CS.scc12,
-                                      CS.out.gasPressed, CS.out.brakePressed, CS.out.cruiseState.standstill, int(frame / 2)))
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, CS.scc12, stopping, int(frame / 2)))
 
         can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, CS.out.standstill, CS.lead_distance))
 

@@ -148,17 +148,14 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, sc
   values["ObjValid"] = 1 if lead_visible else 0
   values["ACC_ObjStatus"] = 1 if lead_visible else 0
   values["TauGapSet"] = gapsetting
-
-  if scc_live:
-    values["ACC_ObjDist"] = lead_dist
+  values["ACC_ObjDist"] = lead_dist
 
   if not scc_live:
     values["MainMode_ACC"] = 1
     values["VSetDis"] = set_speed if enabled else 0
-    values["ObjValid"] = 1 if enabled else 0
+    values["ObjValid"] = 1 if lead_visible else 0
     values["ACC_ObjLatPos"] = 0
     values["ACC_ObjRelSpd"] = 0
-    values["ACC_ObjDist"] = 0
 
   if not stock_cam:
     values["Navi_SCC_Camera_Act"] = 2 if active_cam else 0
@@ -166,17 +163,11 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, sc
 
   return packer.make_can_msg("SCC11", 0, values)
 
-def create_scc12(packer, apply_accel, enabled, scc12, gaspressed, brakepressed,
-                 standstill, idx):
+def create_scc12(packer, apply_accel, enabled, scc12, stopping, idx):
   values = copy.copy(scc12)
 
-  if enabled and not brakepressed:
-    values["ACCMode"] = 2 if gaspressed and (apply_accel > -0.2) else 1
-    if apply_accel < 0.0 and standstill:
-      values["StopReq"] = 1
-  else:
-    values["ACCMode"] = 0
-    values["StopReq"] = 0
+  values["ACCMode"] = 1 if enabled else 0,
+  values["StopReq"] = 1 if enabled and stopping else 0,
 
   values["aReqRaw"] = apply_accel if enabled else 0  # aReqMax
   values["aReqValue"] = apply_accel if enabled else 0  # aReqMin
@@ -198,7 +189,7 @@ def create_scc14(packer, enabled, e_vgo, standstill, accel, gaspressed, objgap, 
   if enabled:
     values["ACCMode"] = 2 if gaspressed and (accel > -0.2) else 1
   else:
-    values["ACCMode"] = 2
+    values["ACCMode"] = 4
 
   values["ObjGap"] = objgap
   
