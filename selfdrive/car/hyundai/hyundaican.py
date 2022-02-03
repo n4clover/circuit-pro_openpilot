@@ -153,7 +153,6 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, sc
 
   if not scc_live:
     values["MainMode_ACC"] = 1
-    values["VSetDis"] = set_speed if enabled else 0
     values["ObjValid"] = 1 if lead_visible else 0
     values["ACC_ObjLatPos"] = 0
     values["ACC_ObjRelSpd"] = 0

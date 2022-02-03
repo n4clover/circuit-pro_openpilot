@@ -115,7 +115,7 @@ class CarController():
     self.scc_smoother = SccSmoother()
     self.last_blinker_frame = 0
 
-  def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
+  def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert, hud_speed,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
     # Steering Torque
@@ -355,9 +355,11 @@ class CarController():
         self.scc12_cnt += 1
         self.scc12_cnt %= 0xF
 
+        set_speed_in_units = hud_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
+
         can_sends.append(create_scc12(self.packer, apply_accel, enabled, CS.scc12, stopping, int(frame / 2), CS.out.gasPressed))
 
-        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, CS.out.standstill, CS.lead_distance))
+        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed_in_units, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, CS.out.standstill, CS.lead_distance))
 
         if frame % 20 == 0 and CS.has_scc13 and not CS.CP.radarDisablePossible:
           can_sends.append(create_scc13(self.packer, CS.scc13))
