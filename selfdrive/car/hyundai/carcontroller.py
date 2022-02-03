@@ -381,10 +381,8 @@ class CarController():
       self.scc12_cnt = -1
       self.counter_init = True
       
-    if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
+    if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5
-    elif visual_alert in (VisualAlert.fcw):
-      warning = 6
     else:
       warning = 0
 

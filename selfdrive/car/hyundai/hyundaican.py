@@ -168,15 +168,12 @@ def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, sc
 def create_scc12(packer, apply_accel, enabled, scc12, stopping, idx):
   values = copy.copy(scc12)
 
-  values["ACCMode"] = 1 if enabled else 0,
-  values["StopReq"] = 1 if enabled and stopping else 0,
-
+  values["ACCMode"] = 1 if enabled else 0
+  values["StopReq"] = 1 if enabled and stopping else 0
   values["aReqRaw"] = apply_accel if enabled else 0  # aReqMax
   values["aReqValue"] = apply_accel if enabled else 0  # aReqMin
-
   values["CR_VSM_Alive"] = idx % 0xF
   values["CR_VSM_ChkSum"] = 0
-  
   dat = packer.make_can_msg("SCC12", 0, values)[2]
   values["CR_VSM_ChkSum"] = 16 - sum([sum(divmod(i, 16)) for i in dat]) % 16
   return packer.make_can_msg("SCC12", 0, values)
