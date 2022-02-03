@@ -420,7 +420,7 @@ class Controls:
     self.CP.pcmCruise = self.CI.CP.pcmCruise
 
     # if stock cruise is completely disabled, then we can use our own set speed logic
-    if CS.CP.radarDisablePossible or CS.CP.radarOffCan:
+    if self.CP.radarDisablePossible or self.CP.radarOffCan and self.CP.openpilotLongitudinalControl:
       if not self.CP.pcmCruise:
         self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.button_timers, self.enabled, self.is_metric)
       elif CS.cruiseState.enabled:
