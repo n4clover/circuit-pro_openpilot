@@ -38,7 +38,7 @@ SP_CARS = (CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
 def process_hud_alert(enabled, fingerprint, visual_alert, left_lane, right_lane,
                       left_lane_depart, right_lane_depart):
 
-  sys_warning = (visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw))
+  sys_warning = (visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw, VisualAlert.fcw))
 
   # initialize to no line visible
   sys_state = 1
@@ -190,7 +190,6 @@ class CarController():
       if not recent_blinker and self.scc_smoother.over_speed_limit:
         left_lane_depart = True
         self.last_blinker_frame = controls.sm.frame
-
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
@@ -381,13 +380,20 @@ class CarController():
     else:
       self.scc12_cnt = -1
       self.counter_init = True
+      
+    if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
+      warning = 5
+    elif visual_alert in (VisualAlert.fcw):
+      warning = 6
+    else:
+      warning = 0
 
     # 20 Hz LFA MFA message
     if frame % 5 == 0:
       activated_hda = road_speed_limiter_get_active()
       # activated_hda: 0 - off, 1 - main road, 2 - highway
       if self.car_fingerprint in FEATURES["send_lfa_mfa"]:
-        can_sends.append(create_lfahda_mfc(self.packer, enabled, activated_hda))
+        can_sends.append(create_lfahda_mfc(self.packer, enabled, activated_hda, warning))
       elif CS.mdps_bus == 0:
         state = 2 if self.car_fingerprint in FEATURES["send_hda_state_2"] else 1
         can_sends.append(create_hda_mfc(self.packer, activated_hda, state))
