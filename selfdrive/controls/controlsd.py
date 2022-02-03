@@ -32,7 +32,7 @@ from selfdrive.ntune import ntune_common_get, ntune_common_enabled, ntune_scc_ge
 
 SOFT_DISABLE_TIME = 3  # seconds
 LDW_MIN_SPEED = 20 * CV.MPH_TO_MS
-LANE_DEPARTURE_THRESHOLD = 0.1
+LANE_DEPARTURE_THRESHOLD = 0.01
 
 REPLAY = "REPLAY" in os.environ
 SIMULATION = "SIMULATION" in os.environ
