@@ -777,13 +777,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));   
 
   toggles.append(new ParamControl("DynamicSpas",
-                                            "Enable Dynamic SPAS - LKAS switch - !ALPHA!",
+                                            "Dynamic SPAS - LKAS switch - !ALPHA!",
                                             "Enable Send Parking Assist Messages depending on situation and factors. Will not switch to SPAS above 60mph; Will only hold SPAS above this speed if wheel is above an angle of |3|.  Warning: It is !ALPHA!, be careful!!",
                                             "../assets/offroad/icon_road.png",
                                             this));   
 
   toggles.append(new ParamControl("SpasMode",
-                                            "Switch to LKAS or Disengage on SPAS override",
+                                            "LKAS or Disengage on SPAS override",
                                             "Switch to LKAS on Steering Pressed or Disengage on override torque. !ALPHA!",
                                             "../assets/offroad/icon_road.png",
                                             this));  
