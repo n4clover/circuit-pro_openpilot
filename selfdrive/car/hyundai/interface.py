@@ -718,6 +718,6 @@ class CarInterface(CarInterfaceBase):
     ret = self.CC.update(c, c.enabled, self.CS, self.frame, c, c.actuators,
                                c.cruiseControl.cancel, c.hudControl.visualAlert, c.hudControl.leftLaneVisible,
                                c.hudControl.rightLaneVisible, c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart,
-                               c.hudControl.setSpeed, c.hudControl.leadVisible, controls, c.hud_control.setSpeed)
+                               c.hudControl.setSpeed, c.hudControl.leadVisible, controls, c.hudControl.setSpeed)
     self.frame += 1
     return ret
