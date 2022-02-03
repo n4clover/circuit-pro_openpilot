@@ -82,7 +82,7 @@ class CarController():
     self.turning_signal_timer = 0
     self.cut_timer = 0
     self.longcontrol = CP.openpilotLongitudinalControl
-    self.scc_live = not CP.radarOffCan 
+    self.scc_live = not CP.radarDisablePossible or not CP.radarOffCan
 
     self.turning_indicator_alert = False
     self.emsType = CP.emsType
