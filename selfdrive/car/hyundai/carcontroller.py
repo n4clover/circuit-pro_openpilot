@@ -330,31 +330,6 @@ class CarController():
 
         self.accel = apply_accel
 
-        controls.apply_accel = apply_accel
-        aReqValue = CS.scc12["aReqValue"]
-        controls.aReqValue = aReqValue
-
-        if aReqValue < controls.aReqValueMin:
-          controls.aReqValueMin = controls.aReqValue
-
-        if aReqValue > controls.aReqValueMax:
-          controls.aReqValueMax = controls.aReqValue
-
-        if self.stock_navi_decel_enabled:
-          controls.sccStockCamAct = CS.scc11["Navi_SCC_Camera_Act"]
-          controls.sccStockCamStatus = CS.scc11["Navi_SCC_Camera_Status"]
-          apply_accel, stock_cam = self.scc_smoother.get_stock_cam_accel(apply_accel, aReqValue, CS.scc11)
-        else:
-          controls.sccStockCamAct = 0
-          controls.sccStockCamStatus = 0
-          stock_cam = False
-
-        if self.scc12_cnt < 0:
-          self.scc12_cnt = CS.scc12["CR_VSM_Alive"] if not CS.no_radar else 0
-
-        self.scc12_cnt += 1
-        self.scc12_cnt %= 0xF
-
         set_speed_in_units = hud_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
 
         if enabled or CS.CP.radarDisablePossible:
@@ -384,7 +359,6 @@ class CarController():
           if CS.CP.radarDisablePossible:
             can_sends.append(create_fca11(self.packer, int(frame / 2)))
     else:
-      self.scc12_cnt = -1
       self.counter_init = True
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
