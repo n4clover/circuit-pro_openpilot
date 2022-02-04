@@ -138,76 +138,46 @@ def create_mdps12(packer, frame, mdps12):
 
   return packer.make_can_msg("MDPS12", 2, values)
 
-def create_scc11(packer, frame, enabled, set_speed, lead_visible, gapsetting, scc_live, scc11, active_cam, stock_cam, standstill, lead_dist):
-  values = copy.copy(scc11)
-
-  values["VSetDis"] = set_speed if enabled else 0
-  if standstill:
-    values["SCCInfoDisplay"] = 0
-  values["DriverAlertDisplay"] = 0
-  values["AliveCounterACC"] = frame // 2 % 0x10
-  values["ObjValid"] = 1 if lead_visible else 0
-  values["ACC_ObjStatus"] = 1 if lead_visible else 0
-  values["TauGapSet"] = gapsetting
-  values["ACC_ObjDist"] = lead_dist
-
-  if not scc_live:
-    values["MainMode_ACC"] = 1
-    values["ObjValid"] = 1 if lead_visible else 0
-    values["ACC_ObjLatPos"] = 0
-    values["ACC_ObjRelSpd"] = 0
-
-  if not stock_cam:
-    values["Navi_SCC_Camera_Act"] = 2 if active_cam else 0
-    values["Navi_SCC_Camera_Status"] = 2 if active_cam else 0
+def create_scc11(packer, enabled, set_speed, lead_visible, gapsetting, lead_dist, idx):
+  values = {
+    "MainMode_ACC": 1,
+    "TauGapSet": gapsetting,
+    "VSetDis": set_speed if enabled else 0,
+    "AliveCounterACC": idx % 0x10,
+    "ObjValid": 1 if lead_visible else 0,
+    "ACC_ObjStatus": 1 if lead_visible else 0,
+    "ACC_ObjLatPos": 0,
+    "ACC_ObjRelSpd": 0,
+    "ACC_ObjDist": lead_dist,
+  }
 
   return packer.make_can_msg("SCC11", 0, values)
 
-def create_scc12(packer, apply_accel, enabled, scc12, stopping, idx, gaspressed):
-  values = copy.copy(scc12)
-
-  if enabled:
-    values["ACCMode"] = 2 if gaspressed else 1
-  else:
-    values["ACCMode"] = 0
-
-  values["StopReq"] = 1 if enabled and stopping and not gaspressed else 0
-  values["aReqRaw"] = apply_accel if enabled else 0  # aReqMax
-  values["aReqValue"] = apply_accel if enabled else 0  # aReqMin
-  values["CR_VSM_Alive"] = idx % 0xF
-  values["CR_VSM_ChkSum"] = 0
-  dat = packer.make_can_msg("SCC12", 0, values)[2]
-  values["CR_VSM_ChkSum"] = 16 - sum([sum(divmod(i, 16)) for i in dat]) % 16
+def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed, ACCMode):
+  values = {
+    "ACCMode": ACCMode,
+    "StopReq": 1 if enabled and stopping and not gaspressed else 0,
+    "aReqRaw": apply_accel if enabled else 0,
+    "aReqValue": apply_accel if enabled else 0, # stock ramps up and down respecting jerk limit until it reaches aReqRaw
+    "CR_VSM_Alive": idx % 0xF,
+  }
+  scc12_dat = packer.make_can_msg("SCC12", 0, values)[2]
+  values["CR_VSM_ChkSum"] = 0x10 - sum(sum(divmod(i, 16)) for i in scc12_dat) % 0x10
   return packer.make_can_msg("SCC12", 0, values)
 
 def create_scc13(packer, scc13):
   values = copy.copy(scc13)
   return packer.make_can_msg("SCC13", 0, values)
 
-def create_scc14(packer, enabled, e_vgo, standstill, accel, gaspressed, objgap, scc14):
-  values = copy.copy(scc14)
-  # from xps-genesis
-  if enabled:
-    values["ACCMode"] = 2 if gaspressed and (accel > -0.2) else 1
-  else:
-    values["ACCMode"] = 4
-
-  values["ObjGap"] = objgap
-  
-  if standstill:
-    values["JerkUpperLimit"] = 0.5
-    values["JerkLowerLimit"] = 10.
-    values["ComfortBandUpper"] = 0.
-    values["ComfortBandLower"] = 0.
-    if e_vgo > 0.27:
-      values["ComfortBandUpper"] = 2.
-      values["ComfortBandLower"] = 0.
-  else:
-    values["JerkUpperLimit"] = 50.
-    values["JerkLowerLimit"] = 50.
-    values["ComfortBandUpper"] = 50.
-    values["ComfortBandLower"] = 50.
-
+def create_scc14(packer, enabled, e_vgo, accel, gaspressed, objgap, jerk, stopping, ACCMode):
+  values = {
+    "ComfortBandUpper": 0.0, # stock usually is 0 but sometimes uses higher values
+    "ComfortBandLower": 0.0, # stock usually is 0 but sometimes uses higher values
+    "JerkUpperLimit": max(jerk, 1.0) if (enabled and not stopping) else 0, # stock usually is 1.0 but sometimes uses higher values
+    "JerkLowerLimit": max(-jerk, 1.0) if enabled else 0, # stock usually is 0.5 but sometimes uses higher values
+    "ACCMode": ACCMode, # stock will always be 4 instead of 0 after first disengage
+    "ObjGap": objgap, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
+  }
 
   return packer.make_can_msg("SCC14", 0, values)
 

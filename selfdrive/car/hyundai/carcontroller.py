@@ -72,6 +72,7 @@ class CarController():
     self.radarDisableActivated = False
     self.radarDisableResetTimer = 0
     self.radarDisableOverlapTimer = 0
+    self.ACCMode = 0
 
     self.pcm_cnt = 0
     self.resume_cnt = 0
@@ -357,17 +358,21 @@ class CarController():
 
         set_speed_in_units = hud_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
 
-        can_sends.append(create_scc12(self.packer, apply_accel, enabled, CS.scc12, stopping, int(frame / 2), CS.out.gasPressed))
+        if enabled or CS.CP.radarDisablePossible:
+          self.ACCMode = 2 if CS.out.gaspressed else 1
+        else:
+          self.ACCMode = 0
 
-        can_sends.append(create_scc11(self.packer, frame, enabled, set_speed_in_units, lead_visible, self.gapsetting, self.scc_live, CS.scc11, self.scc_smoother.active_cam, stock_cam, CS.out.standstill, CS.lead_distance))
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed, self.ACCMode))
+
+        can_sends.append(create_scc11(self.packer, enabled, set_speed_in_units, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
 
         if frame % 20 == 0 and CS.has_scc13 and not CS.CP.radarDisablePossible:
           can_sends.append(create_scc13(self.packer, CS.scc13))
           
-        if CS.has_scc14:
-          acc_standstill = stopping if CS.out.vEgo < 2. else False
-
+        if CS.has_scc14 or CS.CP.radarDisablePossible:
           lead = self.scc_smoother.get_lead(controls.sm)
+          jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
 
           if lead is not None:
             d = lead.dRel
@@ -375,8 +380,8 @@ class CarController():
           else:
             obj_gap = 0
 
-          can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, acc_standstill, apply_accel, CS.out.gasPressed,
-                                        obj_gap, CS.scc14))
+          can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, apply_accel, CS.out.gasPressed,
+                                        obj_gap, jerk, stopping, self.ACCMode))
           if CS.CP.radarDisablePossible:
             can_sends.append(create_fca11(self.packer, int(frame / 2)))
     else:
