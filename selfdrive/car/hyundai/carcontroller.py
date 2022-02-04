@@ -67,7 +67,6 @@ class CarController():
     self.apply_steer_last = 0
     self.accel = 0
     self.lkas11_cnt = 0
-    self.scc12_cnt = -1
     self.counter_init = False
     self.radarDisableActivated = False
     self.radarDisableResetTimer = 0
@@ -75,9 +74,6 @@ class CarController():
     self.ACCMode = 0
 
     self.pcm_cnt = 0
-    self.resume_cnt = 0
-    self.last_lead_distance = 0
-    self.resume_wait_timer = 0
     self.last_resume_frame = 0
 
     self.turning_signal_timer = 0
