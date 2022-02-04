@@ -359,7 +359,7 @@ class CarController():
         set_speed_in_units = hud_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
 
         if enabled or CS.CP.radarDisablePossible:
-          self.ACCMode = 2 if CS.out.gaspressed else 1
+          self.ACCMode = 2 if CS.out.gasPressed else 1
         else:
           self.ACCMode = 0
 
