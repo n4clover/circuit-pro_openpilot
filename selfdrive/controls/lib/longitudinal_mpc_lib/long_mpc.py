@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import numpy as np
-
 from common.realtime import sec_since_boot
 from common.numpy_fast import clip, interp
 from selfdrive.swaglog import cloudlog
