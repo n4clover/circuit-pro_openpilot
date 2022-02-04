@@ -1,7 +1,5 @@
 from common.numpy_fast import clip, interp
 import numpy as np
-import time
-import os
 from random import randint
 from cereal import car
 from common.realtime import DT_CTRL
