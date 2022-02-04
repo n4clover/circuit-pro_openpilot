@@ -83,7 +83,6 @@ class CarController():
     self.turning_signal_timer = 0
     self.cut_timer = 0
     self.longcontrol = CP.openpilotLongitudinalControl
-    self.scc_live = not CP.radarDisablePossible or not CP.radarOffCan
 
     self.turning_indicator_alert = False
     self.emsType = CP.emsType
@@ -321,7 +320,7 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol and (CS.cruiseState_enabled and CS.scc_bus or CS.CP.radarDisablePossible or self.radarDisableActivated and self.counter_init):
+    if self.longcontrol and (CS.cruiseState_enabled and CS.scc_bus or CS.CP.radarDisablePossible or self.radarDisableActivated and self.counter_init or CS.CP.radarOffCan):
       if frame % 2 == 0:
         
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
@@ -370,7 +369,7 @@ class CarController():
         if frame % 20 == 0 and CS.has_scc13 and not CS.CP.radarDisablePossible:
           can_sends.append(create_scc13(self.packer, CS.scc13))
           
-        if CS.has_scc14 or CS.CP.radarDisablePossible:
+        if CS.has_scc14 or CS.CP.radarDisablePossible or self.longcontrol and CS.CP.radarOffCan:
           lead = self.scc_smoother.get_lead(controls.sm)
           jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
 
