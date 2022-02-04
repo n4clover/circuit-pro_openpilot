@@ -589,10 +589,10 @@ class CarInterface(CarInterfaceBase):
     ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
 
-    if self.CP.pcmCruise and not self.CC.scc_live:
-      self.CP.pcmCruise = False
-    elif self.CC.scc_live and not self.CP.pcmCruise:
+    if self.CP.pcmCruise and (not self.CP.radarDisablePossible or not self.CP.radarOffCan):
       self.CP.pcmCruise = True
+    elif not self.CP.pcmCruise and (self.CP.radarDisablePossible or self.CP.radarOffCan):
+      self.CP.pcmCruise = False
 
     # most HKG cars has no long control, it is safer and easier to engage by main on
 
@@ -666,7 +666,7 @@ class CarInterface(CarInterfaceBase):
       # do disable on button down
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
-      if self.CC.longcontrol and not self.CC.scc_live:
+      if self.CC.longcontrol and (self.CP.radarDisablePossible or self.CP.radarOffCan):
         # do enable on both accel and decel buttons
         if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
           events.add(EventName.buttonEnable)

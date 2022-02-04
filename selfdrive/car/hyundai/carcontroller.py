@@ -199,21 +199,7 @@ class CarController():
 
     if frame == 0:  # initialize counts from last received count signals
       self.lkas11_cnt = CS.lkas11["CF_Lkas_MsgCount"]
-
-      # TODO: fix this
-      # self.prev_scc_cnt = CS.scc11["AliveCounterACC"]
-      # self.scc_update_frame = frame
-
-    # check if SCC is alive
-    # if frame % 7 == 0:
-    # if CS.scc11["AliveCounterACC"] == self.prev_scc_cnt:
-    # if frame - self.scc_update_frame > 20 and self.scc_live:
-    # self.scc_live = False
-    # else:
-    # self.scc_live = True
-    # self.prev_scc_cnt = CS.scc11["AliveCounterACC"]
-    # self.scc_update_frame = frame
-
+      
     self.prev_scc_cnt = CS.scc11["AliveCounterACC"]
 
     self.lkas11_cnt = (self.lkas11_cnt + 1) % 0x10
