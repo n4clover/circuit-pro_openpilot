@@ -25,6 +25,7 @@ ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
 ANGLE_DELTA_VU = [1.29, 1.19, 1.14]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
 SPAS_SWITCH = 35 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRatio
+STEER_MAX_OFFSET = 50 # How far from max LKAS torque to engage Dynamic SPAS when under 60mph.
 ###### SPAS #######
 
 CLUSTER_ANIMATION_BP = [0., 1., 10., 20., 30., 40., 50.]
@@ -137,7 +138,7 @@ class CarController():
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-      spas_active = CS.spas_enabled and enabled and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or CarControllerParams.STEER_MAX - 15 < apply_steer and self.dynamicSpas)
+      spas_active = CS.spas_enabled and enabled and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or CarControllerParams.STEER_MAX - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
       lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
     else:
       lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
