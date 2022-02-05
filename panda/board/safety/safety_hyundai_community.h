@@ -171,13 +171,21 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       vehicle_speed = hyundai_speed;
     }
     //generic_rx_checks((addr == 832 && bus == 0));
-    bool stock_ecu_detected = (addr == 832);
+    bool stock_radar_detected = (addr == 832);
 
     // If openpilot is controlling longitudinal we need to ensure the radar is turned off
     // Enforce by checking we don't see SCC12
     if (hyundai_longitudinal && (addr == 1057)) {
-      stock_ecu_detected = true;
+      stock_radar_detected = true;
     }
+    if (hyundai_longitudinal && stock_radar_detected) {
+          if (controls_allowed) {puts("NOT OK !@-Radar Still Alive On Bus-@! !!-Controls not allowed-!!"); puts("\n");}
+            controls_allowed = 0;
+        }
+    else if (hyundai_longitudinal && !stock_radar_detected) {
+          if (controls_allowed) {puts("OK !@ Radar Silenced On Bus @! Controls Allowed "); puts("\n");}
+            controls_allowed = 1;
+        }
     generic_rx_checks((addr == 832 && bus == 0));
   }
   return valid;
@@ -253,8 +261,8 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     int mdps_state = (GET_BYTE(to_send, 0) & 0xF); // MDPS REPORTED STATE
     int raw_angle_can = ((GET_BYTE(to_send, 2) << 8) | GET_BYTE(to_send, 1));
     int desired_angle = to_signed(raw_angle_can, 16);
-    puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
-    puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
+    //puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
+    //puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
     // Rate limit check
     if (controls_allowed && mdps_state == 5) {
       float delta_angle_float;
