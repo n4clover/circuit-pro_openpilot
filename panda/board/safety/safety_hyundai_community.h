@@ -53,6 +53,8 @@ AddrCheckStruct hyundai_community_addr_checks[] = {
 
 addr_checks hyundai_community_rx_checks = {hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
 
+bool hyundai_longitudinal = false;
+
 static int hyundai_community_rx_hook(CANPacket_t *to_push) {
 
   int addr = GET_ADDR(to_push);
@@ -111,6 +113,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       driver_torque = (((GET_BYTE(to_push, 2) & 0x7F) << 5) | (GET_BYTE(to_push, 1) & 0x78)) - 2048;
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
+
     if (hyundai_longitudinal) {
       // ACC steering wheel buttons
       if (addr == 1265) {
@@ -175,7 +178,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
     if (hyundai_longitudinal && (addr == 1057)) {
       stock_ecu_detected = true;
     }
-    generic_rx_checks(stock_ecu_detected);
+    generic_rx_checks((addr == 832 && bus == 0));
   }
   return valid;
 }
@@ -375,11 +378,13 @@ static const addr_checks* hyundai_community_init(int16_t param) {
   controls_allowed = false;
   relay_malfunction_reset();
 
+  hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
+
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);
     puts("  MDPS or SCC on OBD2 CAN: setting can mode obd\n");
   }
-
+  
   hyundai_community_rx_checks = (addr_checks){hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
   return &hyundai_community_rx_checks;
 }
