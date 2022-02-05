@@ -378,7 +378,7 @@ static const addr_checks* hyundai_community_init(int16_t param) {
   controls_allowed = false;
   relay_malfunction_reset();
 
-  hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
+  hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL); //RADAR DISABLE ONLY on JPR's fork
 
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);
