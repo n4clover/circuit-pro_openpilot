@@ -187,8 +187,6 @@ class nTune():
 
     self.lqr.dc_gain = float(self.config["dcGain"])
 
-    self.lqr.sat_limit = float(self.config["steerLimitTimer"])
-
     self.lqr.x_hat = np.array([[0], [0]])
     self.lqr.reset()
 
@@ -201,8 +199,6 @@ class nTune():
           self.config["scale"] = round(self.CP.lateralTuning.lqr.scale, 2)
           self.config["ki"] = round(self.CP.lateralTuning.lqr.ki, 3)
           self.config["dcGain"] = round(self.CP.lateralTuning.lqr.dcGain, 6)
-          self.config["steerLimitTimer"] = round(self.CP.steerLimitTimer, 2)
-          self.config["steerMax"] = round(self.CP.steerMaxV[0], 2)
         else:
           self.config["useLiveSteerRatio"] = 1.
           self.config["steerRatio"] = round(self.CP.steerRatio, 2)

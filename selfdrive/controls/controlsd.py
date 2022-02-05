@@ -201,10 +201,8 @@ class Controls:
     """Compute carEvents from carState"""
 
     self.events.clear()
-    self.events.add_from_msg(CS.events)
-    self.events.add_from_msg(self.sm['driverMonitoringState'].events)
 
-    # Handle startup event
+    # Add startup event
     if self.startup_event is not None:
       if Params().get_bool('spasEnabled'):
         self.events.add(EventName.spasStartup)
@@ -216,6 +214,9 @@ class Controls:
     if not self.initialized:
       self.events.add(EventName.controlsInitializing)
       return
+
+    self.events.add_from_msg(CS.events)
+    self.events.add_from_msg(self.sm['driverMonitoringState'].events)
 
     # Create events for battery, temperature, disk space, and memory
     if EON and (self.sm['peripheralState'].pandaType != PandaType.uno) and \
