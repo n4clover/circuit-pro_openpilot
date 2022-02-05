@@ -41,8 +41,8 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisableOld = Params().get_bool('RadarDisableEnabled')
     ret.radarDisablePossible = Params().get_bool('RadarDisableEnabled') or Params().get_bool('DisableRadar')
     
-    #if ret.radarDisablePossible:
-      #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
+    if ret.radarDisablePossible:
+      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG #ONLY FOR RADAR DISABLE
 
     ret.carName = "hyundai"
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
