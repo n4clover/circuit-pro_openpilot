@@ -112,7 +112,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
-    if (hyundai_longitudinal) {
+    if (HKG_scc_bus != 2 && HKG_scc_bus != 1) {
       // ACC steering wheel buttons
       if (addr == 1265) {
         int button = GET_BYTE(to_push, 0) & 0x7U;
@@ -142,7 +142,6 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
         }
         cruise_engaged_prev = cruise_engaged;
       }
-    
 
       // cruise control for car without SCC
       if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
@@ -173,14 +172,14 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
 
     // If openpilot is controlling longitudinal we need to ensure the radar is turned off
     // Enforce by checking we don't see SCC12
-    if (hyundai_longitudinal && (addr == 1057)) {
+    if (HKG_scc_bus != 2 && HKG_scc_bus != 1 && (addr == 1057)) {
       stock_radar_detected = true;
     }
-    if (hyundai_longitudinal && stock_radar_detected) {
+    if (HKG_scc_bus != 2 && HKG_scc_bus != 1 && stock_radar_detected) {
           if (controls_allowed) {puts("NOT OK !@-Radar Still Alive On Bus-@! !!-Controls not allowed-!!"); puts("\n");}
             controls_allowed = 0;
         }
-    else if (hyundai_longitudinal && !stock_radar_detected) {
+    else if (HKG_scc_bus != 2 && HKG_scc_bus != 1 && !stock_radar_detected) {
           if (controls_allowed) {puts("OK !@ Radar Silenced On Bus @! Controls Allowed "); puts("\n");}
             controls_allowed = 1;
         }
@@ -279,7 +278,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     }
     if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ && mdps_state == 5) {
       //violation = 1; bugged 
-      puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
+      puts("  Driver override torque reached  "); puts("\n");
     }
   }
 
@@ -383,8 +382,6 @@ static const addr_checks* hyundai_community_init(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
   relay_malfunction_reset();
-
-  hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL); //RADAR DISABLE ONLY on JPR's fork
 
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);

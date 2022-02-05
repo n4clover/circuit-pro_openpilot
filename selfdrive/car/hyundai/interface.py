@@ -28,7 +28,7 @@ class CarInterface(CarInterfaceBase):
     v_current_kph = current_speed * CV.MS_TO_KPH
 
     gas_max_bp = [0., 10., 20., 50., 70., 130.]
-    gas_max_v = [CarControllerParams.ACCEL_MAX, 2., 1.8, 1.5, 1.1, 0.55, 0.33]
+    gas_max_v = [CarControllerParams.ACCEL_MAX, 2., 1.8, 1.5, 1., 0.55, 0.33]
 
     return CarControllerParams.ACCEL_MIN, interp(v_current_kph, gas_max_bp, gas_max_v)
 
@@ -41,9 +41,6 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisableOld = Params().get_bool('RadarDisableEnabled')
     ret.radarDisablePossible = Params().get_bool('RadarDisableEnabled') or Params().get_bool('DisableRadar')
     
-    if ret.radarDisablePossible or ret.radarOffCan:
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG #ONLY FOR RADAR DISABLE ON JPR's FORK
-
     ret.carName = "hyundai"
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
     #if candidate in LEGACY_SAFETY_MODE_CAR:
@@ -62,9 +59,9 @@ class CarInterface(CarInterfaceBase):
     # lateral LQR global hyundai
     if UseLQR:
       ret.lateralTuning.init('lqr')
-      ret.lateralTuning.lqr.scale = 1700.
-      ret.lateralTuning.lqr.ki = 0.03
-      ret.lateralTuning.lqr.dcGain = 0.0028
+      ret.lateralTuning.lqr.scale = 1600.
+      ret.lateralTuning.lqr.ki = 0.01
+      ret.lateralTuning.lqr.dcGain = 0.0027
 
       ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
       ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
@@ -74,8 +71,9 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerRatio = 16.5
     ret.steerActuatorDelay = 0.1
-    ret.steerLimitTimer = 2.5
     ret.steerRateCost = 0.4
+
+    ret.steerLimitTimer = 2.5
     ret.steerMaxBP = [0.]
     ret.steerMaxV = [2.]
     ret.emsType = 0
@@ -385,14 +383,14 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1640. + STD_CARGO_KG
       ret.wheelbase = 2.845
       ret.centerToFront = ret.wheelbase * 0.385
-      ret.steerRatio = 17.5
+      ret.steerRatio = 17.
     elif candidate in [CAR.GRANDEUR_IG_FL, CAR.GRANDEUR_IG_FL_HEV]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       tire_stiffness_factor = 0.8
       ret.mass = 1725. + STD_CARGO_KG
       ret.wheelbase = 2.885
       ret.centerToFront = ret.wheelbase * 0.385
-      ret.steerRatio = 17.5
+      ret.steerRatio = 17.
     elif candidate == CAR.VELOSTER:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       ret.mass = 3558. * CV.LB_TO_KG
@@ -641,25 +639,6 @@ class CarInterface(CarInterfaceBase):
       buttonEvents.append(be)
 
       ret.buttonEvents = buttonEvents
-      for b in ret.buttonEvents:
-        # do enable on both accel and decel buttons
-        if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
-          events.add(EventName.buttonEnable)
-        # do disable on button down
-        if b.type == ButtonType.cancel and b.pressed:
-          events.add(EventName.buttonCancel)
-
-    if self.CC.longcontrol and self.CS.cruise_unavail:
-      events.add(EventName.brakeUnavailable)
-    #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
-    #  events.add(EventName.steerTempUnavailable)
-    if self.low_speed_alert and not self.CS.mdps_bus:
-      events.add(EventName.belowSteerSpeed)
-    if self.CC.turning_indicator_alert:
-      events.add(EventName.turningIndicatorOn)
-    if self.mad_mode_enabled and EventName.pedalPressed in events.events:
-      events.events.remove(EventName.pedalPressed)
-
   # handle button presses
     for b in ret.buttonEvents:
       # do disable on button down
@@ -677,6 +656,25 @@ class CarInterface(CarInterfaceBase):
         # do enable on decel button only
         if b.type == ButtonType.decelCruise and not b.pressed:
           events.add(EventName.buttonEnable)
+
+      #for b in ret.buttonEvents:
+        # do enable on both accel and decel buttons
+        #if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
+          #events.add(EventName.buttonEnable)
+        # do disable on button down
+        #if b.type == ButtonType.cancel and b.pressed:
+          #events.add(EventName.buttonCancel)
+
+    if self.CC.longcontrol and self.CS.cruise_unavail:
+      events.add(EventName.brakeUnavailable)
+    #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
+    #  events.add(EventName.steerTempUnavailable)
+    if self.low_speed_alert and not self.CS.mdps_bus:
+      events.add(EventName.belowSteerSpeed)
+    if self.CC.turning_indicator_alert:
+      events.add(EventName.turningIndicatorOn)
+    if self.mad_mode_enabled and EventName.pedalPressed in events.events:
+      events.events.remove(EventName.pedalPressed)
 
     if self.CC.longcontrol and self.CS.cruise_unavail or self.CP.radarDisablePossible and self.CS.brake_error:
       print("cruise error")
