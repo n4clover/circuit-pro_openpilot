@@ -224,7 +224,7 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 0 and CS.out.cruiseState.enabled: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
+    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 0 and CS.out.cruiseState.enabled and not CS.CP.radarDisablePossible: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
       can_sends.append(create_clu11(self.packer, frame % 0x10, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
       self.pcm_cnt += 1
     else:
@@ -337,8 +337,8 @@ class CarController():
 
           can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, apply_accel, CS.out.gasPressed,
                                         obj_gap, jerk, stopping, self.ACCMode))
-          if CS.CP.radarDisablePossible:
-            can_sends.append(create_fca11(self.packer, int(frame / 2)))
+        if CS.CP.radarDisablePossible:
+          can_sends.append(create_fca11(self.packer, int(frame / 2)))
     else:
       self.counter_init = True
       
@@ -434,16 +434,16 @@ class CarController():
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
 
-      # 5 Hz ACC options
-      if frame % 20 == 0 and CS.CP.radarDisablePossible:
-        can_sends.extend(create_acc_opt(self.packer, int(frame / 2)))
-
-      # 2 Hz front radar options
-      if frame % 50 == 0 and CS.CP.radarDisablePossible:
-        can_sends.append(create_frt_radar_opt(self.packer))
-
       self.spas_active_last = spas_active
       self.DTQL = abs(CS.out.steeringWheelTorque)
+
+    # 5 Hz ACC options
+    if frame % 20 == 0 and CS.CP.radarDisablePossible:
+      can_sends.extend(create_acc_opt(self.packer, int(frame / 2)))
+
+    # 2 Hz front radar options
+    if frame % 50 == 0 and CS.CP.radarDisablePossible:
+      can_sends.append(create_frt_radar_opt(self.packer))
 
     new_actuators = actuators.copy()
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
