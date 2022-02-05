@@ -232,13 +232,13 @@ def create_ems11(packer, ems11, enabled):
   return packer.make_can_msg("EMS11", 1, values)
 
 def create_eems11(packer, eems11, enabled):
-  values = eems11
+  values = copy.copy(eems11)
   if enabled:
     values["Accel_Pedal_Pos"] = 1
     values["CR_Vcu_AccPedDep_Pos"] = 1
   return packer.make_can_msg("E_EMS11", 1, values)
 def create_whlspd(packer, whlspd, enabled):
-  values = whlspd
+  values = copy.copy(whlspd)
   if enabled:
     values["WHL_SPD_FL"] = 1
     values["WHL_SPD_FR"] = 1
