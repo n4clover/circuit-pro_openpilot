@@ -142,7 +142,6 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
         }
         cruise_engaged_prev = cruise_engaged;
       }
-    
 
       // cruise control for car without SCC
       if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
@@ -279,7 +278,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     }
     if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ && mdps_state == 5) {
       //violation = 1; bugged 
-      puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
+      puts("  Driver override torque reached  "); puts("\n");
     }
   }
 
