@@ -638,25 +638,6 @@ class CarInterface(CarInterfaceBase):
       buttonEvents.append(be)
 
       ret.buttonEvents = buttonEvents
-      for b in ret.buttonEvents:
-        # do enable on both accel and decel buttons
-        if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
-          events.add(EventName.buttonEnable)
-        # do disable on button down
-        if b.type == ButtonType.cancel and b.pressed:
-          events.add(EventName.buttonCancel)
-
-    if self.CC.longcontrol and self.CS.cruise_unavail:
-      events.add(EventName.brakeUnavailable)
-    #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
-    #  events.add(EventName.steerTempUnavailable)
-    if self.low_speed_alert and not self.CS.mdps_bus:
-      events.add(EventName.belowSteerSpeed)
-    if self.CC.turning_indicator_alert:
-      events.add(EventName.turningIndicatorOn)
-    if self.mad_mode_enabled and EventName.pedalPressed in events.events:
-      events.events.remove(EventName.pedalPressed)
-
   # handle button presses
     for b in ret.buttonEvents:
       # do disable on button down
@@ -674,6 +655,25 @@ class CarInterface(CarInterfaceBase):
         # do enable on decel button only
         if b.type == ButtonType.decelCruise and not b.pressed:
           events.add(EventName.buttonEnable)
+
+      #for b in ret.buttonEvents:
+        # do enable on both accel and decel buttons
+        #if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
+          #events.add(EventName.buttonEnable)
+        # do disable on button down
+        #if b.type == ButtonType.cancel and b.pressed:
+          #events.add(EventName.buttonCancel)
+
+    if self.CC.longcontrol and self.CS.cruise_unavail:
+      events.add(EventName.brakeUnavailable)
+    #if abs(ret.steeringAngleDeg) > 90. and EventName.steerTempUnavailable not in events.events:
+    #  events.add(EventName.steerTempUnavailable)
+    if self.low_speed_alert and not self.CS.mdps_bus:
+      events.add(EventName.belowSteerSpeed)
+    if self.CC.turning_indicator_alert:
+      events.add(EventName.turningIndicatorOn)
+    if self.mad_mode_enabled and EventName.pedalPressed in events.events:
+      events.events.remove(EventName.pedalPressed)
 
     if self.CC.longcontrol and self.CS.cruise_unavail or self.CP.radarDisablePossible and self.CS.brake_error:
       print("cruise error")
