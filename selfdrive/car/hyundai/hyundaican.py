@@ -237,6 +237,14 @@ def create_eems11(packer, eems11, enabled):
     values["Accel_Pedal_Pos"] = 1
     values["CR_Vcu_AccPedDep_Pos"] = 1
   return packer.make_can_msg("E_EMS11", 1, values)
+def create_whlspd(packer, whlspd, enabled):
+  values = whlspd
+  if enabled:
+    values["WHL_SPD_FL"] = 1
+    values["WHL_SPD_FR"] = 1
+    values["WHL_SPD_RL"] = 1
+    values["WHL_SPD_RR"] = 1
+  return packer.make_can_msg("whlspd", 1, values)
 
 def create_scc7d0(cmd):
   return[2000, 0, cmd, 0]
