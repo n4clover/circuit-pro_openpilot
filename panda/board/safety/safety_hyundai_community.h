@@ -53,8 +53,6 @@ AddrCheckStruct hyundai_community_addr_checks[] = {
 
 addr_checks hyundai_community_rx_checks = {hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
 
-bool hyundai_longitudinal = false;
-
 static int hyundai_community_rx_hook(CANPacket_t *to_push) {
 
   int addr = GET_ADDR(to_push);
