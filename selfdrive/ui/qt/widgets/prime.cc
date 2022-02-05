@@ -92,8 +92,8 @@ PairingPopup::PairingPopup(QWidget *parent) : QDialogBase(parent) {
     QLabel *instructions = new QLabel(R"(
       <ol type='1' style='margin-left: 15px;'>
         <li style='margin-bottom: 50px;'>Go to https://api.retropilot.org/useradmin/overview on your phone</li>
-        <li style='margin-bottom: 50px;'>Click "add new device" and scan the QR code on the right</li>
-        <li style='margin-bottom: 50px;'>Bookmark connect.comma.ai to your home screen to use it like an app</li>
+        <li style='margin-bottom: 50px;'>Click "Scan the QR code on the right</li>
+        <li style='margin-bottom: 50px;'>"Copy and paste the string into RetroPilot to register your device.</li>"</li>
       </ol>
     )", this);
     instructions->setStyleSheet("font-size: 47px; font-weight: bold; color: black;");

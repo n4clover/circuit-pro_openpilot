@@ -107,38 +107,57 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-   if (addr == 897 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
+    if (addr == 897 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
       driver_torque = (((GET_BYTE(to_push, 2) & 0x7F) << 5) | (GET_BYTE(to_push, 1) & 0x78)) - 2048;
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
-    if (addr == 1056 && !OP_SCC_live) { // for cars without long control
-      // 2 bits: 13-14
-      int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
-      if (cruise_engaged && !cruise_engaged_prev) {
-        controls_allowed = 1;
-        puts("  SCC w/o long control: controls allowed"); puts("\n");
+    if (hyundai_longitudinal) {
+      // ACC steering wheel buttons
+      if (addr == 1265) {
+        int button = GET_BYTE(to_push, 0) & 0x7U;
+        switch (button) {
+          case 1:  // resume
+          case 2:  // set
+            controls_allowed = 1;
+            break;
+          case 4:  // cancel
+            controls_allowed = 0;
+            break;
+          default:
+            break;  // any other button is irrelevant
+        }
       }
-      if (!cruise_engaged) {
-        if (controls_allowed) {puts("  SCC w/o long control: controls not allowed"); puts("\n");}
-        controls_allowed = 0;
+    } else {
+      if (addr == 1056 && !OP_SCC_live) { // for cars without long control
+        // 2 bits: 13-14
+        int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
+        if (cruise_engaged && !cruise_engaged_prev) {
+          controls_allowed = 1;
+          puts("  SCC w/o long control: controls allowed"); puts("\n");
+        }
+        if (!cruise_engaged) {
+          if (controls_allowed) {puts("  SCC w/o long control: controls not allowed"); puts("\n");}
+          controls_allowed = 0;
+        }
+        cruise_engaged_prev = cruise_engaged;
       }
-      cruise_engaged_prev = cruise_engaged;
-    }
+    
 
-    // cruise control for car without SCC
-    if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
-      // bit 25
-      int cruise_engaged = (GET_BYTES_04(to_push) >> 25 & 0x1); // ACC main_on signal
-      if (cruise_engaged && !cruise_engaged_prev) {
-        controls_allowed = 1;
-        puts("  non-SCC w/ long control: controls allowed"); puts("\n");
+      // cruise control for car without SCC
+      if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
+        // bit 25
+        int cruise_engaged = (GET_BYTES_04(to_push) >> 25 & 0x1); // ACC main_on signal
+        if (cruise_engaged && !cruise_engaged_prev) {
+          controls_allowed = 1;
+          puts("  non-SCC w/ long control: controls allowed"); puts("\n");
+        }
+        if (!cruise_engaged) {
+          if (controls_allowed) {puts("  non-SCC w/ long control: controls not allowed"); puts("\n");}
+            controls_allowed = 0;
+        }
+        cruise_engaged_prev = cruise_engaged;
       }
-      if (!cruise_engaged) {
-        if (controls_allowed) {puts("  non-SCC w/ long control: controls not allowed"); puts("\n");}
-        controls_allowed = 0;
-      }
-      cruise_engaged_prev = cruise_engaged;
     }
 
     // sample wheel speed, averaging opposite corners
@@ -149,6 +168,22 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;    
       vehicle_speed = hyundai_speed;
     }
+    //generic_rx_checks((addr == 832 && bus == 0));
+    bool stock_radar_detected = (addr == 832);
+
+    // If openpilot is controlling longitudinal we need to ensure the radar is turned off
+    // Enforce by checking we don't see SCC12
+    if (hyundai_longitudinal && (addr == 1057)) {
+      stock_radar_detected = true;
+    }
+    if (hyundai_longitudinal && stock_radar_detected) {
+          if (controls_allowed) {puts("NOT OK !@-Radar Still Alive On Bus-@! !!-Controls not allowed-!!"); puts("\n");}
+            controls_allowed = 0;
+        }
+    else if (hyundai_longitudinal && !stock_radar_detected) {
+          if (controls_allowed) {puts("OK !@ Radar Silenced On Bus @! Controls Allowed "); puts("\n");}
+            controls_allowed = 1;
+        }
     generic_rx_checks((addr == 832 && bus == 0));
   }
   return valid;
@@ -224,8 +259,8 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     int mdps_state = (GET_BYTE(to_send, 0) & 0xF); // MDPS REPORTED STATE
     int raw_angle_can = ((GET_BYTE(to_send, 2) << 8) | GET_BYTE(to_send, 1));
     int desired_angle = to_signed(raw_angle_can, 16);
-    puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
-    puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
+    //puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
+    //puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
     // Rate limit check
     if (controls_allowed && mdps_state == 5) {
       float delta_angle_float;
@@ -349,11 +384,13 @@ static const addr_checks* hyundai_community_init(int16_t param) {
   controls_allowed = false;
   relay_malfunction_reset();
 
+  hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL); //RADAR DISABLE ONLY on JPR's fork
+
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);
     puts("  MDPS or SCC on OBD2 CAN: setting can mode obd\n");
   }
-
+  
   hyundai_community_rx_checks = (addr_checks){hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
   return &hyundai_community_rx_checks;
 }

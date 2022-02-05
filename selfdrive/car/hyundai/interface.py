@@ -41,8 +41,8 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisableOld = Params().get_bool('RadarDisableEnabled')
     ret.radarDisablePossible = Params().get_bool('RadarDisableEnabled') or Params().get_bool('DisableRadar')
     
-    #if ret.radarDisablePossible:
-      #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
+    if ret.radarDisablePossible or ret.radarOffCan:
+      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG #ONLY FOR RADAR DISABLE ON JPR's FORK
 
     ret.carName = "hyundai"
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
@@ -62,7 +62,6 @@ class CarInterface(CarInterfaceBase):
     # lateral LQR global hyundai
     if UseLQR:
       ret.lateralTuning.init('lqr')
-
       ret.lateralTuning.lqr.scale = 1700.
       ret.lateralTuning.lqr.ki = 0.03
       ret.lateralTuning.lqr.dcGain = 0.0028
