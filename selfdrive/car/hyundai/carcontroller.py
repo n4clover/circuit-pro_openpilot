@@ -18,7 +18,7 @@ from selfdrive.road_speed_limiter import road_speed_limiter_get_active
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 min_set_speed = 30 * CV.KPH_TO_MS
-###### SPAS ######
+###### SPAS ###### - JPR
 STEER_ANG_MAX = 450 # SPAS Max Angle
 ANGLE_DELTA_BP = [0., 10., 20.]
 ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
