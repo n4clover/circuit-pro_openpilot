@@ -175,7 +175,6 @@ def create_scc14(packer, enabled, e_vgo, accel, gaspressed, objgap, jerk, stoppi
     "ACCMode": ACCMode, # stock will always be 4 instead of 0 after first disengage
     "ObjGap": objgap, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
   }
-
   return packer.make_can_msg("SCC14", 0, values)
 
 def create_fca11(packer, idx):
