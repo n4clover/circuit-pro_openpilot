@@ -158,7 +158,7 @@ def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed, ACCMod
   values["CR_VSM_ChkSum"] = 0x10 - sum(sum(divmod(i, 16)) for i in scc12_dat) % 0x10
   return packer.make_can_msg("SCC12", 0, values)
 
-def create_scc13(packer, scc13):
+def create_scc13(packer):
   values = {
     "SCCDrvModeRValue": 2,
     "SCC_Equip": 1,
