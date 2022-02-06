@@ -2,7 +2,9 @@ int OP_LKAS_live = 0;
 int OP_MDPS_live = 0;
 int OP_CLU_live = 0;
 int OP_SCC_live = 0;
+int SCC_live = 0;
 int car_SCC_live = 0;
+int rx_SCC_live = 0;
 int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
@@ -112,8 +114,8 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
-    if (HKG_scc_bus != 1 && HKG_scc_bus != 2) { //Radar off can or disabled - JPR
-      puts("   HKG SCC BUS   "); puth(HKG_scc_bus); puts("\n"); //debug to make sure when radar off can - jpr
+    if (!SCC_live && HKG_scc_bus != 1 && HKG_scc_bus != 2) { //Radar off can or disabled - JPR
+      //puts("   HKG SCC BUS   "); puth(HKG_scc_bus); puts("\n"); //debug to make sure when radar off can - jpr
       // ACC steering wheel buttons
       if (addr == 1265) {
         int button = GET_BYTE(to_push, 0) & 0x7U;
@@ -169,6 +171,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       vehicle_speed = hyundai_speed;
     }
     generic_rx_checks((addr == 832 && bus == 0));
+    if (addr == 1057) {SCC_live = 20; if (rx_SCC_live > 0) {rx_SCC_live -= 1;}}
   }
   return valid;
 }
