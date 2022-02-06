@@ -284,7 +284,7 @@ class CarController():
         else:
           self.ACCMode = 0
 
-        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping and enabled, int(frame / 2), CS.out.gasPressed, self.ACCMode))
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed, self.ACCMode))
 
         can_sends.append(create_scc11(self.packer, enabled, self.gapsetting, CS.lead_distance, int(frame / 2)))
           
@@ -299,7 +299,7 @@ class CarController():
             obj_gap = 0
 
           can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, apply_accel, CS.out.gasPressed,
-                                        obj_gap, jerk, stopping and enabled, self.ACCMode))
+                                        obj_gap, jerk, stopping, self.ACCMode))
         if CS.CP.radarDisable:
           can_sends.append(create_fca11(self.packer, int(frame / 2)))
 
