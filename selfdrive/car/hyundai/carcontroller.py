@@ -279,14 +279,14 @@ class CarController():
 
         #set_speed_in_units = set_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
 
-        if enabled or CS.CP.radarDisable:
+        if enabled:
           self.ACCMode = 2 if CS.out.gasPressed else 1
         else:
           self.ACCMode = 0
 
-        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed, self.ACCMode))
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping and enabled, int(frame / 2), CS.out.gasPressed, self.ACCMode))
 
-        can_sends.append(create_scc11(self.packer, enabled, set_speed, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
+        can_sends.append(create_scc11(self.packer, enabled, self.gapsetting, CS.lead_distance, int(frame / 2)))
           
         if CS.has_scc14 or CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
           lead = self.scc_smoother.get_lead(controls.sm)
@@ -299,7 +299,7 @@ class CarController():
             obj_gap = 0
 
           can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, apply_accel, CS.out.gasPressed,
-                                        obj_gap, jerk, stopping, self.ACCMode))
+                                        obj_gap, jerk, stopping and enabled, self.ACCMode))
         if CS.CP.radarDisable:
           can_sends.append(create_fca11(self.packer, int(frame / 2)))
 

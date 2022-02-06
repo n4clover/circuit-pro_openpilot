@@ -166,7 +166,7 @@ def create_scc13(packer, scc13):
   }
   return packer.make_can_msg("SCC13", 0, values)
 
-def create_scc14(packer, enabled, e_vgo, accel, gaspressed, objgap, jerk, stopping, ACCMode):
+def create_scc14(packer, enabled, objgap, jerk, stopping, ACCMode):
   values = {
     "ComfortBandUpper": 0.0, # stock usually is 0 but sometimes uses higher values
     "ComfortBandLower": 0.0, # stock usually is 0 but sometimes uses higher values
