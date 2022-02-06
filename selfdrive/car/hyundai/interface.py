@@ -562,13 +562,13 @@ class CarInterface(CarInterfaceBase):
     ret.hasEms = 608 in fingerprint[0] and 809 in fingerprint[0]
 
     ret.radarOffCan = ret.sccBus == -1
-    ret.pcmCruise = not ret.radarOffCan or not ret.DisableRadar
+    ret.pcmCruise = not ret.radarOffCan or not ret.radarDisable
 
     # SPAS
     ret.spasEnabled = Params().get_bool('spasEnabled')
 
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
-    if ret.radarOffCan or ret.DisableRadar or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled') or Params().get_bool('spasEnabled'):
+    if ret.radarOffCan or ret.radarDisable or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled') or Params().get_bool('spasEnabled'):
       ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCommunity, 0)]
     return ret
   
@@ -585,9 +585,9 @@ class CarInterface(CarInterfaceBase):
     ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
 
-    if self.CP.pcmCruise and (not self.CP.DisableRadar or not self.CP.radarOffCan):
+    if self.CP.pcmCruise and (not self.CP.radarDisable or not self.CP.radarOffCan):
       self.CP.pcmCruise = True
-    elif not self.CP.pcmCruise and (self.CP.DisableRadar or self.CP.radarOffCan):
+    elif not self.CP.pcmCruise and (self.CP.radarDisable or self.CP.radarOffCan):
       self.CP.pcmCruise = False
 
     # most HKG cars has no long control, it is safer and easier to engage by main on
@@ -651,7 +651,7 @@ class CarInterface(CarInterfaceBase):
       # do disable on button down
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
-      if self.CC.longcontrol and (self.CP.DisableRadar or self.CP.radarOffCan):
+      if self.CC.longcontrol and (self.CP.radarDisable or self.CP.radarOffCan):
         # do enable on both accel and decel buttons
         if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
           events.add(EventName.buttonEnable)
@@ -675,7 +675,7 @@ class CarInterface(CarInterfaceBase):
     if self.mad_mode_enabled and EventName.pedalPressed in events.events:
       events.events.remove(EventName.pedalPressed)
 
-    if self.CC.longcontrol and self.CS.cruise_unavail or self.CP.DisableRadar and self.CS.brake_error:
+    if self.CC.longcontrol and self.CS.cruise_unavail or self.CP.radarDisable and self.CS.brake_error:
       print("cruise error")
       events.add(EventName.brakeUnavailable)
     if self.CS.park_brake:

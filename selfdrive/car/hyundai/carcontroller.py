@@ -223,7 +223,7 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 0 and CS.out.cruiseState.enabled and not CS.CP.DisableRadar: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
+    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 0 and CS.out.cruiseState.enabled and not CS.CP.radarDisable: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
       can_sends.append(create_clu11(self.packer, frame % 0x10, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
       self.pcm_cnt += 1
     else:
@@ -279,7 +279,7 @@ class CarController():
 
         set_speed_in_units = set_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
 
-        if enabled or CS.CP.DisableRadar:
+        if enabled or CS.CP.radarDisable:
           self.ACCMode = 2 if CS.out.gasPressed else 1
         else:
           self.ACCMode = 0
@@ -288,7 +288,7 @@ class CarController():
 
         can_sends.append(create_scc11(self.packer, enabled, set_speed_in_units, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
           
-        if CS.has_scc14 or CS.CP.DisableRadar or self.longcontrol and CS.CP.radarOffCan:
+        if CS.has_scc14 or CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
           lead = self.scc_smoother.get_lead(controls.sm)
           jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
 
@@ -300,10 +300,10 @@ class CarController():
 
           can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, apply_accel, CS.out.gasPressed,
                                         obj_gap, jerk, stopping, self.ACCMode))
-        if CS.CP.DisableRadar:
+        if CS.CP.radarDisable:
           can_sends.append(create_fca11(self.packer, int(frame / 2)))
 
-      if frame % 20 == 0 and (CS.has_scc13 or CS.CP.DisableRadar):
+      if frame % 20 == 0 and (CS.has_scc13 or CS.CP.radarDisable):
         can_sends.append(create_scc13(self.packer, CS.scc13))
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
@@ -402,11 +402,11 @@ class CarController():
       self.DTQL = abs(CS.out.steeringWheelTorque)
 
     # 5 Hz ACC options
-    if frame % 20 == 0 and CS.CP.DisableRadar:
+    if frame % 20 == 0 and CS.CP.radarDisable:
       can_sends.extend(create_acc_opt(self.packer, int(frame / 2)))
 
     # 2 Hz front radar options
-    if frame % 50 == 0 and CS.CP.DisableRadar:
+    if frame % 50 == 0 and CS.CP.radarDisable:
       can_sends.append(create_frt_radar_opt(self.packer))
 
     new_actuators = actuators.copy()
