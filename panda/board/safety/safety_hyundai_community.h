@@ -113,7 +113,6 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
     } 
 
     if (HKG_scc_bus != 1 && HKG_scc_bus != 2 && !OP_SCC_live) { //Radar off can or disabled - JPR
-      //puts("   HKG SCC BUS   "); puth(HKG_scc_bus); puts("\n"); //debug to make sure when radar off can - jpr
       // ACC steering wheel buttons
       if (addr == 1265) {
         int button = GET_BYTE(to_push, 0) & 0x7U;
@@ -169,7 +168,6 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       vehicle_speed = hyundai_speed;
     }
     generic_rx_checks((addr == 832 && bus == 0));
-    if (addr == 1057) {SCC_live = 20; if (rx_SCC_live > 0) {rx_SCC_live -= 1;}}
   }
   return valid;
 }
