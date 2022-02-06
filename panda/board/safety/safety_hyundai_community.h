@@ -2,9 +2,7 @@ int OP_LKAS_live = 0;
 int OP_MDPS_live = 0;
 int OP_CLU_live = 0;
 int OP_SCC_live = 0;
-int SCC_live = 0;
 int car_SCC_live = 0;
-int rx_SCC_live = 0;
 int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
@@ -114,7 +112,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
-    if (!SCC_live && OP_SCC_live && HKG_scc_bus != 1 && HKG_scc_bus != 2) { //Radar off can or disabled - JPR
+    if (HKG_scc_bus != 1 && HKG_scc_bus != 2 && !OP_SCC_live) { //Radar off can or disabled - JPR
       //puts("   HKG SCC BUS   "); puth(HKG_scc_bus); puts("\n"); //debug to make sure when radar off can - jpr
       // ACC steering wheel buttons
       if (addr == 1265) {
@@ -131,7 +129,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
             break;  // any other button is irrelevant
         }
       }
-    } else {
+    } /*else {
       if (addr == 1056 && !OP_SCC_live) { // for cars without long control
         // 2 bits: 13-14
         int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
@@ -160,7 +158,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
         }
         cruise_engaged_prev = cruise_engaged;
       }
-    }
+    }*/
 
     // sample wheel speed, averaging opposite corners
     if (addr == 902 && bus == 0) {
