@@ -131,8 +131,8 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
             break;  // any other button is irrelevant
         }
       }
-    } else {
-      if (addr == 1056 && !OP_SCC_live) { // for cars without long control
+    } else { // TEMP DISABLE UNTIL FIX
+      /*if (addr == 1056 && !OP_SCC_live) { // for cars without long control
         // 2 bits: 13-14
         int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
         if (cruise_engaged && !cruise_engaged_prev) {
@@ -144,7 +144,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
           controls_allowed = 0;
         }
         cruise_engaged_prev = cruise_engaged;
-      }
+      }*/
 
       // cruise control for car without SCC
       if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
