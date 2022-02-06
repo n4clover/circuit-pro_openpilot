@@ -123,12 +123,12 @@ class CarController():
     if CS.spas_enabled:
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       apply_diff = abs(apply_angle - CS.out.steeringAngleDeg)
-      if apply_diff > 1.65 and enabled: # Rate limit for when steering angle is not apply_angle - JPR
+      if apply_diff > 1.65 and c.active: # Rate limit for when steering angle is not apply_angle - JPR
         self.ratelimit = self.ratelimit + 0.03 # Increase each cycle - JPR
         rate_limit = max(self.ratelimit, 10) # Make sure not to go past +-10 on rate - JPR
         print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
-      elif enabled:
+      elif c.active:
         self.ratelimit = 2.8 # Reset it back - JPR
         if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
@@ -137,10 +137,10 @@ class CarController():
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-      spas_active = CS.spas_enabled and enabled and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or CarControllerParams.STEER_MAX - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
-      lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or CarControllerParams.STEER_MAX - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
+      lkas_active = c.active and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
     else:
-      lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if CS.spas_enabled:
       if Params().get_bool("SpasMode"):
