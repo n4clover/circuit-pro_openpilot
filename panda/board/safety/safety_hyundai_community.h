@@ -114,7 +114,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
-    if (!SCC_live && HKG_scc_bus != 1 && HKG_scc_bus != 2) { //Radar off can or disabled - JPR
+    if (!SCC_live && OP_SCC_live && HKG_scc_bus != 1 && HKG_scc_bus != 2) { //Radar off can or disabled - JPR
       //puts("   HKG SCC BUS   "); puth(HKG_scc_bus); puts("\n"); //debug to make sure when radar off can - jpr
       // ACC steering wheel buttons
       if (addr == 1265) {
