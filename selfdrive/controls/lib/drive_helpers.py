@@ -5,8 +5,11 @@ from common.realtime import DT_MDL
 from selfdrive.config import Conversions as CV
 from selfdrive.modeld.constants import T_IDXS
 from selfdrive.ntune import ntune_common_get
-# WARNING: this value was determined based on the model's training distribution,
-#          model predictions above this speed can be unpredictable
+
+ButtonType = car.CarState.ButtonEvent.Type
+ButtonPrev = ButtonType.unknown
+ButtonCnt = 0
+LongPressed = False
 
 # kph
 V_CRUISE_MAX = 145
@@ -55,37 +58,34 @@ def get_steer_max(CP, v_ego):
   return interp(v_ego, CP.steerMaxBP, CP.steerMaxV)
 
 
-def update_v_cruise(v_cruise_kph, buttonEvents, button_timers, enabled, metric):
+def update_v_cruise(v_cruise_kph, buttonEvents, enabled, metric):
   # handle button presses. TODO: this should be in state_control, but a decelCruise press
   # would have the effect of both enabling and changing speed is checked after the state transition
-  if not enabled:
-    return v_cruise_kph
-
-  long_press = False
-  button_type = None
-
-  v_cruise_delta = 1 if metric else 1.6
-
-  for b in buttonEvents:
-    if b.type.raw in button_timers and not b.pressed:
-      if button_timers[b.type.raw] > CRUISE_LONG_PRESS:
-        return v_cruise_kph # end long press
-      button_type = b.type.raw
-      break
-  else:
-    for k in button_timers.keys():
-      if button_timers[k] and button_timers[k] % CRUISE_LONG_PRESS == 0:
-        button_type = k
-        long_press = True
-        break
-
-  if button_type:
-    v_cruise_delta = v_cruise_delta * (5 if long_press else 1)
-    if long_press and v_cruise_kph % v_cruise_delta != 0: # partial interval
-      v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](v_cruise_kph / v_cruise_delta) * v_cruise_delta
-    else:
-      v_cruise_kph += v_cruise_delta * CRUISE_INTERVAL_SIGN[button_type]
-    v_cruise_kph = clip(round(v_cruise_kph, 1), V_CRUISE_MIN, V_CRUISE_MAX)
+  global ButtonCnt, LongPressed, ButtonPrev
+  if enabled:
+    if ButtonCnt:
+      ButtonCnt += 1
+    for b in buttonEvents:
+      if b.pressed and not ButtonCnt and (b.type == ButtonType.accelCruise or \
+                                          b.type == ButtonType.decelCruise):
+        ButtonCnt = 1
+        ButtonPrev = b.type
+      elif not b.pressed and ButtonCnt:
+        if not LongPressed and b.type == ButtonType.accelCruise:
+          v_cruise_kph += 1 if metric else 1 * CV.MPH_TO_KPH
+        elif not LongPressed and b.type == ButtonType.decelCruise:
+          v_cruise_kph -= 1 if metric else 1 * CV.MPH_TO_KPH
+        LongPressed = False
+        ButtonCnt = 0
+    if ButtonCnt > 70:
+      LongPressed = True
+      V_CRUISE_DELTA = V_CRUISE_DELTA_KM if metric else V_CRUISE_DELTA_MI
+      if ButtonPrev == ButtonType.accelCruise:
+        v_cruise_kph += V_CRUISE_DELTA - v_cruise_kph % V_CRUISE_DELTA
+      elif ButtonPrev == ButtonType.decelCruise:
+        v_cruise_kph -= V_CRUISE_DELTA - -v_cruise_kph % V_CRUISE_DELTA
+      ButtonCnt %= 70
+    v_cruise_kph = clip(v_cruise_kph, V_CRUISE_MIN, V_CRUISE_MAX)
 
   return v_cruise_kph
 
