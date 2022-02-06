@@ -110,7 +110,7 @@ class CarController():
     self.last_blinker_frame = 0
 
   def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
-             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls, hud_speed):
+             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
@@ -277,7 +277,7 @@ class CarController():
 
         self.accel = apply_accel
 
-        set_speed_in_units = hud_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
+        set_speed_in_units = set_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
 
         if enabled or CS.CP.DisableRadar:
           self.ACCMode = 2 if CS.out.gasPressed else 1
