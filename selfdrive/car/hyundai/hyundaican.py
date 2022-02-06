@@ -95,14 +95,6 @@ def create_lfahda_mfc(packer, enabled, active, warning):
 
 def create_acc_opt(packer, idx):
   commands = []
-  
-  scc13_values = {
-    "SCCDrvModeRValue": 2,
-    "SCC_Equip": 1,
-    "Lead_Veh_Dep_Alert_USM": 2,
-  }
-  commands.append(packer.make_can_msg("SCC13", 0, scc13_values))
-  
   fca12_values = {
     "FCA_DrvSetState": 2,
     "FCA_USM": 1, # AEB disabled
@@ -167,7 +159,11 @@ def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed, ACCMod
   return packer.make_can_msg("SCC12", 0, values)
 
 def create_scc13(packer, scc13):
-  values = copy.copy(scc13)
+  values = {
+    "SCCDrvModeRValue": 2,
+    "SCC_Equip": 1,
+    "Lead_Veh_Dep_Alert_USM": 2,
+  }
   return packer.make_can_msg("SCC13", 0, values)
 
 def create_scc14(packer, enabled, e_vgo, accel, gaspressed, objgap, jerk, stopping, ACCMode):

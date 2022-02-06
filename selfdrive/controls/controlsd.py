@@ -326,7 +326,7 @@ class Controls:
     stock_long_is_braking = self.enabled and not self.CP.openpilotLongitudinalControl and CS.aEgo < -1.5
     model_fcw = self.sm['modelV2'].meta.hardBrakePredicted and not CS.brakePressed and not stock_long_is_braking
     planner_fcw = self.sm['longitudinalPlan'].fcw and self.enabled
-    if not self.disable_op_fcw and CS.vEgo > 0.01 and (planner_fcw or model_fcw):
+    if not self.disable_op_fcw and (planner_fcw or model_fcw):
       self.events.add(EventName.fcw)
 
     if TICI:
@@ -421,13 +421,12 @@ class Controls:
     self.CP.pcmCruise = self.CI.CP.pcmCruise
 
     # if stock cruise is completely disabled, then we can use our own set speed logic
-    if self.CP.radarDisablePossible or self.CP.radarOffCan and self.CP.openpilotLongitudinalControl:
-      if not self.CP.pcmCruise:
-        self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.button_timers, self.enabled, self.is_metric)
-      elif CS.cruiseState.enabled:
-        self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
+    #if not self.CP.pcmCruise:
+    #  self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.button_timers, self.enabled, self.is_metric)
+    #elif CS.cruiseState.enabled:
+    #  self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
 
-    SccSmoother.update_cruise_buttons(self, CS, self.CP.openpilotLongitudinalControl)
+    SccSmoother.update_cruise_buttons(self, CS, self.CP.openpilotLongitudinalControl, self.CP.DisableRadar, self.enabled)
 
     # decrement the soft disable timer at every step, as it's reset on
     # entrance in SOFT_DISABLING state

@@ -129,7 +129,7 @@ class CarState(CarStateBase):
       ret.autoHold = cp.vl["ESP11"]["AVH_STAT"]
 
     # cruise state
-    if self.CP.radarDisablePossible:
+    if self.CP.DisableRadar:
       # These are not used for engage/disengage since openpilot keeps track of state using the buttons
       ret.cruiseState.available = cp.vl["TCS13"]["ACCEnable"] == 0
       ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
@@ -187,7 +187,7 @@ class CarState(CarStateBase):
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
-    if not self.CP.radarDisablePossible:
+    if not self.CP.DisableRadar:
       if self.CP.carFingerprint in FEATURES["use_fca"]:
         ret.stockAeb = cp.vl["FCA11"]["FCA_CmdAct"] != 0
         ret.stockFcw = cp.vl["FCA11"]["CF_VSM_Warn"] == 2
@@ -381,7 +381,7 @@ class CarState(CarStateBase):
       ("WHL_SPD11", 50),
     ]
 
-    if not CP.radarDisablePossible:
+    if not CP.DisableRadar:
       signals += [
       ("MainMode_ACC", "SCC11", 1),
       ("SCCInfoDisplay", "SCC11", 0),
@@ -429,7 +429,7 @@ class CarState(CarStateBase):
       ("ComfortBandLower", "SCC14", 0),
       ]
 
-    if CP.sccBus == 0 and CP.pcmCruise and not CP.radarDisablePossible:
+    if CP.sccBus == 0 and CP.pcmCruise and not CP.DisableRadar:
       checks += [
         ("SCC11", 50),
         ("SCC12", 50),
