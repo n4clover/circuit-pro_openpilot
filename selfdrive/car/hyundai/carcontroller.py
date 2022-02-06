@@ -301,7 +301,7 @@ class CarController():
           can_sends.append(create_fca11(self.packer, int(frame / 2)))
 
       if frame % 20 == 0 and (CS.has_scc13 or CS.CP.radarDisable):
-        can_sends.append(create_scc13(self.packer, CS.scc13))
+        can_sends.append(create_scc13(self.packer))
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5
