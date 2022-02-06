@@ -168,7 +168,6 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;    
       vehicle_speed = hyundai_speed;
     }
-    //generic_rx_checks((addr == 832 && bus == 0));
     bool stock_radar_detected = (addr == 832);
 
     // If openpilot is controlling longitudinal we need to ensure the radar is turned off
