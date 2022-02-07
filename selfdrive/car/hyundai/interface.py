@@ -585,10 +585,10 @@ class CarInterface(CarInterfaceBase):
     ret = self.CS.update(self.cp, self.cp2, self.cp_cam)
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
 
-    if self.CP.pcmCruise and (not self.CP.radarDisable or not self.CP.radarOffCan):
-      self.CP.pcmCruise = True
-    elif not self.CP.pcmCruise and (self.CP.radarDisable or self.CP.radarOffCan):
-      self.CP.pcmCruise = False
+    #if self.CP.pcmCruise and (not self.CP.radarDisable or not self.CP.radarOffCan):
+    #  self.CP.pcmCruise = True
+    #elif not self.CP.pcmCruise and (self.CP.radarDisable or self.CP.radarOffCan):
+    #  self.CP.pcmCruise = False
 
     # most HKG cars has no long control, it is safer and easier to engage by main on
 
