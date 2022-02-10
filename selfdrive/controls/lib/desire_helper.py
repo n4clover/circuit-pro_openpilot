@@ -85,8 +85,8 @@ class DesireHelper:
           self.lane_change_state = LaneChangeState.laneChangeStarting
         elif torque_applied and blindspot_detected and self.auto_lane_change_timer != 10.0:
           self.auto_lane_change_timer = 10.0
-        #elif not torque_applied and self.auto_lane_change_timer == 10.0 and not self.prev_torque_applied:
-        #  self.prev_torque_applied = True
+        elif not torque_applied and self.auto_lane_change_timer == 10.0 and not self.prev_torque_applied:
+          self.prev_torque_applied = True
 
       # LaneChangeState.laneChangeStarting
       elif self.lane_change_state == LaneChangeState.laneChangeStarting:
@@ -113,7 +113,7 @@ class DesireHelper:
     else:
       self.lane_change_timer += DT_MDL
 
-    if self.lane_change_state == LaneChangeState.off or self.lane_change_state == LaneChangeState.laneChangeFinishing :
+    if self.lane_change_state == LaneChangeState.off:
       self.auto_lane_change_timer = 0.0
       self.prev_torque_applied = False
     elif self.auto_lane_change_timer < (AUTO_LCA_START_TIME+0.25): # stop afer 3 sec resume from 10 when torque applied
