@@ -384,7 +384,7 @@ class SccSmoother:
       else:
         v_cruise_kph = SccSmoother.update_v_cruise(controls.v_cruise_kph, CS.buttonEvents, controls.enabled,
                                                    controls.is_metric)
-    else:
+    elif controls.CP.pcmCruise:
       v_cruise_kph = 0
 
     if controls.is_cruise_enabled != is_cruise_enabled:
