@@ -296,8 +296,8 @@ class CarController():
         if CS.CP.radarDisable:
           can_sends.append(create_fca11(self.packer, int(frame / 2)))
 
-      if frame % 20 == 0 and (CS.has_scc13 or CS.CP.radarDisable):
-        can_sends.append(create_scc13(self.packer))
+      if frame % 20 == 0:
+        can_sends.extend(create_acc_opt(self.packer))
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5
@@ -393,10 +393,6 @@ class CarController():
 
       self.spas_active_last = spas_active
       self.DTQL = abs(CS.out.steeringWheelTorque)
-
-    # 5 Hz ACC options
-    if frame % 20 == 0 and CS.CP.radarDisable:
-      can_sends.extend(create_acc_opt(self.packer, int(frame / 2)))
 
     # 2 Hz front radar options
     if frame % 50 == 0 and CS.CP.radarDisable:
