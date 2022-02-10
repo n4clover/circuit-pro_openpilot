@@ -38,7 +38,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.openpilotLongitudinalControl = Params().get_bool('LongControlEnabled') or Params().get_bool('RadarDisableEnabled') or Params().get_bool('DisableRadar')
     ret.radarDisable = Params().get_bool('DisableRadar')
-    
+
     ret.carName = "hyundai"
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
     #if candidate in LEGACY_SAFETY_MODE_CAR:
@@ -564,6 +564,9 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = ret.sccBus == -1
     ret.pcmCruise = not ret.radarOffCan or not ret.radarDisable
 
+    if ret.openpilotLongitudinalControl and (ret.radarDisable or ret.radarOffCan):
+      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
+    
     # SPAS
     ret.spasEnabled = Params().get_bool('spasEnabled')
 
@@ -657,7 +660,7 @@ class CarInterface(CarInterfaceBase):
           events.add(EventName.buttonEnable)
         if EventName.wrongCarMode in events.events:
           events.events.remove(EventName.wrongCarMode)
-        if EventName.pcmDisable in events.events:
+        if EventName.pcmDisable in events.events and not (self.CP.radarDisable or self.CP.radarOffCan):
           events.events.remove(EventName.pcmDisable)
       elif not self.CC.longcontrol and ret.cruiseState.enabled:
         # do enable on decel button only
