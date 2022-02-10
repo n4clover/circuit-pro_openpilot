@@ -24,8 +24,8 @@ ANGLE_DELTA_BP = [0., 10., 20.]
 ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
 ANGLE_DELTA_VU = [1.29, 1.19, 1.14]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
-SPAS_SWITCH = 35 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRatio
-STEER_MAX_OFFSET = 50 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
+SPAS_SWITCH = 30 * CV.MPH_TO_MS # MPH - lowered Bc of model and overlearn steerRatio
+STEER_MAX_OFFSET = 65 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
 ###### SPAS #######
 
 CLUSTER_ANIMATION_BP = [0., 1., 10., 20., 30., 40., 50.]
@@ -66,10 +66,6 @@ class CarController():
     self.apply_steer_last = 0
     self.accel = 0
     self.lkas11_cnt = 0
-    self.counter_init = False
-    self.radarDisableActivated = False
-    self.radarDisableResetTimer = 0
-    self.radarDisableOverlapTimer = 0
     self.ACCMode = 0
 
     self.pcm_cnt = 0
