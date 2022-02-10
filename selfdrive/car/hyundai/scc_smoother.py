@@ -376,10 +376,10 @@ class SccSmoother:
   def update_cruise_buttons(controls, CS, longcontrol, enabled):  # called by controlds's state_transition
 
     car_set_speed = CS.cruiseState.speed * CV.MS_TO_KPH
-    is_cruise_enabled = car_set_speed != 0 and car_set_speed != 255 and (CS.cruiseState.enabled and controls.CP.pcmCruise or enabled and (CS.CP.radarDisable or CS.CP.radarOffCan and longcontrol))
+    is_cruise_enabled = car_set_speed != 0 and car_set_speed != 255 and (CS.cruiseState.enabled and controls.CP.pcmCruise or enabled and (controls.CP.radarDisable or controls.CP.radarOffCan and longcontrol))
 
     if is_cruise_enabled:
-      if longcontrol and not (CS.CP.radarDisable or CS.CP.radarOffCan):
+      if longcontrol and not (controls.CP.radarDisable or controls.CP.radarOffCan):
         v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
       else:
         v_cruise_kph = SccSmoother.update_v_cruise(controls.v_cruise_kph, CS.buttonEvents, controls.enabled,
@@ -390,9 +390,9 @@ class SccSmoother:
     if controls.is_cruise_enabled != is_cruise_enabled:
       controls.is_cruise_enabled = is_cruise_enabled
 
-      if controls.is_cruise_enabled and not (CS.CP.radarDisable or CS.CP.radarOffCan and longcontrol):
+      if controls.is_cruise_enabled and not (controls.CP.radarDisable or controls.CP.radarOffCan and longcontrol):
         v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
-      elif controls.is_cruise_enabled and (CS.CP.radarDisable or CS.CP.radarOffCan and longcontrol):
+      elif controls.is_cruise_enabled and (controls.CP.radarDisable or controls.CP.radarOffCan and longcontrol):
         v_cruise_kph = v_cruise_kph = SccSmoother.update_v_cruise(controls.v_cruise_kph, CS.buttonEvents, controls.enabled,
                                                    controls.is_metric)
       else:
