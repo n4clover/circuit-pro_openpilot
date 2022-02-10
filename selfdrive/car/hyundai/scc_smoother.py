@@ -373,13 +373,13 @@ class SccSmoother:
     return min(accel, apply_accel), stock_cam
 
   @staticmethod
-  def update_cruise_buttons(controls, CS, longcontrol):  # called by controlds's state_transition
+  def update_cruise_buttons(controls, CS, longcontrol, enabled):  # called by controlds's state_transition
 
     car_set_speed = CS.cruiseState.speed * CV.MS_TO_KPH
-    is_cruise_enabled = car_set_speed != 0 and car_set_speed != 255 and CS.cruiseState.enabled and controls.CP.pcmCruise
+    is_cruise_enabled = car_set_speed != 0 and car_set_speed != 255 and (CS.cruiseState.enabled and controls.CP.pcmCruise or CS.CP.radarDisable and enabled)
 
     if is_cruise_enabled:
-      if longcontrol:
+      if longcontrol and not CS.CP.radarDisable:
         v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
       else:
         v_cruise_kph = SccSmoother.update_v_cruise(controls.v_cruise_kph, CS.buttonEvents, controls.enabled,
