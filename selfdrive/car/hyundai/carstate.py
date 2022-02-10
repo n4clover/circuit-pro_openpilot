@@ -237,8 +237,8 @@ class CarState(CarStateBase):
 
     # scc smoother
     driver_override = cp.vl["TCS13"]["DriverOverride"]
-    self.acc_mode = cp_scc.vl["SCC12"]["ACCMode"] != 0 #if not self.no_radar else 0
-    self.cruise_gap = cp_scc.vl["SCC11"]["TauGapSet"] #if not self.no_radar else 1
+    self.acc_mode = cp_scc.vl["SCC12"]["ACCMode"] != 0 if self.CP.pcmCruise else cp.vl["TCS13"]["ACCEnable"] == 0
+    self.cruise_gap = 3 #cp_scc.vl["SCC11"]["TauGapSet"] #if not self.no_radar else 1
     self.gas_pressed = ret.gasPressed or driver_override == 1
     self.brake_pressed = ret.brakePressed or driver_override == 2
     self.standstill = ret.standstill or ret.cruiseState.standstill
