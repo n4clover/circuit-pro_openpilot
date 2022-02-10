@@ -271,6 +271,16 @@ class CarController():
         apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
         self.accel = apply_accel
 
+        controls.apply_accel = apply_accel
+        aReqValue = CS.scc12["aReqValue"]
+        controls.aReqValue = aReqValue
+
+        if aReqValue < controls.aReqValueMin:
+          controls.aReqValueMin = controls.aReqValue
+
+        if aReqValue > controls.aReqValueMax:
+          controls.aReqValueMax = controls.aReqValue
+
         if enabled:
           self.ACCMode = 2 if CS.out.gasPressed else 1
         else:
