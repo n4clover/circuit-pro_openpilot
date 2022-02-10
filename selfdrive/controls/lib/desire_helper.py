@@ -85,8 +85,8 @@ class DesireHelper:
           self.lane_change_state = LaneChangeState.laneChangeStarting
         elif torque_applied and blindspot_detected and self.auto_lane_change_timer != 10.0:
           self.auto_lane_change_timer = 10.0
-        #elif not torque_applied and self.auto_lane_change_timer == 10.0 and not self.prev_torque_applied:
-        #  self.prev_torque_applied = True
+        elif not torque_applied and self.auto_lane_change_timer == 10.0 and not self.prev_torque_applied:
+          self.prev_torque_applied = True
 
       # LaneChangeState.laneChangeStarting
       elif self.lane_change_state == LaneChangeState.laneChangeStarting:
