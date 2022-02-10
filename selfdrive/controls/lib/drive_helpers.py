@@ -6,11 +6,6 @@ from selfdrive.config import Conversions as CV
 from selfdrive.modeld.constants import T_IDXS
 from selfdrive.ntune import ntune_common_get
 
-ButtonType = car.CarState.ButtonEvent.Type
-ButtonPrev = ButtonType.unknown
-ButtonCnt = 0
-LongPressed = False
-
 # kph
 V_CRUISE_MAX = 145
 V_CRUISE_MIN = 30
