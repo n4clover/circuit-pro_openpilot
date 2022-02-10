@@ -390,9 +390,9 @@ class SccSmoother:
     if controls.is_cruise_enabled != is_cruise_enabled:
       controls.is_cruise_enabled = is_cruise_enabled
 
-      if controls.is_cruise_enabled and not (CS.CP.radarDisable or CS.CP.radarOffCan):
+      if controls.is_cruise_enabled and not (CS.CP.radarDisable or CS.CP.radarOffCan and longcontrol):
         v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
-      elif controls.is_cruise_enabled and (CS.CP.radarDisable or CS.CP.radarOffCan):
+      elif controls.is_cruise_enabled and (CS.CP.radarDisable or CS.CP.radarOffCan and longcontrol):
         v_cruise_kph = v_cruise_kph = SccSmoother.update_v_cruise(controls.v_cruise_kph, CS.buttonEvents, controls.enabled,
                                                    controls.is_metric)
       else:
