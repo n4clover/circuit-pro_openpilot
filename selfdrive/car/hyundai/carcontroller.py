@@ -263,6 +263,11 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
+    if enabled:
+        self.ACCMode = 2 if CS.out.gasPressed else 1
+    else:
+      self.ACCMode = 0
+
     if self.longcontrol and (CS.cruiseState_enabled and CS.scc_bus or CS.CP.radarDisable or CS.CP.radarOffCan):
       if frame % 2 == 0:
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
@@ -281,10 +286,6 @@ class CarController():
         if aReqValue > controls.aReqValueMax:
           controls.aReqValueMax = controls.aReqValue
 
-        if enabled:
-          self.ACCMode = 2 if CS.out.gasPressed else 1
-        else:
-          self.ACCMode = 0
 
         can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed, self.ACCMode))
         can_sends.append(create_scc11(self.packer, enabled, set_speed, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
