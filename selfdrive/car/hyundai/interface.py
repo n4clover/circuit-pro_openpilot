@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import numpy as np
 from cereal import car
 from panda import Panda
 from common.numpy_fast import interp
@@ -100,9 +99,9 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalActuatorDelayLowerBound = 0.15
     ret.longitudinalActuatorDelayUpperBound = 0.2
 
-    ret.stopAccel = -2.5
-    ret.stoppingDecelRate = 0.73  # brake_travel/s while trying to stop
-    ret.vEgoStopping = 0.7
+    ret.stopAccel = -2.0
+    ret.stoppingDecelRate = 0.7  # brake_travel/s while trying to stop
+    ret.vEgoStopping = 0.5
     ret.vEgoStarting = 0.5  # needs to be >= vEgoStopping to avoid state transition oscillation
 
     # genesis
