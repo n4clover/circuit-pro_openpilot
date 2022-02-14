@@ -555,20 +555,9 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
   QString str;
   float textSize = 50.f;
   QColor textColor = QColor(255, 255, 255, 200);
-
-  if(gap <= 0) {
-    str = "N/A";
-  }
-  else if(longControl && gap == autoTrGap) {
-    str = "AUTO";
-    textColor = QColor(120, 255, 120, 200);
-  }
-  else {
-    str.sprintf("%d", (int)gap);
-    textColor = QColor(120, 255, 120, 200);
-    textSize = 70.f;
-  }
-
+  str = "AUTO";
+  textColor = QColor(120, 255, 120, 200);
+  
   configFont(p, "Open Sans", 35, "Bold");
   drawText(p, x, y-20, "GAP", 200);
 
