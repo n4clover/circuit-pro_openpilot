@@ -506,7 +506,6 @@ static const QString get_tpms_text(float tpms) {
 void NvgWindow::drawBottomIcons(QPainter &p) {
   const SubMaster &sm = *(uiState()->sm);
   auto car_state = sm["carState"].getCarState();
-  auto scc_smoother = sm["carControl"].getCarControl().getSccSmoother();
 
   // tire pressure
   {
