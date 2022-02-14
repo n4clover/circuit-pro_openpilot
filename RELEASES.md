@@ -1,5 +1,6 @@
 Version 0.8.13 (2022-XX-XX)
 ========================
+ * Fixed HKG Longitudinal with Radar Disable - JPR
  * Improved driver monitoring
  * Roll compensation
  * Improved camera focus on the comma two
