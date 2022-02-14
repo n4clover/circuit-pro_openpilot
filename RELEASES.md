@@ -1,5 +1,37 @@
-Version 0.8.12 (2021-12-XX)
+Version 0.8.13 (2022-XX-XX)
 ========================
+ * Fixed HKG Longitudinal with Radar Disable (BOTH - HKG Long & Radar Disable Toggles ON!) - JPR
+ * Improved driver monitoring
+   * Retuned driver pose learner for relaxed driving positions
+   * Added reliance on driving model to be more scene adaptive
+   * Matched strictness between comma two and comma three
+ * Roll compensation
+ * Improved camera focus on the comma two
+ * Subaru ECU firmware fingerprinting thanks to martinl!
+ * Hyundai Santa Fe Plug-in Hybrid 2022 support thanks to sunnyhaibin!
+ * Mazda CX-5 2022 support thanks to Jafaral!
+ * Subaru Impreza 2020 support thanks to martinl!
+ * Toyota Avalon 2022 support thanks to sshane!
+ * Toyota Prius v 2017 support thanks to CT921!
+ * Volkswagen Caravelle 2020 support thanks to jyoung8607!
+
+Version 0.8.12 (2021-12-15)
+========================
+ * New driving model
+   * Improved behavior around exits
+   * Better pose accuracy at high speeds, allowing max speed of 90mph
+   * Fully incorporated comma three data into all parts of training stack
+ * Improved follow distance
+ * Better longitudinal policy, especially in low speed traffic
+ * New alert sounds
+ * AGNOS 3
+   * Display burn in mitigation
+   * Improved audio amplifier configuration
+   * System reliability improvements
+   * Update Python to 3.8.10
+ * Raw logs upload moved to connect.comma.ai
+ * Fixed HUD alerts on newer Honda Bosch thanks to csouers!
+ * Audi Q3 2020-21 support thanks to jyoung8607!
  * Lexus RC 2020 support thanks to ErichMoraga!
 
 Version 0.8.11 (2021-11-29)

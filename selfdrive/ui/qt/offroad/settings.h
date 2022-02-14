@@ -25,7 +25,6 @@ protected:
 
 signals:
   void closeSettings();
-  void offroadTransition(bool offroad);
   void reviewTrainingGuide();
   void showDriverView();
 
@@ -39,11 +38,19 @@ private:
 class DevicePanel : public ListWidget {
   Q_OBJECT
 public:
-  explicit DevicePanel(QWidget* parent = nullptr);
+  explicit DevicePanel(SettingsWindow *parent);
 signals:
   void reviewTrainingGuide();
   void showDriverView();
   void closeSettings();
+
+private slots:
+  void poweroff();
+  void reboot();
+  void updateCalibDescription();
+
+private:
+  Params params;
 };
 
 class TogglesPanel : public ListWidget {
@@ -71,6 +78,20 @@ private:
   Params params;
   QFileSystemWatcher *fs_watch;
 };
+
+class C2NetworkPanel: public QWidget {
+  Q_OBJECT
+public:
+  explicit C2NetworkPanel(QWidget* parent = nullptr);
+
+private:
+  void showEvent(QShowEvent *event) override;
+  QString getIPAddress();
+  LabelControl *ipaddress;
+};
+
+
+
 
 class SelectCar : public QWidget {
   Q_OBJECT

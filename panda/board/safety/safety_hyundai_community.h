@@ -7,13 +7,14 @@ int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
 
+
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
-    {2., 30., 60.}, //kph
-    {14., 13., 12.}};  //deg
+    {0., 30., 60.}, //kph
+    {19, 18., 17.}};  //deg
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_DOWN = { // Add to each value from car controller to leave a bit of margin.
-    {2., 30., 60.}, //kph
-    {15., 14., 13.}}; //deg 
+    {0., 30., 60.}, //kph
+    {20., 19., 18.}}; //deg 
 
 const int HYUNDAI_DEG_TO_CAN = 10; 
 
@@ -30,12 +31,15 @@ const CanMsg HYUNDAI_COMMUNITY_TX_MSGS[] = {
   {1057, 0, 8}, //   SCC12,  Bus 0
   {1290, 0, 8}, //   SCC13,  Bus 0
   {905, 0, 8},  //   SCC14,  Bus 0
-  {1186, 0, 8},  //   4a2SCC, Bus 0
+  {909, 0, 8},  // FCA11 Bus 0
+  {1155, 0, 8}, // FCA12 Bus 0
+  {1186, 0, 2}, // FRT_RADAR11 Bus 0
   {870, 1, 8}, // EMS_366, Bus 1
   {790, 1, 8}, // EMS11, Bus 1
   {881, 1, 8}, // E_EMS11, Bus 1
   {912, 0, 7}, {912,1, 7}, // SPAS11, Bus 0, 1
   {1268, 0, 8}, {1268,1, 8}, // SPAS12, Bus 0, 1
+  {2000, 0, 8}, // SCC_DIAG, Bus 0
  };
 
 // older hyundai models have less checks due to missing counters and checksums
@@ -104,38 +108,56 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-   if (addr == 897 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
+    if (addr == 897 && bus == HKG_mdps_bus) { // Read MDPS11, CR_Mdps_DrvTq : Driver Torque
       driver_torque = (((GET_BYTE(to_push, 2) & 0x7F) << 5) | (GET_BYTE(to_push, 1) & 0x78)) - 2048;
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
-    if (addr == 1056 && !OP_SCC_live) { // for cars without long control
-      // 2 bits: 13-14
-      int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
-      if (cruise_engaged && !cruise_engaged_prev) {
-        controls_allowed = 1;
-        puts("  SCC w/o long control: controls allowed"); puts("\n");
+    if (radar_disable) { //Radar off can or disabled - JPR
+      // ACC steering wheel buttons
+      if (addr == 1265) {
+        int button = GET_BYTE(to_push, 0) & 0x7U;
+        switch (button) {
+          case 1:  // resume
+          case 2:  // set
+            controls_allowed = 1;
+            break;
+          case 4:  // cancel
+            controls_allowed = 0;
+            break;
+          default:
+            break;  // any other button is irrelevant
+        }
       }
-      if (!cruise_engaged) {
-        if (controls_allowed) {puts("  SCC w/o long control: controls not allowed"); puts("\n");}
-        controls_allowed = 0;
+    } else {
+      if (addr == 1056 && !OP_SCC_live) { // for cars without long control
+        // 2 bits: 13-14
+        int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
+        if (cruise_engaged && !cruise_engaged_prev) {
+          controls_allowed = 1;
+          puts("  SCC w/o long control: controls allowed"); puts("\n");
+        }
+        if (!cruise_engaged) {
+          if (controls_allowed) {puts("  SCC w/o long control: controls not allowed"); puts("\n");}
+          controls_allowed = 0;
+        }
+        cruise_engaged_prev = cruise_engaged;
       }
-      cruise_engaged_prev = cruise_engaged;
-    }
 
-    // cruise control for car without SCC
-    if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
-      // bit 25
-      int cruise_engaged = (GET_BYTES_04(to_push) >> 25 & 0x1); // ACC main_on signal
-      if (cruise_engaged && !cruise_engaged_prev) {
-        controls_allowed = 1;
-        puts("  non-SCC w/ long control: controls allowed"); puts("\n");
+      // cruise control for car without SCC
+      if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
+        // bit 25
+        int cruise_engaged = (GET_BYTES_04(to_push) >> 25 & 0x1); // ACC main_on signal
+        if (cruise_engaged && !cruise_engaged_prev) {
+          controls_allowed = 1;
+          puts("  non-SCC w/ long control: controls allowed"); puts("\n");
+        }
+        if (!cruise_engaged) {
+          if (controls_allowed) {puts("  non-SCC w/ long control: controls not allowed"); puts("\n");}
+            controls_allowed = 0;
+        }
+        cruise_engaged_prev = cruise_engaged;
       }
-      if (!cruise_engaged) {
-        if (controls_allowed) {puts("  non-SCC w/ long control: controls not allowed"); puts("\n");}
-        controls_allowed = 0;
-      }
-      cruise_engaged_prev = cruise_engaged;
     }
 
     // sample wheel speed, averaging opposite corners
@@ -221,8 +243,8 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     int mdps_state = (GET_BYTE(to_send, 0) & 0xF); // MDPS REPORTED STATE
     int raw_angle_can = ((GET_BYTE(to_send, 2) << 8) | GET_BYTE(to_send, 1));
     int desired_angle = to_signed(raw_angle_can, 16);
-    puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
-    puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
+    //puts("    Desired CAN Angle   "); puth(desired_angle); puts("\n");
+    //puts("    Steer Enabled   "); puth(steer_enabled); puts("\n");
     // Rate limit check
     if (controls_allowed && mdps_state == 5) {
       float delta_angle_float;
@@ -241,7 +263,14 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
     }
     if (ABS(driver_torque) > HYUNDAI_SPAS_OVERRIDE_TQ && mdps_state == 5) {
       //violation = 1; bugged 
-      puts("  Driver override torque reached : Controls Not Allowed  "); puts("\n");
+      puts("  Driver override torque reached  "); puts("\n");
+    }
+  }
+
+  // UDS: Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
+  if (addr == 2000) {
+    if ((GET_BYTES_04(to_send) != 0x00803E02U) || (GET_BYTES_48(to_send) != 0x0U)) {
+      tx = 0;
     }
   }
 
@@ -343,7 +372,7 @@ static const addr_checks* hyundai_community_init(int16_t param) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);
     puts("  MDPS or SCC on OBD2 CAN: setting can mode obd\n");
   }
-
+  
   hyundai_community_rx_checks = (addr_checks){hyundai_community_addr_checks, HYUNDAI_COMMUNITY_ADDR_CHECK_LEN};
   return &hyundai_community_rx_checks;
 }

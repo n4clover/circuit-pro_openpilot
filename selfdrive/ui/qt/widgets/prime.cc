@@ -92,8 +92,8 @@ PairingPopup::PairingPopup(QWidget *parent) : QDialogBase(parent) {
     QLabel *instructions = new QLabel(R"(
       <ol type='1' style='margin-left: 15px;'>
         <li style='margin-bottom: 50px;'>Go to https://api.retropilot.org/useradmin/overview on your phone</li>
-        <li style='margin-bottom: 50px;'>Click "add new device" and scan the QR code on the right</li>
-        <li style='margin-bottom: 50px;'>Bookmark connect.comma.ai to your home screen to use it like an app</li>
+        <li style='margin-bottom: 50px;'>Click "Scan the QR code on the right</li>
+        <li style='margin-bottom: 50px;'>"Copy and paste the string into RetroPilot to register your device.</li>"</li>
       </ol>
     )", this);
     instructions->setStyleSheet("font-size: 47px; font-weight: bold; color: black;");
@@ -162,7 +162,7 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
   if (auto dongleId = getDongleId()) {
     QString url = CommaApi::BASE_URL + "/v1/devices/" + *dongleId + "/owner";
     RequestRepeater *repeater = new RequestRepeater(this, url, "ApiCache_Owner", 6);
-    QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &PrimeUserWidget::replyFinished);
+    QObject::connect(repeater, &RequestRepeater::requestDone, this, &PrimeUserWidget::replyFinished);
   }
 }
 
@@ -292,14 +292,14 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
     QString url = CommaApi::BASE_URL + "/v1.1/devices/" + *dongleId + "/";
     RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_Device", 5);
 
-    QObject::connect(repeater, &RequestRepeater::failedResponse, this, &SetupWidget::show);
-    QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &SetupWidget::replyFinished);
+    QObject::connect(repeater, &RequestRepeater::requestDone, this, &SetupWidget::replyFinished);
   }
   hide(); // Only show when first request comes back
 }
 
-void SetupWidget::replyFinished(const QString &response) {
+void SetupWidget::replyFinished(const QString &response, bool success) {
   show();
+  if (!success) return;
 
   QJsonDocument doc = QJsonDocument::fromJson(response.toUtf8());
   if (doc.isNull()) {
@@ -308,19 +308,19 @@ void SetupWidget::replyFinished(const QString &response) {
   }
 
   QJsonObject json = doc.object();
+  int prime_type = json["prime_type"].toInt();
+
+  if (uiState()->prime_type != prime_type) {
+    uiState()->prime_type = prime_type;
+    Params().put("PrimeType", std::to_string(prime_type));
+  }
+
   if (!json["is_paired"].toBool()) {
     mainLayout->setCurrentIndex(0);
   } else {
     popup->reject();
 
-    bool prime = json["prime"].toBool();
-
-    if (QUIState::ui_state.has_prime != prime) {
-      QUIState::ui_state.has_prime = prime;
-      Params().putBool("HasPrime", prime);
-    }
-
-    if (prime) {
+    if (prime_type) {
       mainLayout->setCurrentWidget(primeUser);
     } else {
       mainLayout->setCurrentWidget(primeAd);

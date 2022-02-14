@@ -19,11 +19,11 @@ def get_radar_can_parser(CP):
     for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT):
       msg = f"RADAR_TRACK_{addr:x}"
       signals += [
-        ("STATE", msg, 0),
-        ("AZIMUTH", msg, 0),
-        ("LONG_DIST", msg, 0),
-        ("REL_ACCEL", msg, 0),
-        ("REL_SPEED", msg, 0),
+        ("STATE", msg),
+        ("AZIMUTH", msg),
+        ("LONG_DIST", msg),
+        ("REL_ACCEL", msg),
+        ("REL_SPEED", msg),
       ]
       checks += [(msg, 50)]
     return CANParser('hyundai_kia_mando_front_radar', signals, checks, 1)
@@ -31,11 +31,11 @@ def get_radar_can_parser(CP):
   else:
     signals = [
       # sig_name, sig_address, default
-      ("ObjValid", "SCC11", 0),
-      ("ACC_ObjStatus", "SCC11", 0),
-      ("ACC_ObjLatPos", "SCC11", 0),
-      ("ACC_ObjDist", "SCC11", 0),
-      ("ACC_ObjRelSpd", "SCC11", 0),
+      ("ObjValid", "SCC11"),
+      ("ACC_ObjStatus", "SCC11"),
+      ("ACC_ObjLatPos", "SCC11"),
+      ("ACC_ObjDist", "SCC11"),
+      ("ACC_ObjRelSpd", "SCC11"),
     ]
     checks = [
       ("SCC11", 50),
@@ -51,7 +51,7 @@ class RadarInterface(RadarInterfaceBase):
     self.trigger_msg = 0x420 if not self.new_radar else RADAR_START_ADDR + RADAR_MSG_COUNT - 1
     self.track_id = 0
 
-    self.radar_off_can = CP.radarOffCan
+    self.radar_off_can = CP.radarOffCan or CP.radarDisable
     self.rcp = get_radar_can_parser(CP)
 
   def update(self, can_strings):
@@ -99,8 +99,6 @@ class RadarInterface(RadarInterfaceBase):
           self.pts[addr].vRel = msg['REL_SPEED']
           self.pts[addr].aRel = msg['REL_ACCEL']
           self.pts[addr].yvRel = float('nan')
-          if Params().get_bool("CreepDebug"):
-            print("Rel Dist : ", self.pts[addr].dRel)
 
         else:
           del self.pts[addr]
@@ -126,8 +124,6 @@ class RadarInterface(RadarInterfaceBase):
           self.pts[ii].aRel = float('nan')
           self.pts[ii].yvRel = float('nan')
           self.pts[ii].measured = True
-          if Params().get_bool("CreepDebug"):
-            print("Rel Dist : ", self.pts[ii].dRel)
 
         else:
           if ii in self.pts:

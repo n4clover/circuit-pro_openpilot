@@ -21,7 +21,6 @@ struct InitData {
   kernelVersion @15 :Text;
   osVersion @18 :Text;
 
-  gctx @1 :Text;
   dongleId @2 :Text;
 
   deviceType @3 :DeviceType;
@@ -55,6 +54,7 @@ struct InitData {
   }
 
   # ***** deprecated stuff *****
+  gctxDEPRECATED @1 :Text;
   androidBuildInfo @5 :AndroidBuildInfo;
   androidSensorsDEPRECATED @6 :List(AndroidSensor);
   chffrAndroidExtraDEPRECATED @7 :ChffrAndroidExtra;
@@ -307,6 +307,7 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   chargingDisabled @18 :Bool;
   offroadPowerUsageUwh @23 :UInt32;
   carBatteryCapacityUwh @25 :UInt32;
+  powerDrawW @40 :Float32;
 
   # device thermals
   cpuTempC @26 :List(Float32);
@@ -315,12 +316,19 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   ambientTempC @30 :Float32;
   nvmeTempC @35 :List(Float32);
   modemTempC @36 :List(Float32);
+  pmicTempC @39 :List(Float32);
+  thermalZones @38 :List(ThermalZone);
   thermalStatus @14 :ThermalStatus;
 
   fanSpeedPercentDesired @10 :UInt16;
   screenBrightnessPercent @37 :Int8;
+
+  wifiIpAddress @41 :Text;
   
-  wifiIpAddress @38 :Text;
+  struct ThermalZone {
+    name @0 :Text;
+    temp @1 :Float32;
+  }
 
   enum ThermalStatus {
     green @0;
@@ -383,12 +391,14 @@ struct PandaState @0xa7649e2575e4591e {
   ignitionCan @13 :Bool;
   safetyModel @14 :Car.CarParams.SafetyModel;
   safetyParam @20 :Int16;
+  unsafeMode @23 :Int16;
   faultStatus @15 :FaultStatus;
   powerSaveEnabled @16 :Bool;
   uptime @17 :UInt32;
   faults @18 :List(FaultType);
   harnessStatus @21 :HarnessStatus;
   heartbeatLost @22 :Bool;
+  blockedCnt @24 :UInt32;
 
   enum FaultStatus {
     none @0;
@@ -624,6 +634,8 @@ struct ControlsState @0x97ff69c53601abf1 {
     delta @8 :Float32;
     output @9 :Float32;
     saturated @10 :Bool;
+    steeringAngleDesiredDeg @11 :Float32;
+    steeringRateDesiredDeg @12 :Float32;
   }
 
   struct LateralPIDState {
@@ -636,6 +648,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     f @6 :Float32;
     output @7 :Float32;
     saturated @8 :Bool;
+    steeringAngleDesiredDeg @9 :Float32;
    }
 
   struct LateralLQRState {
@@ -645,6 +658,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     output @3 :Float32;
     lqrOutput @4 :Float32;
     saturated @5 :Bool;
+    steeringAngleDesiredDeg @6 :Float32;
   }
 
   struct LateralAngleState {
@@ -652,6 +666,7 @@ struct ControlsState @0x97ff69c53601abf1 {
     steeringAngleDeg @1 :Float32;
     output @2 :Float32;
     saturated @3 :Bool;
+    steeringAngleDesiredDeg @4 :Float32;
   }
 
   struct LateralDebugState {
@@ -833,6 +848,8 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   speeds @33 :List(Float32);
   jerks @34 :List(Float32);
 
+  solverExecutionTime @35 :Float32;
+
   enum LongitudinalPlanSource {
     cruise @0;
     lead0 @1;
@@ -893,9 +910,11 @@ struct LateralPlan @0xe1e9318e2ae8b51e {
   psis @26 :List(Float32);
   curvatures @27 :List(Float32);
   curvatureRates @28 :List(Float32);
+
+  solverExecutionTime @30 :Float32;
   
-  autoLaneChangeEnabled @30 :Bool;
-  autoLaneChangeTimer @31 :Int8;
+  autoLaneChangeEnabled @31 :Bool;
+  autoLaneChangeTimer @32 :Int8;
 
   enum Desire {
     none @0;
@@ -1332,6 +1351,7 @@ struct LiveParametersData {
   angleOffsetAverageStd @11 :Float32;
   stiffnessFactorStd @12 :Float32;
   steerRatioStd @13 :Float32;
+  roll @14 :Float32;
 }
 
 struct LiveMapDataDEPRECATED {
@@ -1437,14 +1457,14 @@ struct NavRoute {
 }
 
 struct RoadLimitSpeed {
-    active @0 :UInt16;
-    roadLimitSpeed @1 :UInt16;
+    active @0 :Int16;
+    roadLimitSpeed @1 :Int16;
     isHighway @2 :Bool;
-    camType @3 :UInt16;
-    camLimitSpeedLeftDist @4 :UInt16;
-    camLimitSpeed @5 :UInt16;
-    sectionLimitSpeed @6 :UInt16;
-    sectionLeftDist @7 :UInt16;
+    camType @3 :Int16;
+    camLimitSpeedLeftDist @4 :Int16;
+    camLimitSpeed @5 :Int16;
+    sectionLimitSpeed @6 :Int16;
+    sectionLeftDist @7 :Int16;
     camSpeedFactor @8 :Float32;
 }
 
@@ -1504,13 +1524,15 @@ struct Event {
     clocks @35 :Clocks;
     deviceState @6 :DeviceState;
     logMessage @18 :Text;
+    errorLogMessage @85 :Text;
 
     # navigation
     navInstruction @82 :NavInstruction;
     navRoute @83 :NavRoute;
+    navThumbnail @84: Thumbnail;
     
     # neokii
-    roadLimitSpeed @84 :RoadLimitSpeed;
+    roadLimitSpeed @86 :RoadLimitSpeed;
 
     # *********** debug ***********
     testJoystick @52 :Joystick;

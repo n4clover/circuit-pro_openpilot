@@ -1,6 +1,7 @@
 #include "selfdrive/ui/qt/offroad/settings.h"
 
 #include <cassert>
+#include <cmath>
 #include <string>
 
 #include <QDebug>
@@ -43,7 +44,7 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
     {
       "IsLdwEnabled",
       "Enable Lane Departure Warnings",
-      "Receive alerts to steer back into the lane when your vehicle drifts over a detected lane line without a turn signal activated while driving over 31mph (50kph).",
+      "Receive alerts to steer back into the lane when your vehicle drifts over a detected lane line without a turn signal activated while driving over 31 mph (50 km/h).",
       "../assets/offroad/icon_warning.png",
     },
     {
@@ -57,18 +58,6 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
       "Use Metric System",
       "Display speed in km/h instead of mph.",
       "../assets/offroad/icon_metric.png",
-    },
-    {
-      "CommunityFeaturesToggle",
-      "Enable Community Features",
-      "Use features, such as community supported hardware, from the open source community that are not maintained or supported by comma.ai and have not been confirmed to meet the standard safety model. Be extra cautious when using these features",
-      "../assets/offroad/icon_shell.png",
-    },
-    {
-      "UploadRaw",
-      "Upload Raw Logs",
-      "Upload full logs and full resolution video by default while on Wi-Fi. If not enabled, individual logs can be marked for upload at useradmin.comma.ai.",
-      "../assets/offroad/icon_network.png",
     },
     {
       "RecordFront",
@@ -108,20 +97,17 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
     auto toggle = new ParamControl(param, title, desc, icon, this);
     bool locked = params.getBool((param + "Lock").toStdString());
     toggle->setEnabled(!locked);
-    if (!locked) {
-      connect(parent, &SettingsWindow::offroadTransition, toggle, &ParamControl::setEnabled);
-    }
+    //if (!locked) {
+    //  connect(uiState(), &UIState::offroadTransition, toggle, &ParamControl::setEnabled);
+    //}
     addItem(toggle);
   }
 }
 
-DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
+DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   setSpacing(50);
-  Params params = Params();
   addItem(new LabelControl("Dongle ID", getDongleId().value_or("N/A")));
-
-  QString serial = QString::fromStdString(params.get("HardwareSerial", false));
-  addItem(new LabelControl("Serial", serial));
+  addItem(new LabelControl("Serial", params.get("HardwareSerial").c_str()));
 
   QHBoxLayout *reset_layout = new QHBoxLayout();
   reset_layout->setSpacing(30);
@@ -151,69 +137,112 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
       });
     }
   });
-
   addItem(reset_layout);
+
+  QHBoxLayout *custom1_layout = new QHBoxLayout();
+  custom1_layout->setSpacing(30);
+
+  QPushButton *run_ntune_btn = new QPushButton("Run nTune Calibration");
+  run_ntune_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  custom1_layout->addWidget(run_ntune_btn);
+  QObject::connect(run_ntune_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("Are you sure you want to run nTune calibration? This lags for a second.", this)) {
+      std::system("cd /data/openpilot/selfdrive && python ntune.py");
+      ConfirmationDialog::alert("You have successfully run nTune!", this);
+      emit closeSettings();
+    }
+  });
+
+  QPushButton *delete_recordings_btn = new QPushButton("Delete UI Screen Recordings");
+  delete_recordings_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  custom1_layout->addWidget(delete_recordings_btn);
+  QObject::connect(delete_recordings_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("Are you sure you want to delete recordings? This cannot be undone.", this)) {
+      if (Hardware::TICI()) {
+        std::system("cd /data/media/0/videos && rm *.*");
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 3!", this);
+        emit closeSettings();   
+      }
+      else if (Hardware::EON()) {
+        std::system("cd /storage/emulated/0/videos && rm *.*");
+        ConfirmationDialog::alert("You have successfully deleted screen recordings on Comma 2!", this);
+        emit closeSettings();        
+      }
+      else {
+        ConfirmationDialog::alert("You have NOT successfully deleted screen recordings! : Unknown location : Unknown Device", this);
+        emit closeSettings();
+      }
+    }
+  });
+
+  addItem(custom1_layout);
+
+  QHBoxLayout *custom2_layout = new QHBoxLayout();
+  custom2_layout->setSpacing(30);
+
+  QPushButton *delete_logs_btn = new QPushButton("Delete Logs To Be Uploaded");
+  delete_logs_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  custom2_layout->addWidget(delete_logs_btn);
+  QObject::connect(delete_logs_btn, &QPushButton::released, [=]() {
+    if (ConfirmationDialog::confirm("Are you sure you want to delete all logs of drives to be uploaded? This cannot be undone.", this)) {
+      if (Hardware::TICI()) {
+        std::system("cd /data/media/0/realdata && rm -rf *");
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 3!", this);
+        emit closeSettings();
+      }
+      else if (Hardware::EON()) {
+        std::system("cd /storage/emulated/0/realdata && rm -rf *");
+        ConfirmationDialog::alert("You have successfully deleted logs of drives to be uploaded on Comma 2!", this);
+        emit closeSettings();
+      }
+      else {
+        ConfirmationDialog::alert("You have NOT successfully deleted logs of drives to be uploaded! : Unknown location : Unknown Device", this);
+        emit closeSettings();
+      }
+    }
+  });
+  addItem(custom2_layout);
 
   // offroad-only buttons
 
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",
-                                        "Preview the driver facing camera to help optimize device mounting position for best driver monitoring experience. (vehicle must be off)");
+                                   "Preview the driver facing camera to help optimize device mounting position for best driver monitoring experience. (vehicle must be off)");
   connect(dcamBtn, &ButtonControl::clicked, [=]() { emit showDriverView(); });
+  addItem(dcamBtn);
 
-  QString resetCalibDesc = "openpilot requires the device to be mounted within 4° left or right and within 5° up or down. openpilot is continuously calibrating, resetting is rarely required.";
-  auto resetCalibBtn = new ButtonControl("Reset Calibration", "RESET", resetCalibDesc);
-  connect(resetCalibBtn, &ButtonControl::clicked, [=]() {
+  auto resetCalibBtn = new ButtonControl("Reset Calibration", "RESET", " ");
+  connect(resetCalibBtn, &ButtonControl::showDescription, this, &DevicePanel::updateCalibDescription);
+  connect(resetCalibBtn, &ButtonControl::clicked, [&]() {
     if (ConfirmationDialog::confirm("Are you sure you want to reset calibration?", this)) {
-      Params().remove("CalibrationParams");
+      params.remove("CalibrationParams");
     }
   });
-  connect(resetCalibBtn, &ButtonControl::showDescription, [=]() {
-    QString desc = resetCalibDesc;
-    std::string calib_bytes = Params().get("CalibrationParams");
-    if (!calib_bytes.empty()) {
-      try {
-        AlignedBuffer aligned_buf;
-        capnp::FlatArrayMessageReader cmsg(aligned_buf.align(calib_bytes.data(), calib_bytes.size()));
-        auto calib = cmsg.getRoot<cereal::Event>().getLiveCalibration();
-        if (calib.getCalStatus() != 0) {
-          double pitch = calib.getRpyCalib()[1] * (180 / M_PI);
-          double yaw = calib.getRpyCalib()[2] * (180 / M_PI);
-          desc += QString(" Your device is pointed %1° %2 and %3° %4.")
-                      .arg(QString::number(std::abs(pitch), 'g', 1), pitch > 0 ? "up" : "down",
-                           QString::number(std::abs(yaw), 'g', 1), yaw > 0 ? "right" : "left");
-        }
-      } catch (kj::Exception) {
-        qInfo() << "invalid CalibrationParams";
-      }
-    }
-    resetCalibBtn->setDescription(desc);
-  });
+  addItem(resetCalibBtn);
 
-  ButtonControl *retrainingBtn = nullptr;
   if (!params.getBool("Passive")) {
-    retrainingBtn = new ButtonControl("Review Training Guide", "REVIEW", "Review the rules, features, and limitations of openpilot");
+    auto retrainingBtn = new ButtonControl("Review Training Guide", "REVIEW", "Review the rules, features, and limitations of openpilot");
     connect(retrainingBtn, &ButtonControl::clicked, [=]() {
       if (ConfirmationDialog::confirm("Are you sure you want to review the training guide?", this)) {
         emit reviewTrainingGuide();
       }
     });
+    addItem(retrainingBtn);
   }
 
-  ButtonControl *regulatoryBtn = nullptr;
   if (Hardware::TICI()) {
-    regulatoryBtn = new ButtonControl("Regulatory", "VIEW", "");
+    auto regulatoryBtn = new ButtonControl("Regulatory", "VIEW", "");
     connect(regulatoryBtn, &ButtonControl::clicked, [=]() {
       const std::string txt = util::read_file("../assets/offroad/fcc.html");
       RichTextDialog::alert(QString::fromStdString(txt), this);
     });
+    addItem(regulatoryBtn);
   }
 
-  for (auto btn : {dcamBtn, resetCalibBtn, retrainingBtn, regulatoryBtn}) {
-    if (btn) {
-      connect(parent, SIGNAL(offroadTransition(bool)), btn, SLOT(setEnabled(bool)));
-      addItem(btn);
+  /*QObject::connect(uiState(), &UIState::offroadTransition, [=](bool offroad) {
+    for (auto btn : findChildren<ButtonControl *>()) {
+      btn->setEnabled(offroad);
     }
-  }
+  });*/
 
   // power buttons
   QHBoxLayout *power_layout = new QHBoxLayout();
@@ -222,46 +251,74 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   QPushButton *reboot_btn = new QPushButton("Reboot");
   reboot_btn->setObjectName("reboot_btn");
   power_layout->addWidget(reboot_btn);
-  QObject::connect(reboot_btn, &QPushButton::clicked, [=]() {
-    if (QUIState::ui_state.status == UIStatus::STATUS_DISENGAGED) {
-      if (ConfirmationDialog::confirm("Are you sure you want to reboot?", this)) {
-        // Check engaged again in case it changed while the dialog was open
-        if (QUIState::ui_state.status == UIStatus::STATUS_DISENGAGED) {
-          Params().putBool("DoReboot", true);
-        }
-      }
-    } else {
-      ConfirmationDialog::alert("Disengage to Reboot", this);
-    }
-  });
+  QObject::connect(reboot_btn, &QPushButton::clicked, this, &DevicePanel::reboot);
 
   QPushButton *poweroff_btn = new QPushButton("Power Off");
   poweroff_btn->setObjectName("poweroff_btn");
   power_layout->addWidget(poweroff_btn);
-  QObject::connect(poweroff_btn, &QPushButton::clicked, [=]() {
-    if (QUIState::ui_state.status == UIStatus::STATUS_DISENGAGED) {
-      if (ConfirmationDialog::confirm("Are you sure you want to power off?", this)) {
-        // Check engaged again in case it changed while the dialog was open
-        if (QUIState::ui_state.status == UIStatus::STATUS_DISENGAGED) {
-          Params().putBool("DoShutdown", true);
-        }
-      }
-    } else {
-      ConfirmationDialog::alert("Disengage to Power Off", this);
-    }
-  });
+  QObject::connect(poweroff_btn, &QPushButton::clicked, this, &DevicePanel::poweroff);
+
+  if (Hardware::TICI()) {
+    connect(uiState(), &UIState::offroadTransition, poweroff_btn, &QPushButton::setVisible);
+  }
 
   setStyleSheet(R"(
-    QPushButton {
-      height: 120px;
-      border-radius: 15px;
-    }
-    #reboot_btn { background-color: #393939; }
+    #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }
     #reboot_btn:pressed { background-color: #4a4a4a; }
-    #poweroff_btn { background-color: #E22C2C; }
+    #poweroff_btn { height: 120px; border-radius: 15px; background-color: #E22C2C; }
     #poweroff_btn:pressed { background-color: #FF2424; }
   )");
   addItem(power_layout);
+}
+
+void DevicePanel::updateCalibDescription() {
+  QString desc =
+      "openpilot requires the device to be mounted within 4° left or right and "
+      "within 5° up or 8° down. openpilot is continuously calibrating, resetting is rarely required.";
+  std::string calib_bytes = Params().get("CalibrationParams");
+  if (!calib_bytes.empty()) {
+    try {
+      AlignedBuffer aligned_buf;
+      capnp::FlatArrayMessageReader cmsg(aligned_buf.align(calib_bytes.data(), calib_bytes.size()));
+      auto calib = cmsg.getRoot<cereal::Event>().getLiveCalibration();
+      if (calib.getCalStatus() != 0) {
+        double pitch = calib.getRpyCalib()[1] * (180 / M_PI);
+        double yaw = calib.getRpyCalib()[2] * (180 / M_PI);
+        desc += QString(" Your device is pointed %1° %2 and %3° %4.")
+                    .arg(QString::number(std::abs(pitch), 'g', 1), pitch > 0 ? "down" : "up",
+                         QString::number(std::abs(yaw), 'g', 1), yaw > 0 ? "left" : "right");
+      }
+    } catch (kj::Exception) {
+      qInfo() << "invalid CalibrationParams";
+    }
+  }
+  qobject_cast<ButtonControl *>(sender())->setDescription(desc);
+}
+
+void DevicePanel::reboot() {
+  if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+    if (ConfirmationDialog::confirm("Are you sure you want to reboot?", this)) {
+      // Check engaged again in case it changed while the dialog was open
+      if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+        Params().putBool("DoReboot", true);
+      }
+    }
+  } else {
+    ConfirmationDialog::alert("Disengage to Reboot", this);
+  }
+}
+
+void DevicePanel::poweroff() {
+  if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+    if (ConfirmationDialog::confirm("Are you sure you want to power off?", this)) {
+      // Check engaged again in case it changed while the dialog was open
+      if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+        Params().putBool("DoShutdown", true);
+      }
+    }
+  } else {
+    ConfirmationDialog::alert("Disengage to Power Off", this);
+  }
 }
 
 SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
@@ -283,12 +340,12 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
 
 
   auto uninstallBtn = new ButtonControl("Uninstall " + getBrand(), "UNINSTALL");
-  connect(uninstallBtn, &ButtonControl::clicked, [=]() {
+  connect(uninstallBtn, &ButtonControl::clicked, [&]() {
     if (ConfirmationDialog::confirm("Are you sure you want to uninstall?", this)) {
-      Params().putBool("DoUninstall", true);
+      params.putBool("DoUninstall", true);
     }
   });
-  connect(parent, SIGNAL(offroadTransition(bool)), uninstallBtn, SLOT(setEnabled(bool)));
+  connect(uiState(), &UIState::offroadTransition, uninstallBtn, &QPushButton::setEnabled);
 
   QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitBranchLbl, gitCommitLbl, osVersionLbl, uninstallBtn};
   for (QWidget* w : widgets) {
@@ -327,15 +384,14 @@ void SoftwarePanel::updateLabels() {
   osVersionLbl->setText(QString::fromStdString(Hardware::get_os_version()).trimmed());
 }
 
-QWidget * network_panel(QWidget * parent) {
-#ifdef QCOM
-  QWidget *w = new QWidget(parent);
-  QVBoxLayout *layout = new QVBoxLayout(w);
+C2NetworkPanel::C2NetworkPanel(QWidget *parent) : QWidget(parent) {
+  QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setContentsMargins(50, 0, 50, 0);
 
   ListWidget *list = new ListWidget();
   list->setSpacing(30);
   // wifi + tethering buttons
+#ifdef QCOM
   auto wifiBtn = new ButtonControl("Wi-Fi Settings", "OPEN");
   QObject::connect(wifiBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_wifi(); });
   list->addItem(wifiBtn);
@@ -343,17 +399,42 @@ QWidget * network_panel(QWidget * parent) {
   auto tetheringBtn = new ButtonControl("Tethering Settings", "OPEN");
   QObject::connect(tetheringBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_tethering(); });
   list->addItem(tetheringBtn);
+#endif
+  ipaddress = new LabelControl("IP Address", "");
+  list->addItem(ipaddress);
 
   // SSH key management
   list->addItem(new SshToggle());
   list->addItem(new SshControl());
-
   layout->addWidget(list);
   layout->addStretch(1);
+}
+
+void C2NetworkPanel::showEvent(QShowEvent *event) {
+  ipaddress->setText(getIPAddress());
+}
+
+QString C2NetworkPanel::getIPAddress() {
+  std::string result = util::check_output("ifconfig wlan0");
+  if (result.empty()) return "";
+
+  const std::string inetaddrr = "inet addr:";
+  std::string::size_type begin = result.find(inetaddrr);
+  if (begin == std::string::npos) return "";
+
+  begin += inetaddrr.length();
+  std::string::size_type end = result.find(' ', begin);
+  if (end == std::string::npos) return "";
+
+  return result.substr(begin, end - begin).c_str();
+}
+
+QWidget *network_panel(QWidget *parent) {
+#ifdef QCOM
+  return new C2NetworkPanel(parent);
 #else
-  Networking *w = new Networking(parent);
+  return new Networking(parent);
 #endif
-  return w;
 }
 
 static QStringList get_list(const char* path)
@@ -394,7 +475,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   )");
 
   // close button
-  QPushButton* close_btn = new QPushButton("← Back");
+  QPushButton *close_btn = new QPushButton("← Back");
   close_btn->setStyleSheet(R"(
     QPushButton {
       font-size: 50px;
@@ -405,6 +486,9 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       border-radius: 30px;
       color: #dddddd;
       background-color: #444444;
+    }
+    QPushButton:pressed {
+      background-color: #3B3B3B;
     }
   )");
   close_btn->setFixedSize(300, 110);
@@ -505,7 +589,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
 
   main_layout = new QStackedLayout(this);
 
-  QWidget* homeScreen = new QWidget(this);
+  homeScreen = new QWidget(this);
   QVBoxLayout* vlayout = new QVBoxLayout(homeScreen);
   vlayout->setContentsMargins(0, 20, 0, 20);
 
@@ -563,11 +647,19 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "This causes slow frame time on weak hardware.",
                                             "../assets/offroad/icon_road.png",
                                             this));
+
   toggles.append(new ParamControl("UseLQR",
                                             "Enable LQR Lateral Control",
                                             "For Linear Quadratic Ratio Control: Warning please run nTune after 15-20 miles of driving.",
                                             "../assets/offroad/icon_road.png",
                                             this));
+
+  toggles.append(new ParamControl("SteerLockout",
+                                            "Enable More Than 90° for LKAS",
+                                            "This disables the max steer limit of 90°. SPAS does not apply to this. This will cause fault on certain cars that have a 90° limit on LKAS.",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+
   toggles.append(new ParamControl("LowSpeedAlerts",
                                             "Enable Low Speed Alerts",
                                             "Enables Low Speed alerts for cars with min steer speeds.",
@@ -580,21 +672,15 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));
 
-  toggles.append(new ParamControl("LongControlEnabled",
-                                            "Enable HKG Long Control",
-                                            "warnings: it is beta, be careful!! Openpilot will control the speed of your car",
-                                            "../assets/offroad/icon_road.png",
+  toggles.append(new ParamControl("IsLdwsCar",
+                                            "LDWS Only Car; No SCC",
+                                            "If your car only supports LDWS, turn it on.",
+                                            "../assets/offroad/icon_openpilot.png",
                                             this));
 
   toggles.append(new ParamControl("MadModeEnabled",
                                             "Enable HKG MAD mode",
                                             "Openpilot will engage when turn cruise control on",
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
-
-  toggles.append(new ParamControl("IsLdwsCar",
-                                            "LDWS",
-                                            "If your car only supports LDWS, turn it on.",
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
 
@@ -605,8 +691,32 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));
 
   toggles.append(new ParamControl("AutoLaneChangeEnabled",
-                                            "Enable Auto Lane Change(Nudgeless)",
+                                            "Enable Auto Lane Change Nudgeless",
                                             "warnings: it is beta, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+
+  toggles.append(new ParamControl("NoMinLaneChangeSpeed",
+                                            "Auto Lane Change At Any Speed",
+                                            "warnings: it is beta, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));
+
+  toggles.append(new ParamControl("KeepSteeringTurnSignals",
+                                            "Keep Steering While Turn Signals",
+                                            "",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+
+  /*toggles.append(new ParamControl("TurnSignals",
+                                            "Neokii or Crwusiz on screen blinkers.",
+                                            "Your choice. No reboot required.",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+*/
+  toggles.append(new ParamControl("CustomLeadMark",
+                                            "Use Custom Lead Mark",
+                                            "",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
@@ -617,18 +727,66 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             this));
 
   toggles.append(new ParamControl("SccSmootherSyncGasPressed",
-                                            "Sync set speed on gas pressed",
+                                            "Sync Set Speed On Gas Pressed",
                                             "",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
   toggles.append(new ParamControl("StockNaviDecelEnabled",
-                                            "Stock Navi based deceleration",
+                                            "Stock Navi Based Deceleration",
                                             "Use the stock navi based deceleration for longcontrol",
                                             "../assets/offroad/icon_road.png",
                                             this));
-/*
-  toggles.append(new ParamControl("NewRadarInterface",
+
+  toggles.append(new ParamControl("UseSMDPSHarness",
+                                            "Use SMDPS Harness",
+                                            "Use of MDPS Harness to enable openpilot steering down to 0 MPH",
+                                            "../assets/offroad/icon_road.png",
+                                            this));  
+
+  toggles.append(new ParamControl("KeepSteeringTurnSignals",
+                                            "Keep steering while turn signals",
+                                            "",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+                                            
+  toggles.append(new ParamControl("HapticFeedbackWhenSpeedCamera",
+                                            "Haptic feedback (speed-cam alert)",
+                                            "Haptic feedback when a speed camera is detected",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+
+  toggles.append(new ParamControl("LongControlEnabled",
+                                            "Enable HKG Long Control",
+                                            "warnings: it is beta, be careful!! Openpilot will control the speed of your car",
+                                            "../assets/offroad/icon_road.png",
+                                            this));  
+
+  toggles.append(new ParamControl("DisableRadar",
+                                            "Comma Radar Disable",
+                                            "openpilot will disable the car's radar and will take over control of gas and brakes. Warning: this disables AEB!",
+                                            "../assets/offroad/icon_road.png",
+                                            this)); 
+ 
+  toggles.append(new ParamControl("spasEnabled",
+                                            "Enable SPAS.",
+                                            "Enable Send Parking Assist Messages up to 38mph. Warning: It is beta, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));   
+
+  toggles.append(new ParamControl("DynamicSpas",
+                                            "Dynamic SPAS/LKAS Switch - ALPHA",
+                                            "Enable Send Parking Assist Messages depending on situation and factors. Will not switch to SPAS above 60mph; Will only hold SPAS above this speed if wheel is above an angle of |3|.  Warning: It is !ALPHA!, be careful!!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));   
+
+  toggles.append(new ParamControl("SpasMode",
+                                            "LKAS or Disengage on SPAS Override",
+                                            "Switch to LKAS on Steering Pressed or Disengage on override torque. !ALPHA!",
+                                            "../assets/offroad/icon_road.png",
+                                            this));  
+
+  /*toggles.append(new ParamControl("NewRadarInterface",
                                             "Use new radar interface",
                                             "",
                                             "../assets/offroad/icon_road.png",
@@ -646,29 +804,10 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_shell.png",
                                             this));
 
-  toggles.append(new ParamControl("CustomLeadMark",
-                                            "Use custom lead mark",
-                                            "",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-  /* toggles.append(new ParamControl("spasEnabled",
-                                            "Enable SPAS.",
-                                            "Enable Send Parking Assist Messages up to 38mph. Warning: It is beta, be careful!!",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
+
   toggles.append(new ParamControl("SPASDebug",
                                             "Enable SPAS Debugging.",
                                             "This outputs OP SPAS State: (The state that op is calling MDPS to) and MDPS SPAS State: (The state MDPS is actually in)",
-                                            "../assets/offroad/icon_road.png",
-                                            this)); */
-  toggles.append(new ParamControl("CreepDebug",
-                                            "Enable Creep / Stopping State Debugging.",
-                                            "This outputs relevent information.",
-                                            "../assets/offroad/icon_road.png",
-                                            this));
-  toggles.append(new ParamControl("UseSMDPSHarness",
-                                            "Use SMDPS Harness",
-                                            "Use of MDPS Harness to enable openpilot steering down to 0 MPH",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
@@ -729,3 +868,4 @@ SelectCar::SelectCar(QWidget* parent): QWidget(parent) {
 
   main_layout->addWidget(list);
 }
+

@@ -219,6 +219,65 @@ class Tici(HardwareBase):
 
     return network_strength
 
+  @staticmethod
+  def set_bandwidth_limit(upload_speed_kbps: int, download_speed_kbps: int) -> None:
+    upload_speed_kbps = int(upload_speed_kbps)  # Ensure integer value
+    download_speed_kbps = int(download_speed_kbps)  # Ensure integer value
+
+    adapter = "wwan0"
+    ifb = "ifb0"
+
+    sudo = ["sudo"]
+    tc = sudo + ["tc"]
+
+    # check, cmd
+    cleanup = [
+      # Clean up old rules
+      (False, tc + ["qdisc", "del", "dev", adapter, "root"]),
+      (False, tc + ["qdisc", "del", "dev", ifb, "root"]),
+      (False, tc + ["qdisc", "del", "dev", adapter, "ingress"]),
+      (False, tc + ["qdisc", "del", "dev", ifb, "ingress"]),
+
+      # Bring ifb0 down
+      (False, sudo + ["ip", "link", "set", "dev", ifb, "down"]),
+    ]
+
+    upload = [
+      # Create root Hierarchy Token Bucket that sends all trafic to 1:20
+      (True, tc + ["qdisc", "add", "dev", adapter, "root", "handle", "1:", "htb", "default", "20"]),
+
+      # Create class 1:20 with specified rate limit
+      (True, tc + ["class", "add", "dev", adapter, "parent", "1:", "classid", "1:20", "htb", "rate", f"{upload_speed_kbps}kbit"]),
+
+      # Create universal 32 bit filter on adapter that sends all outbound ip traffic through the class
+      (True, tc + ["filter", "add", "dev", adapter, "parent", "1:", "protocol", "ip", "prio", "10", "u32", "match", "ip", "dst", "0.0.0.0/0", "flowid", "1:20"]),
+    ]
+
+    download = [
+      # Bring ifb0 up
+      (True, sudo + ["ip", "link", "set", "dev", ifb, "up"]),
+
+      # Redirect ingress (incoming) to egress ifb0
+      (True, tc + ["qdisc", "add", "dev", adapter, "handle", "ffff:", "ingress"]),
+      (True, tc + ["filter", "add", "dev", adapter, "parent", "ffff:", "protocol", "ip", "u32", "match", "u32", "0", "0", "action", "mirred", "egress", "redirect", "dev", ifb]),
+
+      # Add class and rules for virtual interface
+      (True, tc + ["qdisc", "add", "dev", ifb, "root", "handle", "2:", "htb"]),
+      (True, tc + ["class", "add", "dev", ifb, "parent", "2:", "classid", "2:1", "htb", "rate", f"{download_speed_kbps}kbit"]),
+
+      # Add filter to rule for IP address
+      (True, tc + ["filter", "add", "dev", ifb, "protocol", "ip", "parent", "2:", "prio", "1", "u32", "match", "ip", "src", "0.0.0.0/0", "flowid", "2:1"]),
+    ]
+
+    commands = cleanup
+    if upload_speed_kbps != -1:
+      commands += upload
+    if download_speed_kbps != -1:
+      commands += download
+
+    for check, cmd in commands:
+      subprocess.run(cmd, check=check)
+
   def get_modem_version(self):
     try:
       modem = self.get_modem()
@@ -276,7 +335,7 @@ class Tici(HardwareBase):
     os.system("sudo poweroff")
 
   def get_thermal_config(self):
-    return ThermalConfig(cpu=((1, 2, 3, 4, 5, 6, 7, 8), 1000), gpu=((48,49), 1000), mem=(15, 1000), bat=(None, 1), ambient=(65, 1000))
+    return ThermalConfig(cpu=((1, 2, 3, 4, 5, 6, 7, 8), 1000), gpu=((48,49), 1000), mem=(15, 1000), bat=(None, 1), ambient=(65, 1000), pmic=((35, 36), 1000))
 
   def set_screen_brightness(self, percentage):
     try:
@@ -304,6 +363,13 @@ class Tici(HardwareBase):
       val = "0" if powersave_enabled else "1"
       os.system(f"sudo su -c 'echo {val} > /sys/devices/system/cpu/cpu{i}/online'")
 
+    for n in ('0', '4'):
+      gov = 'userspace' if powersave_enabled else 'performance'
+      os.system(f"sudo su -c 'echo {gov} > /sys/devices/system/cpu/cpufreq/policy{n}/scaling_governor'")
+
+      if powersave_enabled:
+        os.system(f"sudo su -c 'echo 979200 > /sys/devices/system/cpu/cpufreq/policy{n}/scaling_setspeed'")
+
   def get_gpu_usage_percent(self):
     try:
       used, total = open('/sys/class/kgsl/kgsl-3d0/gpubusy').read().strip().split()
@@ -313,6 +379,9 @@ class Tici(HardwareBase):
 
   def initialize_hardware(self):
     self.amplifier.initialize_configuration()
+
+    # Allow thermald to write engagement status to kmsg
+    os.system("sudo chmod a+w /dev/kmsg")
 
   def get_networks(self):
     r = {}

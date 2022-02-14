@@ -13,9 +13,9 @@ from common.text_window import TextWindow
 from selfdrive.hardware import TICI, EON
 from selfdrive.hardware.eon.apk import update_apks, pm_grant, appops_set
 from selfdrive.swaglog import cloudlog, add_file_handler
-from selfdrive.version import dirty
+from selfdrive.version import is_dirty
 
-MAX_CACHE_SIZE = 2e9
+MAX_CACHE_SIZE = 4e9 if "CI" in os.environ else 2e9
 CACHE_DIR = Path("/data/scons_cache" if TICI else "/tmp/scons_cache")
 
 TOTAL_SCONS_NODES = 2405
@@ -23,7 +23,7 @@ MAX_BUILD_PROGRESS = 100
 PREBUILT = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
 
 
-def build(spinner, dirty=False):
+def build(spinner: Spinner, dirty: bool = False) -> None:
   env = os.environ.copy()
   env['SCONS_PROGRESS'] = "1"
   nproc = os.cpu_count()
@@ -31,6 +31,7 @@ def build(spinner, dirty=False):
 
   for retry in [False]:
     scons = subprocess.Popen(["scons", j_flag, "--cache-populate"], cwd=BASEDIR, env=env, stderr=subprocess.PIPE)
+    assert scons.stderr is not None
 
     compile_output = []
 
@@ -70,7 +71,7 @@ def build(spinner, dirty=False):
       else:
         # Build failed log errors
         errors = [line.decode('utf8', 'replace') for line in compile_output
-                  if any([err in line for err in [b'error: ', b'not found, needed by target']])]
+                  if any(err in line for err in [b'error: ', b'not found, needed by target'])]
         error_s = "\n".join(errors)
         add_file_handler(cloudlog)
         cloudlog.error("scons build failed\n" + error_s)
@@ -78,7 +79,7 @@ def build(spinner, dirty=False):
         # Show TextWindow
         spinner.close()
         if not os.getenv("CI"):
-          error_s = "\n \n".join(["\n".join(textwrap.wrap(e, 65)) for e in errors])
+          error_s = "\n \n".join("\n".join(textwrap.wrap(e, 65)) for e in errors)
           with TextWindow("openpilot failed to build\n \n" + error_s) as t:
             t.wait_for_exit()
         exit(1)
@@ -99,7 +100,7 @@ def build(spinner, dirty=False):
 if __name__ == "__main__" and not PREBUILT:
   spinner = Spinner()
   spinner.update_progress(0, 100)
-  build(spinner, dirty)
+  build(spinner, is_dirty())
 
   if EON:
     update_apks()
