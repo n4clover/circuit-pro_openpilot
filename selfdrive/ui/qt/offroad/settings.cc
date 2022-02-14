@@ -788,7 +788,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
 
   toggles.append(new ParamControl("NewRadarInterface",
                                             "Are Radar Tracks Enabled?",
-                                            "ONLY ENABLE IF TRACKS ARE ENABLED VIA SSH SCRIPT!",
+                                            "!ONLY ENABLE IF TRACKS ARE ENABLED VIA SSH SCRIPT!",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
