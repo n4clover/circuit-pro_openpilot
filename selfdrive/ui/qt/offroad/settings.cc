@@ -786,13 +786,13 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));  
 
-  /*toggles.append(new ParamControl("NewRadarInterface",
-                                            "Use new radar interface",
-                                            "",
+  toggles.append(new ParamControl("NewRadarInterface",
+                                            "Are Radar Tracks Enabled?",
+                                            "!ONLY ENABLE IF TRACKS ARE ENABLED VIA SSH SCRIPT!",
                                             "../assets/offroad/icon_road.png",
                                             this));
 
-  toggles.append(new ParamControl("DisableOpFcw",
+  /*toggles.append(new ParamControl("DisableOpFcw",
                                             "Disable Openpilot FCW",
                                             "",
                                             "../assets/offroad/icon_shell.png",
