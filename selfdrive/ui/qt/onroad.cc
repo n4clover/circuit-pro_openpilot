@@ -544,10 +544,6 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
   const int y = rect().bottom() - footer_h / 2 - 10;
 
   // cruise gap
-  int gap = car_state.getCruiseGap();
-  bool longControl = scc_smoother.getLongControl();
-  int autoTrGap = scc_smoother.getAutoTrGap();
-
   p.setPen(Qt::NoPen);
   p.setBrush(QBrush(QColor(0, 0, 0, 255 * .1f)));
   p.drawEllipse(x - radius / 2, y - radius / 2, radius, radius);
