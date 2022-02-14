@@ -255,15 +255,9 @@ class CarController():
         self.gapsettingdance = 2
         self.gapcount = 0
       self.gapsetting = self.gapsettingdance
-    elif 10 > CS.lead_distance > 0: # Set gap to associated distance of lead. - JPR
-      self.gapsetting = 1
-    elif 30 > CS.lead_distance > 15:
-      self.gapsetting = 2
-    elif 55 > CS.lead_distance > 30:
-      self.gapsetting = 3
-    elif CS.lead_distance > 55:
-      self.gapsetting = 4
-
+    else:
+      d = self.scc_smoother.get_lead(controls.sm).dRel
+      self.gapsettingdance = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
