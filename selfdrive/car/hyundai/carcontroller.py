@@ -55,7 +55,6 @@ def process_hud_alert(enabled, fingerprint, visual_alert, left_lane, right_lane,
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
-
 class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.car_fingerprint = CP.carFingerprint
@@ -256,8 +255,10 @@ class CarController():
         self.gapcount = 0
       self.gapsetting = self.gapsettingdance
     else:
-      d = CS.lead_distance
-      self.gapsettingdance = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
+      lead = self.scc_smoother.get_lead(controls.sm)
+      if lead is not None:
+        d = lead.dRel
+        self.gapsettingdance = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
