@@ -256,7 +256,7 @@ class CarController():
       self.gapsetting = self.gapsettingdance
     else:
       d = CS.lead_distance
-      self.gapsettingdance = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
+      self.gapsetting = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
