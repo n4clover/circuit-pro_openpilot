@@ -258,6 +258,10 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::clicked, this, &DevicePanel::poweroff);
 
+  if (Hardware::TICI()) {
+    connect(uiState(), &UIState::offroadTransition, poweroff_btn, &QPushButton::setVisible);
+  }
+
   setStyleSheet(R"(
     #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }
     #reboot_btn:pressed { background-color: #4a4a4a; }
@@ -740,9 +744,15 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));  
 
-  toggles.append(new ParamControl("WarningOverSpeedLimit",
-                                            "Warning When Speeding",
-                                            "Warning when the current speed exceeds the speed limit.",
+  toggles.append(new ParamControl("KeepSteeringTurnSignals",
+                                            "Keep steering while turn signals",
+                                            "",
+                                            "../assets/offroad/icon_openpilot.png",
+                                            this));
+                                            
+  toggles.append(new ParamControl("HapticFeedbackWhenSpeedCamera",
+                                            "Haptic feedback (speed-cam alert)",
+                                            "Haptic feedback when a speed camera is detected",
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
 
@@ -757,12 +767,6 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "openpilot will disable the car's radar and will take over control of gas and brakes. Warning: this disables AEB!",
                                             "../assets/offroad/icon_road.png",
                                             this)); 
-
-  toggles.append(new ParamControl("RadarDisableEnabled",
-                                            "Community Radar Disable",
-                                            "Leagacy Cars ONLY! : openpilot will disable the car's radar and will take over control of gas and brakes. Warning: this disables AEB!",
-                                            "../assets/offroad/icon_road.png",
-                                            this));  
  
   toggles.append(new ParamControl("spasEnabled",
                                             "Enable SPAS.",

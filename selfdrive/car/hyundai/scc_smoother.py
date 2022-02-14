@@ -138,7 +138,7 @@ class SccSmoother:
     else:
       max_speed_clu = self.kph_to_clu(controls.v_cruise_kph)
 
-    self.active_cam = road_limit_speed > 0
+    self.active_cam = road_limit_speed > 0 and left_dist > 0
 
     if road_speed_limiter.roadLimitSpeed is not None:
       camSpeedFactor = clip(road_speed_limiter.roadLimitSpeed.camSpeedFactor, 1.0, 1.1)
@@ -397,7 +397,8 @@ class SccSmoother:
 
       controls.LoC.reset(v_pid=CS.vEgo)
 
-    controls.v_cruise_kph = v_cruise_kph
+    if controls.CP.pcmCruise:
+      controls.v_cruise_kph = v_cruise_kph
 
   @staticmethod
   def update_v_cruise(v_cruise_kph, buttonEvents, enabled, metric):

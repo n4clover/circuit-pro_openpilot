@@ -95,14 +95,6 @@ def create_lfahda_mfc(packer, enabled, active, warning):
 
 def create_acc_opt(packer, idx):
   commands = []
-  
-  scc13_values = {
-    "SCCDrvModeRValue": 2,
-    "SCC_Equip": 1,
-    "Lead_Veh_Dep_Alert_USM": 2,
-  }
-  commands.append(packer.make_can_msg("SCC13", 0, scc13_values))
-  
   fca12_values = {
     "FCA_DrvSetState": 2,
     "FCA_USM": 1, # AEB disabled
@@ -117,12 +109,21 @@ def create_frt_radar_opt(packer):
   }
   return packer.make_can_msg("FRT_RADAR11", 0, frt_radar11_values)
 
-def create_hda_mfc(packer, active, state):
-  values = {
-    "HDA_USM": 2,
-    "HDA_Active": 1 if active > 0 else 0,
-    "HDA_Icon_State": state if active > 0 else 0,
-  }
+def create_hda_mfc(packer, active, CS, left_lane, right_lane):
+  values = copy.copy(CS.lfahda_mfc)
+
+  ldwSysState = 0
+  if left_lane:
+    ldwSysState += 1
+  if right_lane:
+    ldwSysState += 2
+
+  values["HDA_LdwSysState"] = ldwSysState
+  values["HDA_USM"] = 2
+  values["HDA_VSetReq"] = 100
+  values["HDA_Icon_Wheel"] = 1 if active > 1 and CS.out.cruiseState.enabledAcc else 0
+  values["HDA_Icon_State"] = 2 if active > 1 else 0
+  values["HDA_Chime"] = 1 if active > 1 else 0
 
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
@@ -154,9 +155,9 @@ def create_scc11(packer, enabled, set_speed, lead_visible, gapsetting, lead_dist
 
   return packer.make_can_msg("SCC11", 0, values)
 
-def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed, ACCMode):
+def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed):
   values = {
-    "ACCMode": ACCMode,
+    "ACCMode": 2 if gaspressed and enabled and (apply_accel > -0.2) else 1 if enabled else 0,
     "StopReq": 1 if enabled and stopping and not gaspressed else 0,
     "aReqRaw": apply_accel if enabled else 0,
     "aReqValue": apply_accel if enabled else 0, # stock ramps up and down respecting jerk limit until it reaches aReqRaw
@@ -166,20 +167,23 @@ def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed, ACCMod
   values["CR_VSM_ChkSum"] = 0x10 - sum(sum(divmod(i, 16)) for i in scc12_dat) % 0x10
   return packer.make_can_msg("SCC12", 0, values)
 
-def create_scc13(packer, scc13):
-  values = copy.copy(scc13)
+def create_scc13(packer):
+  values = {
+    "SCCDrvModeRValue": 2,
+    "SCC_Equip": 1,
+    "Lead_Veh_Dep_Alert_USM": 2,
+  }
   return packer.make_can_msg("SCC13", 0, values)
 
-def create_scc14(packer, enabled, e_vgo, accel, gaspressed, objgap, jerk, stopping, ACCMode):
+def create_scc14(packer, enabled, jerk, stopping, gaspressed, apply_accel):
   values = {
     "ComfortBandUpper": 0.0, # stock usually is 0 but sometimes uses higher values
     "ComfortBandLower": 0.0, # stock usually is 0 but sometimes uses higher values
     "JerkUpperLimit": max(jerk, 1.0) if (enabled and not stopping) else 0, # stock usually is 1.0 but sometimes uses higher values
     "JerkLowerLimit": max(-jerk, 1.0) if enabled else 0, # stock usually is 0.5 but sometimes uses higher values
-    "ACCMode": ACCMode, # stock will always be 4 instead of 0 after first disengage
-    "ObjGap": objgap, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
+    "ACCMode": 2 if gaspressed and enabled and (apply_accel > -0.2) else 1 if enabled else 4, # stock will always be 4 instead of 0 after first disengage
+    "ObjGap": 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
   }
-
   return packer.make_can_msg("SCC14", 0, values)
 
 def create_fca11(packer, idx):
@@ -237,6 +241,3 @@ def create_eems11(packer, eems11, enabled):
     values["Accel_Pedal_Pos"] = 1
     values["CR_Vcu_AccPedDep_Pos"] = 1
   return packer.make_can_msg("E_EMS11", 1, values)
-
-def create_scc7d0(cmd):
-  return[2000, 0, cmd, 0]

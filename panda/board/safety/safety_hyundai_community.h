@@ -7,6 +7,7 @@ int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
 
+
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
     {0., 30., 60.}, //kph
     {19, 18., 17.}};  //deg
@@ -112,7 +113,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
 
-    if (HKG_scc_bus != 2 && HKG_scc_bus != 1) {
+    if (radar_disable) { //Radar off can or disabled - JPR
       // ACC steering wheel buttons
       if (addr == 1265) {
         int button = GET_BYTE(to_push, 0) & 0x7U;
@@ -167,22 +168,6 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;    
       vehicle_speed = hyundai_speed;
     }
-    //generic_rx_checks((addr == 832 && bus == 0));
-    bool stock_radar_detected = (addr == 832);
-
-    // If openpilot is controlling longitudinal we need to ensure the radar is turned off
-    // Enforce by checking we don't see SCC12
-    if (HKG_scc_bus != 2 && HKG_scc_bus != 1 && (addr == 1057)) {
-      stock_radar_detected = true;
-    }
-    if (HKG_scc_bus != 2 && HKG_scc_bus != 1 && stock_radar_detected) {
-          if (controls_allowed) {puts("NOT OK !@-Radar Still Alive On Bus-@! !!-Controls not allowed-!!"); puts("\n");}
-            controls_allowed = 0;
-        }
-    else if (HKG_scc_bus != 2 && HKG_scc_bus != 1 && !stock_radar_detected) {
-          if (controls_allowed) {puts("OK !@ Radar Silenced On Bus @! Controls Allowed "); puts("\n");}
-            controls_allowed = 1;
-        }
     generic_rx_checks((addr == 832 && bus == 0));
   }
   return valid;

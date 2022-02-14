@@ -6,8 +6,8 @@ from common.realtime import DT_CTRL
 from common.numpy_fast import clip, interp
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_fca11, create_lkas11, create_clu11, \
-  create_acc_opt, create_frt_radar_opt, create_scc7d0,\
-  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11, create_scc11, create_scc12, create_scc13, create_scc14
+  create_acc_opt, create_frt_radar_opt, create_scc13,\
+  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11, create_scc11, create_scc12, create_scc14
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.values import Buttons, CAR, FEATURES, CarControllerParams
 from opendbc.can.packer import CANPacker
@@ -24,15 +24,12 @@ ANGLE_DELTA_BP = [0., 10., 20.]
 ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
 ANGLE_DELTA_VU = [1.29, 1.19, 1.14]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
-SPAS_SWITCH = 35 * CV.MPH_TO_MS #MPH - lowered Bc of model and overlearn steerRatio
-STEER_MAX_OFFSET = 50 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
+SPAS_SWITCH = 30 * CV.MPH_TO_MS # MPH - lowered Bc of model and overlearn steerRatio
+STEER_MAX_OFFSET = 85 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
 ###### SPAS #######
 
 CLUSTER_ANIMATION_BP = [0., 1., 10., 20., 30., 40., 50.]
 CLUSTER_ANIMATION_SPEED= [0., 100., 40., 30., 20., 10., 3.]
-
-SP_CARS = (CAR.GENESIS, CAR.GENESIS_G70, CAR.GENESIS_G80,
-           CAR.GENESIS_EQ900, CAR.GENESIS_EQ900_L, CAR.K9, CAR.GENESIS_G90)
 
 def process_hud_alert(enabled, fingerprint, visual_alert, left_lane, right_lane,
                       left_lane_depart, right_lane_depart):
@@ -52,9 +49,9 @@ def process_hud_alert(enabled, fingerprint, visual_alert, left_lane, right_lane,
   left_lane_warning = 0
   right_lane_warning = 0
   if left_lane_depart:
-    left_lane_warning = 1 if fingerprint in SP_CARS else 2
+    left_lane_warning = 1
   if right_lane_depart:
-    right_lane_warning = 1 if fingerprint in SP_CARS else 2
+    right_lane_warning = 1
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
@@ -66,10 +63,6 @@ class CarController():
     self.apply_steer_last = 0
     self.accel = 0
     self.lkas11_cnt = 0
-    self.counter_init = False
-    self.radarDisableActivated = False
-    self.radarDisableResetTimer = 0
-    self.radarDisableOverlapTimer = 0
     self.ACCMode = 0
 
     self.pcm_cnt = 0
@@ -103,14 +96,16 @@ class CarController():
     self.ldws_opt = param.get_bool('IsLdwsCar')
     self.stock_navi_decel_enabled = param.get_bool('StockNaviDecelEnabled')
     self.keep_steering_turn_signals = param.get_bool('KeepSteeringTurnSignals')
-    self.warning_over_speed_limit = param.get_bool('WarningOverSpeedLimit')
     self.NoMinLaneChangeSpeed = param.get_bool('NoMinLaneChangeSpeed')
+    self.haptic_feedback_speed_camera = param.get_bool('HapticFeedbackWhenSpeedCamera')
 
     self.scc_smoother = SccSmoother()
     self.last_blinker_frame = 0
+    self.prev_active_cam = False
+    self.active_cam_timer = 0
 
   def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
-             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls, hud_speed):
+             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
     # Steering Torque
     new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
@@ -123,12 +118,12 @@ class CarController():
     if CS.spas_enabled:
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       apply_diff = abs(apply_angle - CS.out.steeringAngleDeg)
-      if apply_diff > 1.65 and enabled: # Rate limit for when steering angle is not apply_angle - JPR
+      if apply_diff > 1.65 and c.active: # Rate limit for when steering angle is not apply_angle - JPR
         self.ratelimit = self.ratelimit + 0.03 # Increase each cycle - JPR
         rate_limit = max(self.ratelimit, 10) # Make sure not to go past +-10 on rate - JPR
         print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
-      elif enabled:
+      elif c.active:
         self.ratelimit = 2.8 # Reset it back - JPR
         if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
@@ -137,10 +132,10 @@ class CarController():
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-      spas_active = CS.spas_enabled and enabled and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or CarControllerParams.STEER_MAX - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
-      lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or CarControllerParams.STEER_MAX - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
+      lkas_active = c.active and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
     else:
-      lkas_active = enabled and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if CS.spas_enabled:
       if Params().get_bool("SpasMode"):
@@ -179,14 +174,19 @@ class CarController():
 
     self.apply_steer_last = apply_steer
 
-    if self.warning_over_speed_limit:
-      recent_blinker = (controls.sm.frame - self.last_blinker_frame) * DT_CTRL < 5.0
-      if not recent_blinker and self.scc_smoother.over_speed_limit:
-        left_lane_depart = True
-        self.last_blinker_frame = controls.sm.frame
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
+
+    if self.haptic_feedback_speed_camera:
+      if self.prev_active_cam != self.scc_smoother.active_cam:
+        self.prev_active_cam = self.scc_smoother.active_cam
+        if self.scc_smoother.active_cam:
+          self.active_cam_timer = int(1.5 / DT_CTRL)
+
+      if self.active_cam_timer > 0:
+        self.active_cam_timer -= 1
+        left_lane_warning = right_lane_warning = 1
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
     enabled_speed = 38 if CS.is_set_speed_in_mph else 60
@@ -223,7 +223,7 @@ class CarController():
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
       can_sends.append(create_clu11(self.packer, frame // 2 % 0x10, CS.mdps_bus, CS.clu11, Buttons.NONE, enabled_speed))
 
-    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 0 and CS.out.cruiseState.enabled and not CS.CP.radarDisablePossible: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
+    if pcm_cancel_cmd and self.longcontrol and self.pcm_cnt == 0 and CS.out.cruiseState.enabled and not CS.CP.radarDisable: #Make SCC cancel when op disengage or last accel is kept (IDK) -JPR
       can_sends.append(create_clu11(self.packer, frame % 0x10, CS.scc_bus, CS.clu11, Buttons.CANCEL, clu11_speed))
       self.pcm_cnt += 1
     else:
@@ -238,39 +238,6 @@ class CarController():
     
     if self.pcm_cnt == 20:
       self.pcm_cnt = 0 
-
-    if CS.CP.radarDisableOld:
-      self.radarDisableOverlapTimer += 1
-      self.radarDisableResetTimer = 0
-      if self.radarDisableOverlapTimer >= 30:
-        self.radarDisableActivated = True
-        if 200 > self.radarDisableOverlapTimer > 36:
-          if frame % 41 == 0 or self.radarDisableOverlapTimer == 37:
-            can_sends.append(create_scc7d0(b'\x02\x10\x03\x00\x00\x00\x00\x00'))
-          elif frame % 43 == 0 or self.radarDisableOverlapTimer == 37:
-            can_sends.append(create_scc7d0(b'\x03\x28\x03\x01\x00\x00\x00\x00'))
-          elif frame % 19 == 0 or self.radarDisableOverlapTimer == 37:
-            can_sends.append(create_scc7d0(b'\x02\x10\x85\x00\x00\x00\x00\x00'))  # this disables RADAR for
-      else:
-        self.counter_init = False
-        can_sends.append(create_scc7d0(b'\x02\x10\x90\x00\x00\x00\x00\x00'))  # this enables RADAR
-        can_sends.append(create_scc7d0(b'\x03\x29\x03\x01\x00\x00\x00\x00'))
-    elif self.radarDisableActivated:
-      can_sends.append(create_scc7d0(b'\x02\x10\x90\x00\x00\x00\x00\x00'))  # this enables RADAR
-      can_sends.append(create_scc7d0(b'\x03\x29\x03\x01\x00\x00\x00\x00'))
-      self.radarDisableOverlapTimer = 0
-      if frame % 50 == 0:
-        self.radarDisableResetTimer += 1
-        if self.radarDisableResetTimer > 2:
-          self.radarDisableActivated = False
-          self.counter_init = True
-    else:
-      self.radarDisableOverlapTimer = 0
-      self.radarDisableResetTimer = 0
-
-    if (frame % 50 == 0 or self.radarDisableOverlapTimer == 37) and \
-            CS.CP.radarDisableOld and self.radarDisableOverlapTimer >= 30:
-      can_sends.append(create_scc7d0(b'\x02\x3E\x00\x00\x00\x00\x00\x00'))
 
     if not lead_visible:
       self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
@@ -288,58 +255,43 @@ class CarController():
         self.gapsettingdance = 2
         self.gapcount = 0
       self.gapsetting = self.gapsettingdance
-    elif 10 > CS.lead_distance > 0: # Set gap to associated distance of lead. - JPR
-      self.gapsetting = 1
-    elif 30 > CS.lead_distance > 15:
-      self.gapsetting = 2
-    elif 55 > CS.lead_distance > 30:
-      self.gapsetting = 3
-    elif CS.lead_distance > 55:
-      self.gapsetting = 4
-
+    else:
+      d = self.scc_smoother.get_lead(controls.sm).dRel
+      self.gapsettingdance = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol and (CS.cruiseState_enabled and CS.scc_bus or CS.CP.radarDisablePossible or self.radarDisableActivated and self.counter_init or CS.CP.radarOffCan):
+    if self.longcontrol and (CS.cruiseState_enabled and CS.scc_bus or CS.CP.radarDisable or CS.CP.radarOffCan):
       if frame % 2 == 0:
-        
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
         apply_accel = clip(actuators.accel if c.active else 0,
                            CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
         apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
-
         self.accel = apply_accel
 
-        set_speed_in_units = hud_speed * (CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH)
+        controls.apply_accel = apply_accel
+        aReqValue = CS.scc12["aReqValue"]
+        controls.aReqValue = aReqValue
 
-        if enabled or CS.CP.radarDisablePossible:
-          self.ACCMode = 2 if CS.out.gasPressed else 1
-        else:
-          self.ACCMode = 0
+        if aReqValue < controls.aReqValueMin:
+          controls.aReqValueMin = controls.aReqValue
 
-        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed, self.ACCMode))
+        if aReqValue > controls.aReqValueMax:
+          controls.aReqValueMax = controls.aReqValue
 
-        can_sends.append(create_scc11(self.packer, enabled, set_speed_in_units, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
-
-        if frame % 20 == 0 and CS.has_scc13 and not CS.CP.radarDisablePossible:
-          can_sends.append(create_scc13(self.packer, CS.scc13))
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed))
+        can_sends.append(create_scc11(self.packer, enabled, set_speed, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
           
-        if CS.has_scc14 or CS.CP.radarDisablePossible or self.longcontrol and CS.CP.radarOffCan:
-          lead = self.scc_smoother.get_lead(controls.sm)
+        if CS.has_scc14 or CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
           jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
 
-          if lead is not None:
-            d = lead.dRel
-            obj_gap = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4 if d < 80 else 5
-          else:
-            obj_gap = 0
+          can_sends.append(create_scc14(self.packer, enabled, jerk, stopping, CS.out.gasPressed, apply_accel))
 
-          can_sends.append(create_scc14(self.packer, enabled, CS.out.vEgo, apply_accel, CS.out.gasPressed,
-                                        obj_gap, jerk, stopping, self.ACCMode))
-        if CS.CP.radarDisablePossible:
+        if CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
           can_sends.append(create_fca11(self.packer, int(frame / 2)))
-    else:
-      self.counter_init = True
+
+      if frame % 20 == 0:
+        can_sends.append(create_scc13(self.packer))
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5
@@ -352,9 +304,8 @@ class CarController():
       # activated_hda: 0 - off, 1 - main road, 2 - highway
       if self.car_fingerprint in FEATURES["send_lfa_mfa"]:
         can_sends.append(create_lfahda_mfc(self.packer, enabled, activated_hda, warning))
-      elif CS.mdps_bus == 0:
-        state = 2 if self.car_fingerprint in FEATURES["send_hda_state_2"] else 1
-        can_sends.append(create_hda_mfc(self.packer, activated_hda, state))
+      elif CS.has_lfa_hda:
+        can_sends.append(create_hda_mfc(self.packer, activated_hda, CS, left_lane, right_lane))
 
 ############### SPAS STATES ############## JPR
 # State 1 : Start
@@ -437,11 +388,11 @@ class CarController():
       self.DTQL = abs(CS.out.steeringWheelTorque)
 
     # 5 Hz ACC options
-    if frame % 20 == 0 and CS.CP.radarDisablePossible:
+    if frame % 20 == 0 and CS.CP.radarDisable:
       can_sends.extend(create_acc_opt(self.packer, int(frame / 2)))
 
     # 2 Hz front radar options
-    if frame % 50 == 0 and CS.CP.radarDisablePossible:
+    if frame % 50 == 0 and CS.CP.radarDisable:
       can_sends.append(create_frt_radar_opt(self.packer))
 
     new_actuators = actuators.copy()

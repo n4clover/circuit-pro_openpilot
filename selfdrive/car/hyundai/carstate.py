@@ -29,6 +29,7 @@ class CarState(CarStateBase):
     self.scc_bus = CP.sccBus
     self.has_scc13 = CP.hasScc13 or CP.carFingerprint in FEATURES["has_scc13"]
     self.has_scc14 = CP.hasScc14 or CP.carFingerprint in FEATURES["has_scc14"]
+    self.has_lfa_hda = CP.hasLfaHda
     self.leftBlinker = False
     self.rightBlinker = False
     self.lkas_button_on = True
@@ -129,12 +130,14 @@ class CarState(CarStateBase):
       ret.autoHold = cp.vl["ESP11"]["AVH_STAT"]
 
     # cruise state
-    if self.CP.radarDisablePossible:
+    if self.CP.radarDisable:
       # These are not used for engage/disengage since openpilot keeps track of state using the buttons
       ret.cruiseState.available = cp.vl["TCS13"]["ACCEnable"] == 0
       ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
       ret.cruiseState.standstill = False
       ret.cruiseState.enabledAcc = ret.cruiseState.enabled
+      print("cruiseState.enabled", cp.vl["TCS13"]["ACC_REQ"])
+      print("cruiseState.available", cp.vl["TCS13"]["ACCEnable"])
     else:
       ret.cruiseState.enabled = (cp_scc.vl["SCC12"]["ACCMode"] != 0) if not self.no_radar else \
                                       cp.vl["LVR12"]["CF_Lvr_CruiseSet"] != 0
@@ -159,7 +162,6 @@ class CarState(CarStateBase):
 
     # TODO: Check this
     ret.brakeLights = bool(cp.vl["TCS13"]["BrakeLight"] or ret.brakePressed)
-
     ret.gasPressed = cp.vl["TCS13"]["DriverOverride"] == 1
 
     if self.CP.carFingerprint in EV_HYBRID_CAR:
@@ -187,7 +189,7 @@ class CarState(CarStateBase):
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
-    if not self.CP.radarDisablePossible:
+    if not self.CP.radarDisable:
       if self.CP.carFingerprint in FEATURES["use_fca"]:
         ret.stockAeb = cp.vl["FCA11"]["FCA_CmdAct"] != 0
         ret.stockFcw = cp.vl["FCA11"]["CF_VSM_Warn"] == 2
@@ -211,6 +213,7 @@ class CarState(CarStateBase):
     self.mdps12 = cp_mdps.vl["MDPS12"]
     self.park_brake = cp.vl["TCS13"]["PBRAKE_ACT"] == 1
     self.brake_error = cp.vl["TCS13"]["ACCEnable"] != 0 # 0 ACC CONTROL ENABLED, 1-3 ACC CONTROL DISABLED
+    self.lfahda_mfc = cp_cam.vl["LFAHDA_MFC"]
     self.steer_state = cp_mdps.vl["MDPS12"]["CF_Mdps_ToiActive"] #0 NOT ACTIVE, 1 ACTIVE
     self.cruise_unavail_cnt += 1 if cp.vl["TCS13"]["CF_VSM_Avail"] != 1 and cp.vl["TCS13"]["ACCEnable"] != 0 else -self.cruise_unavail_cnt
     self.cruise_unavail = self.cruise_unavail_cnt > 100
@@ -237,8 +240,8 @@ class CarState(CarStateBase):
 
     # scc smoother
     driver_override = cp.vl["TCS13"]["DriverOverride"]
-    self.acc_mode = cp_scc.vl["SCC12"]["ACCMode"] != 0 if not self.no_radar else 0
-    self.cruise_gap = cp_scc.vl["SCC11"]["TauGapSet"] if not self.no_radar else 1
+    self.acc_mode = ret.cruiseState.enabled if self.CP.radarDisable else cp_scc.vl["SCC12"]["ACCMode"] != 0
+    self.cruise_gap = 3 #cp_scc.vl["SCC11"]["TauGapSet"] #if not self.no_radar else 1
     self.gas_pressed = ret.gasPressed or driver_override == 1
     self.brake_pressed = ret.brakePressed or driver_override == 2
     self.standstill = ret.standstill or ret.cruiseState.standstill
@@ -380,7 +383,7 @@ class CarState(CarStateBase):
       ("WHL_SPD11", 50),
     ]
 
-    if not CP.radarDisablePossible:
+    if not CP.radarDisable:
       signals += [
       ("MainMode_ACC", "SCC11", 1),
       ("SCCInfoDisplay", "SCC11", 0),
@@ -428,7 +431,7 @@ class CarState(CarStateBase):
       ("ComfortBandLower", "SCC14", 0),
       ]
 
-    if CP.sccBus == 0 and CP.pcmCruise and not CP.radarDisablePossible:
+    if CP.sccBus == 0 and CP.pcmCruise and not CP.radarDisable:
       checks += [
         ("SCC11", 50),
         ("SCC12", 50),
@@ -763,5 +766,15 @@ class CarState(CarStateBase):
         ("SCC11", 50),
         ("SCC12", 50),
       ]
+
+      if CP.hasLfaHda:
+        signals += [
+          ("HDA_USM", "LFAHDA_MFC"),
+          ("HDA_Active", "LFAHDA_MFC"),
+          ("HDA_Icon_State", "LFAHDA_MFC"),
+          ("HDA_LdwSysState", "LFAHDA_MFC"),
+          ("HDA_Icon_Wheel", "LFAHDA_MFC"),
+        ]
+        checks += [("LFAHDA_MFC", 20)]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, 2, enforce_checks=False)

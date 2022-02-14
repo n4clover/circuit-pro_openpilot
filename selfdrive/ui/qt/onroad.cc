@@ -153,7 +153,7 @@ void OnroadWindow::mousePressEvent(QMouseEvent* e) {
 void OnroadWindow::offroadTransition(bool offroad) {
 #ifdef ENABLE_MAPS
   if (!offroad) {
-    if (map == nullptr && (uiState()->has_prime || !MAPBOX_TOKEN.isEmpty())) {
+    if (map == nullptr && (uiState()->prime_type || !MAPBOX_TOKEN.isEmpty())) {
       MapWindow * m = new MapWindow(get_mapbox_settings());
       m->setFixedWidth(topWidget(this)->width() / 2);
       m->offroadTransition(offroad);
@@ -406,6 +406,7 @@ void NvgWindow::drawIcon(QPainter &p, int x, int y, QPixmap &img, QBrush bg, flo
 void NvgWindow::drawText2(QPainter &p, int x, int y, int flags, const QString &text, const QColor& color) {
   QFontMetrics fm(p.font());
   QRect rect = fm.boundingRect(text);
+  rect.adjust(-1, -1, 1, 1);
   p.setPen(color);
   p.drawText(QRect(x, y, rect.width(), rect.height()), flags, text);
 }
@@ -512,7 +513,7 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
     const int w = 58;
     const int h = 126;
     const int x = 110;
-    const int y = height() - h - 80;
+    const int y = height() - h - 85;
 
     auto tpms = car_state.getTpms();
     const float fl = tpms.getFl();
@@ -528,7 +529,7 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
     QFontMetrics fm(p.font());
     QRect rcFont = fm.boundingRect("9");
 
-    int center_x = x + 4;
+    int center_x = x + 3;
     int center_y = y + h/2;
     const int marginX = (int)(rcFont.width() * 2.7f);
     const int marginY = (int)((h/2 - rcFont.height()) * 0.7f);
@@ -648,11 +649,29 @@ void NvgWindow::drawSpeed(QPainter &p) {
   UIState *s = uiState();
   const SubMaster &sm = *(s->sm);
   float cur_speed = std::max(0.0, sm["carState"].getCarState().getCluSpeedMs() * (s->scene.is_metric ? MS_TO_KPH : MS_TO_MPH));
+  auto car_state = sm["carState"].getCarState();
+  float accel = car_state.getAEgo();
+
+  QColor color = QColor(255, 255, 255, 230);
+
+  if(accel > 0) {
+    int a = (int)(255.f - (180.f * (accel/2.f)));
+    a = std::min(a, 255);
+    a = std::max(a, 80);
+    color = QColor(a, a, 255, 230);
+  }
+  else {
+    int a = (int)(255.f - (255.f * (-accel/3.f)));
+    a = std::min(a, 255);
+    a = std::max(a, 60);
+    color = QColor(255, a, a, 230);
+  }
 
   QString speed;
   speed.sprintf("%.0f", cur_speed);
   configFont(p, "Open Sans", 176, "Bold");
-  drawText(p, rect().center().x(), 230, speed);
+  drawTextWithColor(p, rect().center().x(), 230, speed, color);
+
   configFont(p, "Open Sans", 66, "Regular");
   drawText(p, rect().center().x(), 310, s->scene.is_metric ? "km/h" : "mph", 200);
 }
@@ -928,6 +947,12 @@ void NvgWindow::drawDebugText(QPainter &p) {
 
   y += height;
   str.sprintf("%.3f (%.3f/%.3f)\n", aReqValue, aReqValueMin, aReqValueMax);
+  p.drawText(text_x, y, str);
+
+  auto car_state = sm["carState"].getCarState();
+
+  y += height;
+  str.sprintf("aEgo: %.3f\n", car_state.getAEgo());
   p.drawText(text_x, y, str);
 
   auto lead_radar = sm["radarState"].getRadarState().getLeadOne();
