@@ -261,11 +261,6 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if enabled:
-        self.ACCMode = 2 if CS.out.gasPressed else 1
-    else:
-      self.ACCMode = 0
-
     if self.longcontrol and (CS.cruiseState_enabled and CS.scc_bus or CS.CP.radarDisable or CS.CP.radarOffCan):
       if frame % 2 == 0:
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
@@ -284,21 +279,13 @@ class CarController():
         if aReqValue > controls.aReqValueMax:
           controls.aReqValueMax = controls.aReqValue
 
-
-        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed, self.ACCMode))
+        can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed))
         can_sends.append(create_scc11(self.packer, enabled, set_speed, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
           
         if CS.has_scc14 or CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
-          #lead = self.scc_smoother.get_lead(controls.sm)
           jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
 
-         # if lead is not None:
-          #  d = lead.dRel
-           # obj_gap = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4 if d < 80 else 5
-          #else:
-          #  obj_gap = 0
-
-          can_sends.append(create_scc14(self.packer, enabled, jerk, stopping, self.ACCMode))
+          can_sends.append(create_scc14(self.packer, enabled, jerk, stopping, CS.out.gasPressed, apply_accel))
 
         if CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
           can_sends.append(create_fca11(self.packer, int(frame / 2)))

@@ -155,9 +155,9 @@ def create_scc11(packer, enabled, set_speed, lead_visible, gapsetting, lead_dist
 
   return packer.make_can_msg("SCC11", 0, values)
 
-def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed, ACCMode):
+def create_scc12(packer, apply_accel, enabled, stopping, idx, gaspressed):
   values = {
-    "ACCMode": ACCMode,
+    "ACCMode": 2 if gaspressed and enabled and (apply_accel > -0.2) else 1 if enabled else 0,
     "StopReq": 1 if enabled and stopping and not gaspressed else 0,
     "aReqRaw": apply_accel if enabled else 0,
     "aReqValue": apply_accel if enabled else 0, # stock ramps up and down respecting jerk limit until it reaches aReqRaw
@@ -175,13 +175,13 @@ def create_scc13(packer):
   }
   return packer.make_can_msg("SCC13", 0, values)
 
-def create_scc14(packer, enabled, jerk, stopping, ACCMode):
+def create_scc14(packer, enabled, jerk, stopping, gaspressed, apply_accel):
   values = {
     "ComfortBandUpper": 0.0, # stock usually is 0 but sometimes uses higher values
     "ComfortBandLower": 0.0, # stock usually is 0 but sometimes uses higher values
     "JerkUpperLimit": max(jerk, 1.0) if (enabled and not stopping) else 0, # stock usually is 1.0 but sometimes uses higher values
     "JerkLowerLimit": max(-jerk, 1.0) if enabled else 0, # stock usually is 0.5 but sometimes uses higher values
-    "ACCMode": ACCMode, # stock will always be 4 instead of 0 after first disengage
+    "ACCMode": 2 if gaspressed and enabled and (apply_accel > -0.2) else 1 if enabled else 4, # stock will always be 4 instead of 0 after first disengage
     "ObjGap": 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
   }
   return packer.make_can_msg("SCC14", 0, values)
