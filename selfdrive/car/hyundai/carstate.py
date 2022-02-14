@@ -136,6 +136,8 @@ class CarState(CarStateBase):
       ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
       ret.cruiseState.standstill = False
       ret.cruiseState.enabledAcc = ret.cruiseState.enabled
+      print("cruiseState.enabled", cp.vl["TCS13"]["ACC_REQ"])
+      print("cruiseState.available", cp.vl["TCS13"]["ACCEnable"])
     else:
       ret.cruiseState.enabled = (cp_scc.vl["SCC12"]["ACCMode"] != 0) if not self.no_radar else \
                                       cp.vl["LVR12"]["CF_Lvr_CruiseSet"] != 0
@@ -238,7 +240,7 @@ class CarState(CarStateBase):
 
     # scc smoother
     driver_override = cp.vl["TCS13"]["DriverOverride"]
-    self.acc_mode = cp_scc.vl["SCC12"]["ACCMode"] != 0 if self.CP.pcmCruise else cp.vl["TCS13"]["ACCEnable"] == 0
+    self.acc_mode = ret.cruiseState.enabled if self.CP.radarDisable else cp_scc.vl["SCC12"]["ACCMode"] != 0
     self.cruise_gap = 3 #cp_scc.vl["SCC11"]["TauGapSet"] #if not self.no_radar else 1
     self.gas_pressed = ret.gasPressed or driver_override == 1
     self.brake_pressed = ret.brakePressed or driver_override == 2
