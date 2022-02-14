@@ -506,7 +506,6 @@ static const QString get_tpms_text(float tpms) {
 void NvgWindow::drawBottomIcons(QPainter &p) {
   const SubMaster &sm = *(uiState()->sm);
   auto car_state = sm["carState"].getCarState();
-  auto scc_smoother = sm["carControl"].getCarControl().getSccSmoother();
 
   // tire pressure
   {
@@ -544,10 +543,6 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
   const int y = rect().bottom() - footer_h / 2 - 10;
 
   // cruise gap
-  int gap = car_state.getCruiseGap();
-  bool longControl = scc_smoother.getLongControl();
-  int autoTrGap = scc_smoother.getAutoTrGap();
-
   p.setPen(Qt::NoPen);
   p.setBrush(QBrush(QColor(0, 0, 0, 255 * .1f)));
   p.drawEllipse(x - radius / 2, y - radius / 2, radius, radius);
@@ -555,20 +550,9 @@ void NvgWindow::drawBottomIcons(QPainter &p) {
   QString str;
   float textSize = 50.f;
   QColor textColor = QColor(255, 255, 255, 200);
-
-  if(gap <= 0) {
-    str = "N/A";
-  }
-  else if(longControl && gap == autoTrGap) {
-    str = "AUTO";
-    textColor = QColor(120, 255, 120, 200);
-  }
-  else {
-    str.sprintf("%d", (int)gap);
-    textColor = QColor(120, 255, 120, 200);
-    textSize = 70.f;
-  }
-
+  str = "AUTO";
+  textColor = QColor(120, 255, 120, 200);
+  
   configFont(p, "Open Sans", 35, "Bold");
   drawText(p, x, y-20, "GAP", 200);
 
