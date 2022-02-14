@@ -1,6 +1,6 @@
 Version 0.8.13 (2022-XX-XX)
 ========================
- * Fixed HKG Longitudinal with Radar Disable - JPR
+ * Fixed HKG Longitudinal with Radar Disable (BOTH - HKG Long & Radar Disable Toggles ON!) - JPR
  * Improved driver monitoring
    * Retuned driver pose learner for relaxed driving positions
    * Added reliance on driving model to be more scene adaptive
