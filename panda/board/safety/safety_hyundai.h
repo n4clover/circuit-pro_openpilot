@@ -61,11 +61,13 @@ AddrCheckStruct hyundai_legacy_addr_checks[] = {
 const int HYUNDAI_PARAM_EV_GAS = 1;
 const int HYUNDAI_PARAM_HYBRID_GAS = 2;
 const int HYUNDAI_PARAM_LONGITUDINAL = 4;
+const int MAD_MODE = 5;
 
 bool hyundai_legacy = false;
 bool hyundai_ev_gas_signal = false;
 bool hyundai_hybrid_gas_signal = false;
 bool hyundai_longitudinal = false;
+bool mad_mode = false;
 bool radar_disable = false;
 
 addr_checks hyundai_rx_checks = {hyundai_addr_checks, HYUNDAI_ADDR_CHECK_LEN};
@@ -191,11 +193,11 @@ static int hyundai_rx_hook(CANPacket_t *to_push) {
     }
 
     // read gas pressed signal
-    if ((addr == 881) && hyundai_ev_gas_signal) {
+    if ((addr == 881) && hyundai_ev_gas_signal && !mad_mode) {
       gas_pressed = (((GET_BYTE(to_push, 4) & 0x7FU) << 1) | GET_BYTE(to_push, 3) >> 7) != 0U;
-    } else if ((addr == 881) && hyundai_hybrid_gas_signal) {
+    } else if ((addr == 881) && hyundai_hybrid_gas_signal && !mad_mode) {
       gas_pressed = GET_BYTE(to_push, 7) != 0U;
-    } else if (addr == 608) {  // ICE
+    } else if (addr == 608 && !mad_mode) {  // ICE
       gas_pressed = (GET_BYTE(to_push, 7) >> 6) != 0U;
     } else {
     }
@@ -207,7 +209,7 @@ static int hyundai_rx_hook(CANPacket_t *to_push) {
       vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;
     }
 
-    if (addr == 916) {
+    if (addr == 916 && !mad_mode) {
       brake_pressed = (GET_BYTE(to_push, 6) >> 7) != 0U;
     }
 
@@ -359,6 +361,7 @@ static const addr_checks* hyundai_init(int16_t param) {
   relay_malfunction_reset();
 
   hyundai_legacy = false;
+  mad_mode = GET_FLAG(param, MAD_MODE);
   hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
   hyundai_hybrid_gas_signal = !hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
 

@@ -4,7 +4,7 @@ from cereal import car
 from panda import Panda
 from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import CAR, Buttons, CarControllerParams, LEGACY_SAFETY_MODE_CAR
+from selfdrive.car.hyundai.values import CAR, Buttons, CarControllerParams, LEGACY_SAFETY_MODE_CAR, HYBRID_CAR, EV_CAR
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
@@ -40,10 +40,17 @@ class CarInterface(CarInterfaceBase):
 
     ret.carName = "hyundai"
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
-    #if candidate in LEGACY_SAFETY_MODE_CAR:
-    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy, 0)]
-    #else:
-    #  ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundai, 0)]
+    if candidate in LEGACY_SAFETY_MODE_CAR and (ret.mdpsBus == 1 or ret.sccBus == 1 or ret.sccBus == 2 or Params().get_bool('spasEnabled')):
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy, 0)]
+    else:
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundai, 0)]
+      # set appropriate safety param for gas signal
+      if candidate in HYBRID_CAR:
+        ret.safetyConfigs[0].safetyParam = 2
+      elif candidate in EV_CAR:
+        ret.safetyConfigs[0].safetyParam = 1
+      if Params().get_bool('MadModeEnabled'):
+        ret.safetyConfigs[0].safetyParam = 5
 
     tire_stiffness_factor = 1.
     if Params().get_bool('SteerLockout'):
