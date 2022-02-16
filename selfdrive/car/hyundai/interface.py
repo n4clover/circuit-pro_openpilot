@@ -595,7 +595,7 @@ class CarInterface(CarInterfaceBase):
 
     # most HKG cars has no long control, it is safer and easier to engage by main on
 
-    if self.mad_mode_enabled:
+    if self.mad_mode_enabled and not self.CP.radarDisable:
       ret.cruiseState.enabled = ret.cruiseState.available
 
     # turning indicator alert logic
