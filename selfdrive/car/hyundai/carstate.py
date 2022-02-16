@@ -136,8 +136,8 @@ class CarState(CarStateBase):
       ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
       ret.cruiseState.standstill = False
       ret.cruiseState.enabledAcc = ret.cruiseState.enabled
-      print("cruiseState.enabled", cp.vl["TCS13"]["ACC_REQ"])
-      print("cruiseState.available", cp.vl["TCS13"]["ACCEnable"])
+      #print("cruiseState.enabled", cp.vl["TCS13"]["ACC_REQ"])
+      #print("cruiseState.available", cp.vl["TCS13"]["ACCEnable"])
     else:
       ret.cruiseState.enabled = (cp_scc.vl["SCC12"]["ACCMode"] != 0) if not self.no_radar else \
                                       cp.vl["LVR12"]["CF_Lvr_CruiseSet"] != 0

@@ -117,10 +117,10 @@ class CarController():
     if CS.spas_enabled:
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       apply_diff = abs(apply_angle - CS.out.steeringAngleDeg)
-      if apply_diff > 1.65 and c.active: # Rate limit for when steering angle is not apply_angle - JPR
+      if apply_diff > 1.75 and c.active: # Rate limit for when steering angle is not apply_angle - JPR
         self.ratelimit = self.ratelimit + 0.03 # Increase each cycle - JPR
         rate_limit = max(self.ratelimit, 10) # Make sure not to go past +-10 on rate - JPR
-        print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
+        #print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
       elif c.active:
         self.ratelimit = 2.8 # Reset it back - JPR
