@@ -253,6 +253,8 @@ class CarController():
       elif self.gapcount > self.animationSpeed and self.gapsettingdance == 3:
         self.gapsettingdance = 2
         self.gapcount = 0
+      elif CS.out.vEgo < 0.3:
+        self.gapsetting = 4
       self.gapsetting = self.gapsettingdance
     else:
       d = CS.lead_distance
