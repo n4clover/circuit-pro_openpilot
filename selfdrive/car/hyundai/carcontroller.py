@@ -88,7 +88,7 @@ class CarController():
       self.spas_active_last = 0
       self.override = False
       self.dynamicSpas = Params().get_bool('DynamicSpas')
-      self.ratelimit = 2.8 # Starting point - JPR
+      self.ratelimit = 2.3 # Starting point - JPR
 
     param = Params()
 
@@ -123,7 +123,7 @@ class CarController():
         #print("apply_diff is greater than 1.5 : rate limit :", rate_limit)
         apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - rate_limit, CS.out.steeringAngleDeg + rate_limit)
       elif c.active:
-        self.ratelimit = 2.8 # Reset it back - JPR
+        self.ratelimit = 2.3 # Reset it back - JPR
         if self.last_apply_angle * apply_angle > 0. and abs(apply_angle) > abs(self.last_apply_angle):
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
         else:
@@ -146,7 +146,7 @@ class CarController():
       else:
         if CS.out.steeringPressed:
             self.cut_timer = 0
-        if CS.out.steeringPressed or self.cut_timer <= 65: # Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+        if CS.out.steeringPressed or self.cut_timer <= 85: # Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
           spas_active = False
           lkas_active = True
           self.cut_timer += 1
