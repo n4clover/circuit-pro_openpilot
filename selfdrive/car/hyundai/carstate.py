@@ -133,7 +133,7 @@ class CarState(CarStateBase):
     if self.CP.radarDisable:
       # These are not used for engage/disengage since openpilot keeps track of state using the buttons
       ret.cruiseState.available = cp.vl["TCS13"]["ACCEnable"] == 0
-      ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
+      ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] != 3
       ret.cruiseState.standstill = False
       ret.cruiseState.enabledAcc = ret.cruiseState.enabled
       print("cruiseState.enabled", cp.vl["TCS13"]["ACC_REQ"])
