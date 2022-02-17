@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QSound>
+#include <QMouseEvent>
 
 #include "selfdrive/common/timing.h"
 #include "selfdrive/ui/qt/util.h"
@@ -43,7 +44,6 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   QObject::connect(uiState(), &UIState::uiUpdate, this, &OnroadWindow::updateState);
   QObject::connect(uiState(), &UIState::offroadTransition, this, &OnroadWindow::offroadTransition);
 
-#ifdef QCOM2
   // screen recoder - neokii
 
   record_timer = std::make_shared<QTimer>();
@@ -64,7 +64,7 @@ OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
   stacked_layout->addWidget(recorder_widget);
   recorder_widget->raise();
   alerts->raise();
-#endif
+
 }
 
 void OnroadWindow::updateState(const UIState &s) {
@@ -88,8 +88,6 @@ void OnroadWindow::updateState(const UIState &s) {
 
 void OnroadWindow::mouseReleaseEvent(QMouseEvent* e) {
 
-#ifdef QCOM2
-  // neokii
   QPoint endPos = e->pos();
   int dx = endPos.x() - startPos.x();
   int dy = endPos.y() - startPos.y();
@@ -133,21 +131,11 @@ void OnroadWindow::mouseReleaseEvent(QMouseEvent* e) {
 
   // propagation event to parent(HomeWindow)
   QWidget::mouseReleaseEvent(e);
-#endif
 }
 
 void OnroadWindow::mousePressEvent(QMouseEvent* e) {
-#ifdef QCOM2
   startPos = e->pos();
-#else
-  if (map != nullptr) {
-    bool sidebarVisible = geometry().x() > 0;
-    map->setVisible(!sidebarVisible && !map->isVisible());
-  }
-
-  // propagation event to parent(HomeWindow)
-  QWidget::mouseReleaseEvent(e);
-#endif
+  //QWidget::mousePressEvent(e);
 }
 
 void OnroadWindow::offroadTransition(bool offroad) {
@@ -155,11 +143,15 @@ void OnroadWindow::offroadTransition(bool offroad) {
   if (!offroad) {
     if (map == nullptr && (uiState()->prime_type || !MAPBOX_TOKEN.isEmpty())) {
       MapWindow * m = new MapWindow(get_mapbox_settings());
-      m->setFixedWidth(topWidget(this)->width() / 2);
-      m->offroadTransition(offroad);
-      QObject::connect(uiState(), &UIState::offroadTransition, m, &MapWindow::offroadTransition);
-      split->addWidget(m, 0, Qt::AlignRight);
       map = m;
+
+      QObject::connect(uiState(), &UIState::offroadTransition, m, &MapWindow::offroadTransition);
+
+      m->setFixedWidth(topWidget(this)->width() / 2);
+      split->addWidget(m, 0, Qt::AlignRight);
+
+      // Make map visible after adding to split
+      m->offroadTransition(offroad);
     }
   }
 #endif
@@ -170,11 +162,10 @@ void OnroadWindow::offroadTransition(bool offroad) {
   bool wide_cam = Hardware::TICI() && Params().getBool("EnableWideCamera");
   nvg->setStreamType(wide_cam ? VISION_STREAM_RGB_WIDE : VISION_STREAM_RGB_BACK);
 
-#ifdef QCOM2
   if(offroad && recorder) {
     recorder->stop(false);
   }
-#endif
+
 }
 
 void OnroadWindow::paintEvent(QPaintEvent *event) {
@@ -695,7 +686,7 @@ void NvgWindow::drawSpeedLimit(QPainter &p) {
       p.drawPixmap(x, y, w, h, activeNDA == 1 ? ic_nda : ic_hda);
   }
 
-  if(limit_speed > 10 && left_dist > 0)
+  if(limit_speed > 10 && limit_speed < 130)
   {
     int radius_ = 192;
 
@@ -718,18 +709,20 @@ void NvgWindow::drawSpeedLimit(QPainter &p) {
 
     if(left_dist >= 1000)
       str_left_dist.sprintf("%.1fkm", left_dist / 1000.f);
-    else
+    else if(left_dist > 0)
       str_left_dist.sprintf("%dm", left_dist);
 
     configFont(p, "Open Sans", 80, "Bold");
     p.setPen(QColor(0, 0, 0, 230));
     p.drawText(rect, Qt::AlignCenter, str_limit_speed);
 
-    configFont(p, "Open Sans", 60, "Bold");
-    rect.translate(0, radius_/2 + 45);
-    rect.adjust(-30, 0, 30, 0);
-    p.setPen(QColor(255, 255, 255, 230));
-    p.drawText(rect, Qt::AlignCenter, str_left_dist);
+    if(str_left_dist.length() > 0) {
+      configFont(p, "Open Sans", 60, "Bold");
+      rect.translate(0, radius_/2 + 45);
+      rect.adjust(-30, 0, 30, 0);
+      p.setPen(QColor(255, 255, 255, 230));
+      p.drawText(rect, Qt::AlignCenter, str_left_dist);
+    }
   }
   else {
     auto controls_state = sm["controlsState"].getControlsState();
