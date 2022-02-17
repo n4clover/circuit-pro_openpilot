@@ -279,12 +279,11 @@ class CarController():
           controls.aReqValueMax = controls.aReqValue
 
         can_sends.append(create_scc12(self.packer, apply_accel, enabled, stopping, int(frame / 2), CS.out.gasPressed))
-        can_sends.append(create_scc11(self.packer, enabled, set_speed, lead_visible, self.gapsetting, CS.lead_distance, int(frame / 2)))
+        can_sends.append(create_scc11(self.packer, enabled, set_speed, lead_visible, self.gapsetting, int(frame / 2)))
           
         if CS.has_scc14 or CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
           jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
-
-          can_sends.append(create_scc14(self.packer, enabled, jerk, stopping, CS.out.gasPressed, apply_accel))
+          can_sends.append(create_scc14(self.packer, enabled, jerk, stopping, CS.out.gasPressed, apply_accel, lead_visible))
 
         if CS.CP.radarDisable or self.longcontrol and CS.CP.radarOffCan:
           can_sends.append(create_fca11(self.packer, int(frame / 2)))

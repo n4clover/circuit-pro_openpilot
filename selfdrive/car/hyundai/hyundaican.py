@@ -140,7 +140,7 @@ def create_mdps12(packer, frame, mdps12):
 
   return packer.make_can_msg("MDPS12", 2, values)
 
-def create_scc11(packer, enabled, set_speed, lead_visible, gapsetting, lead_dist, idx):
+def create_scc11(packer, enabled, set_speed, lead_visible, gapsetting, idx):
   values = {
     "MainMode_ACC": 1,
     "TauGapSet": gapsetting,
@@ -150,7 +150,7 @@ def create_scc11(packer, enabled, set_speed, lead_visible, gapsetting, lead_dist
     "ACC_ObjStatus": 1 if lead_visible else 0,
     "ACC_ObjLatPos": 0,
     "ACC_ObjRelSpd": 0,
-    "ACC_ObjDist": lead_dist,
+    "ACC_ObjDist": 0,
   }
 
   return packer.make_can_msg("SCC11", 0, values)
@@ -175,14 +175,14 @@ def create_scc13(packer):
   }
   return packer.make_can_msg("SCC13", 0, values)
 
-def create_scc14(packer, enabled, jerk, stopping, gaspressed, apply_accel):
+def create_scc14(packer, enabled, jerk, stopping, gaspressed, apply_accel, lead_visible):
   values = {
     "ComfortBandUpper": 0.0, # stock usually is 0 but sometimes uses higher values
     "ComfortBandLower": 0.0, # stock usually is 0 but sometimes uses higher values
     "JerkUpperLimit": max(jerk, 1.0) if (enabled and not stopping) else 0, # stock usually is 1.0 but sometimes uses higher values
     "JerkLowerLimit": max(-jerk, 1.0) if enabled else 0, # stock usually is 0.5 but sometimes uses higher values
     "ACCMode": 2 if gaspressed and enabled and (apply_accel > -0.2) else 1 if enabled else 4, # stock will always be 4 instead of 0 after first disengage
-    "ObjGap": 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
+    "ObjGap": 2 if lead_visible else 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
   }
   return packer.make_can_msg("SCC14", 0, values)
 
