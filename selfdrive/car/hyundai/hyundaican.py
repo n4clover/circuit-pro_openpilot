@@ -129,7 +129,7 @@ def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, set_spe
 
   scc11_values = {
     "MainMode_ACC": 1 if radarDisable or enabled else 0,
-    "TauGapSet": gapsetting,
+    "TauGapSet": gapsetting if enabled else 0,
     "VSetDis": set_speed if enabled else 0,
     "AliveCounterACC": idx % 0x10,
     "ObjValid": 1 if lead_visible else 0,

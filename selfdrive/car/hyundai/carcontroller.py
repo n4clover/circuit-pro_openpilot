@@ -260,7 +260,7 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol:
+    if self.longcontrol and CS.cruiseState_enabled or CS.CP.radarDisable:
       if frame % 2 == 0:
         stopping = controls.LoC.long_control_state == LongCtrlState.stopping
         apply_accel = clip(actuators.accel if c.active else 0,
@@ -279,7 +279,7 @@ class CarController():
           controls.aReqValueMax = controls.aReqValue
 
         jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
-        
+
         can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable)) 
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
