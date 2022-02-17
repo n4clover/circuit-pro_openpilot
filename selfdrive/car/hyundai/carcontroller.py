@@ -25,7 +25,7 @@ ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
 ANGLE_DELTA_VU = [1.29, 1.19, 1.14]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
 SPAS_SWITCH = 30 * CV.MPH_TO_MS # MPH - lowered Bc of model and overlearn steerRatio
-STEER_MAX_OFFSET = 95 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
+STEER_MAX_OFFSET = 110 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
 ###### SPAS #######
 
 CLUSTER_ANIMATION_BP = [0., 1., 10., 20., 30., 40., 50.]
