@@ -141,7 +141,7 @@ def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, set_spe
   commands.append(packer.make_can_msg("SCC11", 0, scc11_values))
 
   scc12_values = {
-    "ACCMode": 1 if enabled else 2 if enabled and gaspressed else 0,
+    "ACCMode": 2 if enabled and gaspressed else 1 if enabled else 0,
     "StopReq": 1 if enabled and stopping and not gaspressed else 0,
     "aReqRaw": accel if enabled else 0,
     "aReqValue": accel if enabled else 0, # stock ramps up and down respecting jerk limit until it reaches aReqRaw
