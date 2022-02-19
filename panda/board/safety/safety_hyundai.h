@@ -379,6 +379,7 @@ static const addr_checks* hyundai_legacy_init(int16_t param) {
   relay_malfunction_reset();
 
   hyundai_legacy = true;
+  hyundai_longitudinal = false;
   radar_disable = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
   hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
   hyundai_hybrid_gas_signal = !hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
