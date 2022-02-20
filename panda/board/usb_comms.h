@@ -432,9 +432,11 @@ int usb_cb_control_msg(USB_Setup_TypeDef *setup, uint8_t *resp) {
       green_led_enabled = (setup->b.wValue.w != 0U);
       break;
     // **** 0xf8: disable heartbeat checks
+    #ifdef ALLOW_DEBUG or RADAR_DISABLE
     case 0xf8:
       heartbeat_disabled = true;
       break;
+    #endif
     // **** 0xde: set CAN FD data bitrate
     case 0xf9:
       if (setup->b.wValue.w < CAN_CNT) {
