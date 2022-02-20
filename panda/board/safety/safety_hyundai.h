@@ -381,6 +381,7 @@ static const addr_checks* hyundai_legacy_init(int16_t param) {
   hyundai_legacy = true;
   hyundai_longitudinal = false;
   radar_disable = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
+  if (radar_disable) {heartbeat_disabled = true;}
   hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
   hyundai_hybrid_gas_signal = !hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
   hyundai_rx_checks = (addr_checks){hyundai_legacy_addr_checks, HYUNDAI_LEGACY_ADDR_CHECK_LEN};
