@@ -97,8 +97,6 @@ class CarInterface(CarInterfaceBase):
 	
     ret.longitudinalActuatorDelayLowerBound = 0.3
     ret.longitudinalActuatorDelayUpperBound = 0.3
-
-    ret.stopAccel = -2.2
     ret.stoppingDecelRate = 0.72  # brake_travel/s while trying to stop
     ret.vEgoStopping = 0.9
     ret.vEgoStarting = 0.9  # needs to be >= vEgoStopping to avoid state transition oscillation
