@@ -81,8 +81,6 @@ class CarController():
     self.last_blinker_frame = 0
     self.prev_active_cam = False
     self.active_cam_timer = 0
-  def CC_recive_data(self, override):
-    self.override = override
     
 
   def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
@@ -96,7 +94,23 @@ class CarController():
     self.steer_rate_limited = new_steer != apply_steer
 
     # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, lkas_active, self.packer, self.car_fingerprint, self.emsType)
+    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert)
+
+    # Disable steering while turning blinker on and speed below min lane chnage speed
+    if (CS.out.leftBlinker or CS.out.rightBlinker) and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed:
+      self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
+    if self.turning_indicator_alert: # set and clear by interface...)
+      lkas_active = False
+    if self.turning_signal_timer > 0:
+      self.turning_signal_timer -= 1
+
+    if not lkas_active:
+      apply_steer = 0
+
+    if CS.spas_enabled:
+      lkas_active = c.active and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+    else:
+      lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if abs(CS.out.steeringAngleDeg) > 90 and CS.CP.steerLockout:
       lkas_active = False

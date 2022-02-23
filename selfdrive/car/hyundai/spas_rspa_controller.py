@@ -29,7 +29,7 @@ class SpasRspaController:
     self.ratelimit = 2.3 # Starting point - JPR
     self.rate = 0
 
-  def update(self, c, enabled, CS, actuators, frame, lkas_active, packer, car_fingerprint, emsType):
+  def update(self, c, enabled, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut):
     self.packer = packer
     self.car_fingerprint = car_fingerprint
 
@@ -53,31 +53,17 @@ class SpasRspaController:
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or CarControllerParams.STEER_MAX - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
-      lkas_active = c.active and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
-    else:
-      lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
 
     if CS.spas_enabled and enabled:
         if CS.out.steeringPressed:
             self.cut_timer = 0
         if CS.out.steeringPressed or self.cut_timer < 85 and self.rate < 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
           spas_active = False
-          lkas_active = True
           self.cut_timer += 1
-
-    # Disable steering while turning blinker on and speed below min lane chnage speed
-    if (CS.out.leftBlinker or CS.out.rightBlinker) and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed:
-      self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
-    if self.turning_indicator_alert: # set and clear by interface...)
-      lkas_active = False
-      if CS.spas_enabled:
-        spas_active = False
-    if self.turning_signal_timer > 0:
-      self.turning_signal_timer -= 1
-
-    if not lkas_active:
-      apply_steer = 0
+    
+    if turnsignalcut:
+      spas_active = False
 
     can_sends = []
 
@@ -149,7 +135,6 @@ class SpasRspaController:
           print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
           print("spas_active:", spas_active)
           print("apply angle:", apply_angle)
-          print("lkas_active:", lkas_active)
           print("driver torque:", CS.out.steeringWheelTorque)
         if emsType == 0:
           print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
