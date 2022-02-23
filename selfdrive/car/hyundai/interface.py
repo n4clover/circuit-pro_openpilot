@@ -285,6 +285,8 @@ class CarInterface(CarInterfaceBase):
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
       ret.mass = 1999. + STD_CARGO_KG
       ret.wheelbase = 2.90
+      ret.steerRatio = 15.6 * 1.15
+      tire_stiffness_factor = 0.63
       ret.centerToFront = ret.wheelbase * 0.4
     elif candidate in [CAR.ELANTRA, CAR.ELANTRA_GT_I30]:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Hyundai.png img_spinner_comma.png")
