@@ -93,6 +93,14 @@ class CarController():
 
     self.steer_rate_limited = new_steer != apply_steer
 
+    if CS.spas_enabled:
+      lkas_active = c.active and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+    else:
+      lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+
+    if abs(CS.out.steeringAngleDeg) > 90 and CS.CP.steerLockout:
+      lkas_active = False
+
     # Disable steering while turning blinker on and speed below min lane chnage speed
     if (CS.out.leftBlinker or CS.out.rightBlinker) and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed:
       self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
@@ -103,14 +111,6 @@ class CarController():
 
     if not lkas_active:
       apply_steer = 0
-
-    if CS.spas_enabled:
-      lkas_active = c.active and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
-    else:
-      lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
-
-    if abs(CS.out.steeringAngleDeg) > 90 and CS.CP.steerLockout:
-      lkas_active = False
 
     self.lkas_active = lkas_active
 
