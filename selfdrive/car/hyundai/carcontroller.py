@@ -259,6 +259,5 @@ class CarController():
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
     new_actuators.accel = self.accel
     if CS.spas_enabled:
-      self.spas_active_last = self.spas_active
-      self.spas_active = True if CS.mdps11_stat == 5 else False
+      
     return new_actuators, can_sends
