@@ -38,7 +38,7 @@ class SpasRspaController:
     # Keep Track of Steering wheel rate - JPR
     self.rate = abs(CS.out.steeringAngleDeg - self.lastSteeringAngleDeg)
     # SPAS
-    if CS.spas_enabled and enabled:
+    if CS.spas_enabled:
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       apply_diff = abs(apply_angle - CS.out.steeringAngleDeg)
       if apply_diff > 1.75 and c.active: # Rate limit for when steering angle is not apply_angle - JPR
@@ -61,7 +61,7 @@ class SpasRspaController:
       spas_active = False
       self.startup_count += 1
 
-    if CS.spas_enabled and enabled:
+    if CS.spas_enabled:
       if CS.out.steeringPressed:
         self.cut_timer = 0
       if CS.out.steeringPressed or self.cut_timer < 85 and self.rate < 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
