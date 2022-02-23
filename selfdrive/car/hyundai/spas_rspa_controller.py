@@ -16,6 +16,8 @@ SPAS_SWITCH = 30 * CV.MPH_TO_MS # MPH - lowered Bc of model and overlearn steerR
 STEER_MAX_OFFSET = 105 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
 ###### SPAS #######
 
+EventName = car.CarEvent.EventName
+
 class SpasRspaController:
   def __init__(self):
     self.last_apply_angle = 0.0
@@ -30,6 +32,11 @@ class SpasRspaController:
     self.lastSteeringAngleDeg = 0
     self.cut_timer = 0
     self.startup_count = 0
+    self.SteeringTempUnavailable
+
+  def inject_events(self, events):
+    if self.SteeringTempUnavailable:
+        events.add(EventName.steerTempUnavailable)
 
   def update(self, c, enabled, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
     self.packer = packer
@@ -141,6 +148,11 @@ class SpasRspaController:
           print("driver torque:", CS.out.steeringWheelTorque)
         if emsType == 0:
           print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
+
+        if CS.mdps11_stat == 6 or CS.mdps11_stat == 8:
+          self.SteeringTempUnavailable = True
+        else:
+          self.SteeringTempUnavailable = False
 
       # SPAS12 20Hz
       if (frame % 5) == 0:

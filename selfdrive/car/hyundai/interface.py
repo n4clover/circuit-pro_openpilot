@@ -691,17 +691,13 @@ class CarInterface(CarInterfaceBase):
     if self.mad_mode_enabled and EventName.pedalPressed in events.events:
       events.events.remove(EventName.pedalPressed)
 
-    if Params().get_bool('spasEnabled'):
-      if self.CS.mdps11_stat == 7 and not self.CC.turning_indicator_alert:
-        if self.CS.mdps11_stat == 7 and self.CS.mdps11_stat_last == 7 and not self.CC.lkas_active and self.CS.mdps11_stat == 5: # We need to alert driver when SPAS abort or fail.
-          events.add(EventName.steerSaturated) 
-
-      if self.CS.mdps11_stat == 6 or self.CS.mdps11_stat == 8:
-        events.add(EventName.steerTempUnavailable)
-
     # scc smoother
     if self.CC.scc_smoother is not None:
       self.CC.scc_smoother.inject_events(events)
+
+    # SPAS and RSPA controller - JPR
+    if self.CC.scc_smoother is not None:
+      self.CC.spas_rspa_controller.inject_events(events)
 
     ret.events = events.to_msg()
 
