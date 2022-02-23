@@ -149,12 +149,3 @@ class SpasRspaController:
       self.spas_active_last = self.spas_active
       self.spas_active = spas_active
       self.lastSteeringAngleDeg = CS.out.steeringAngleDeg
-
-
-    
-      
-
-
-
-
-

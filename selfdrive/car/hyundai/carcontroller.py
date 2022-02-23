@@ -82,7 +82,6 @@ class CarController():
     self.prev_active_cam = False
     self.active_cam_timer = 0
     
-
   def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
@@ -150,8 +149,6 @@ class CarController():
     self.prev_scc_cnt = CS.scc11["AliveCounterACC"]
 
     self.lkas11_cnt = (self.lkas11_cnt + 1) % 0x10
-
-
 
     # tester present - w/ no response (keeps radar disabled)
     if CS.CP.radarDisable:
@@ -258,6 +255,5 @@ class CarController():
     new_actuators = actuators.copy()
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
     new_actuators.accel = self.accel
-    if CS.spas_enabled:
       
     return new_actuators, can_sends
