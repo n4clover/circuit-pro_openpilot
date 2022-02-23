@@ -18,9 +18,7 @@ STEER_MAX_OFFSET = 105 # How far from MAX LKAS torque to engage Dynamic SPAS whe
 ###### SPAS #######
 
 class SpasRspaController:
-  def __init__(self, CP):
-    super().__init__(CP)
-    self.emsType = CP.emsType
+  def __init__(self):
     self.DTQL = 0
     self.last_apply_angle = 0.0
     self.en_spas = 2
@@ -32,7 +30,7 @@ class SpasRspaController:
     self.dynamicSpas = Params().get_bool('DynamicSpas')
     self.ratelimit = 2.3 # Starting point - JPR
 
-  def update(self, c, enabled, CS, actuators, frame, lkas_active, packer, car_fingerprint):
+  def update(self, c, enabled, CS, actuators, frame, lkas_active, packer, car_fingerprint, emsType):
     self.packer = packer
     self.car_fingerprint = car_fingerprint
     # SPAS
@@ -109,15 +107,15 @@ class SpasRspaController:
             spas_active_stat = True
           else:
             spas_active_stat = False
-        if self.emsType == 1:
+        if emsType == 1:
           can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
           if Params().get_bool('SPASDebug'):
             print("EMS_366")
-        elif self.emsType == 2:
+        elif emsType == 2:
           can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
           if Params().get_bool('SPASDebug'):
             print("EMS_11")
-        elif self.emsType == 3:
+        elif emsType == 3:
           can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
           if Params().get_bool('SPASDebug'):
             print("E_EMS11")
@@ -161,7 +159,7 @@ class SpasRspaController:
           print("apply angle:", apply_angle)
           print("lkas_active:", lkas_active)
           print("driver torque:", CS.out.steeringWheelTorque)
-        if self.emsType == 0:
+        if emsType == 0:
           print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
       # SPAS12 20Hz

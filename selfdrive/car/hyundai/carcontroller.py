@@ -93,7 +93,7 @@ class CarController():
     self.steer_rate_limited = new_steer != apply_steer
 
     # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, lkas_active, self.packer, self.car_fingerprint)
+    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, lkas_active, self.packer, self.car_fingerprint, self.emsType)
 
     if abs(CS.out.steeringAngleDeg) > 90 and CS.CP.steerLockout:
       lkas_active = False
