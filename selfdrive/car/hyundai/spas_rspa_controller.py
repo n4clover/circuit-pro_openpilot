@@ -29,6 +29,7 @@ class SpasRspaController:
     self.ratelimit = 2.3 # Starting point - JPR
     self.rate = 0
     self.lastSteeringAngleDeg = 0
+    self.cut_timer = 0
 
   def update(self, c, enabled, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut):
     self.packer = packer
@@ -54,7 +55,7 @@ class SpasRspaController:
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
+    spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
 
     if CS.spas_enabled and enabled:
       if CS.out.steeringPressed:
