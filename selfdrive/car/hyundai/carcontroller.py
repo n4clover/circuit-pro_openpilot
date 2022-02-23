@@ -116,8 +116,10 @@ class CarController():
 
     self.apply_steer_last = apply_steer
 
+    can_sends = []
+
     # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert)
+    self.spas_rspa_controller.update(c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
@@ -149,7 +151,7 @@ class CarController():
 
     self.lkas11_cnt = (self.lkas11_cnt + 1) % 0x10
 
-    can_sends = []
+
 
     # tester present - w/ no response (keeps radar disabled)
     if CS.CP.radarDisable:
@@ -256,4 +258,7 @@ class CarController():
     new_actuators = actuators.copy()
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
     new_actuators.accel = self.accel
+    if CS.spas_enabled:
+      self.spas_active_last = self.spas_active
+      self.spas_active = True if CS.mdps11_stat == 5 else False
     return new_actuators, can_sends

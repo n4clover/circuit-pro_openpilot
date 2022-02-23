@@ -5,7 +5,6 @@ from selfdrive.car.hyundai.hyundaican import create_spas11, create_spas12, creat
 from common.numpy_fast import clip, interp
 from selfdrive.config import Conversions as CV
 from common.realtime import DT_CTRL
-from opendbc.can.packer import CANPacker
 
 ###### SPAS ###### - JPR
 STEER_ANG_MAX = 450 # SPAS Max Angle
@@ -30,8 +29,9 @@ class SpasRspaController:
     self.rate = 0
     self.lastSteeringAngleDeg = 0
     self.cut_timer = 0
+    self.startup_count = 0
 
-  def update(self, c, enabled, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut):
+  def update(self, c, enabled, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
     self.packer = packer
     self.car_fingerprint = car_fingerprint
 
@@ -55,7 +55,11 @@ class SpasRspaController:
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
       self.last_apply_angle = apply_angle
-    spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
+    if self.startup_count == 2000:
+      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
+    else:
+      spas_active = False
+      self.startup_count += 1
 
     if CS.spas_enabled and enabled:
       if CS.out.steeringPressed:
@@ -67,26 +71,23 @@ class SpasRspaController:
       if turnsignalcut:
         spas_active = False
 
-    can_sends = []
-
    ############### SPAS STATES ############## JPR
-# State 1 : Start
-# State 2 : New Request
-# State 3 : Ready to Assist(Steer)
-# State 4 : Hand Shake between OpenPilot and MDPS ECU
-# State 5 : Assisting (Steering)
-# State 6 : Failed to Assist (Steer)
-# State 7 : Cancel
-# State 8 : Failed to get ready to Assist (Steer)
-# ---------------------------------------------------
+   # State 1 : Start
+   # State 2 : New Request
+   # State 3 : Ready to Assist(Steer)
+   # State 4 : Hand Shake between OpenPilot and MDPS ECU
+   # State 5 : Assisting (Steering)
+   # State 6 : Failed to Assist (Steer)
+   # State 7 : Cancel
+   # State 8 : Failed to get ready to Assist (Steer)
+   # ---------------------------------------------------
     if CS.spas_enabled:
-      if CS.mdps_bus:
-        spas_active_stat = False
-        if spas_active: # Spoof Speed on mdps11_stat 3, 4 and 5 JPR
-          if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3:
-            spas_active_stat = True
-          else:
-            spas_active_stat = False
+      if spas_active: # Spoof Speed on mdps11_stat 3, 4 and 5 JPR
+        if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3:
+          spas_active_stat = True
+        else:
+          spas_active_stat = False
+          
         if emsType == 1:
           can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
           if Params().get_bool('SPASDebug'):
@@ -100,7 +101,6 @@ class SpasRspaController:
           if Params().get_bool('SPASDebug'):
             print("E_EMS11")
 
-      if (frame % 2) == 0:
         if CS.mdps11_stat == 7:
             self.en_spas = 7
 
@@ -130,9 +130,10 @@ class SpasRspaController:
         if not spas_active:
           apply_angle = CS.mdps11_strang
 
-        self.mdps11_stat_last = CS.mdps11_stat
-        can_sends.append(create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
-        if Params().get_bool('SPASDebug'):
+        if (frame % 2) == 0:
+          can_sends.append(create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
+
+        if Params().get_bool('SPASDebug'): # SPAS debugging - JPR
           print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
           print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
           print("spas_active:", spas_active)
@@ -144,11 +145,11 @@ class SpasRspaController:
       # SPAS12 20Hz
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
-
+      self.mdps11_stat_last = CS.mdps11_stat
       self.spas_active_last = self.spas_active
       self.spas_active = spas_active
       self.lastSteeringAngleDeg = CS.out.steeringAngleDeg
-      return can_sends
+
 
     
       
