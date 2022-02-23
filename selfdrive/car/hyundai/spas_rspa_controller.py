@@ -32,7 +32,7 @@ class SpasRspaController:
     self.lastSteeringAngleDeg = 0
     self.cut_timer = 0
     self.startup_count = 0
-    self.SteeringTempUnavailable
+    self.SteeringTempUnavailable = False
 
   def inject_events(self, events):
     if self.SteeringTempUnavailable:
