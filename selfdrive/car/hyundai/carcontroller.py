@@ -81,7 +81,6 @@ class CarController():
     self.last_blinker_frame = 0
     self.prev_active_cam = False
     self.active_cam_timer = 0
-    self.steerMax = CarControllerParams.STEER_MAX
     
 
   def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
@@ -118,7 +117,7 @@ class CarController():
     self.apply_steer_last = apply_steer
 
     # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, self.steerMax, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert)
+    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
