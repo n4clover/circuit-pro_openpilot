@@ -81,6 +81,9 @@ class CarController():
     self.last_blinker_frame = 0
     self.prev_active_cam = False
     self.active_cam_timer = 0
+  def CC_recive_data(self, override):
+    self.override = override
+    
 
   def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):

@@ -769,12 +769,6 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this));   
 
-  toggles.append(new ParamControl("SpasMode",
-                                            "LKAS or Disengage on SPAS Override",
-                                            "Switch to LKAS on Steering Pressed or Disengage on override torque. !ALPHA!",
-                                            "../assets/offroad/icon_road.png",
-                                            this));  
-
   toggles.append(new ParamControl("NewRadarInterface",
                                             "Are Radar Tracks Enabled?",
                                             "!ONLY ENABLE IF TRACKS ARE ENABLED VIA SSH SCRIPT!",

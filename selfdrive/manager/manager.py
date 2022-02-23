@@ -78,7 +78,6 @@ def manager_init() -> None:
     ("SteerLockout", "0"),
     ("spasEnabled", "0"),
     ("DynamicSpas", "0"),
-    ("SpasMode", "0"),
     ("SPASDebug", "0"),
   ]
   if not PC:

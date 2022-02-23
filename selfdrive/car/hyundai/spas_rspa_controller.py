@@ -19,20 +19,22 @@ STEER_MAX_OFFSET = 105 # How far from MAX LKAS torque to engage Dynamic SPAS whe
 
 class SpasRspaController:
   def __init__(self):
-    self.DTQL = 0
     self.last_apply_angle = 0.0
     self.en_spas = 2
     self.mdps11_stat_last = 0
     self.lkas_active = False
     self.spas_active = False
     self.spas_active_last = 0
-    self.override = False
     self.dynamicSpas = Params().get_bool('DynamicSpas')
     self.ratelimit = 2.3 # Starting point - JPR
+    self.rate = 0
 
   def update(self, c, enabled, CS, actuators, frame, lkas_active, packer, car_fingerprint, emsType):
     self.packer = packer
     self.car_fingerprint = car_fingerprint
+
+    # Keep Track of Steering wheel rate - JPR
+    self.rate = abs(CS.out.steeringAngleDeg - self.lastSteeringAngleDeg)
     # SPAS
     if CS.spas_enabled and enabled:
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
@@ -57,16 +59,9 @@ class SpasRspaController:
       lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
 
     if CS.spas_enabled and enabled:
-      if Params().get_bool("SpasMode"):
-        if abs(CS.out.steeringWheelTorque) > TQ  and self.DTQL > TQ and spas_active and not lkas_active:
-          self.override = True
-          #print("OVERRIDE")
-        else:
-          self.override = False
-      else:
         if CS.out.steeringPressed:
             self.cut_timer = 0
-        if CS.out.steeringPressed or self.cut_timer <= 85: # Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+        if CS.out.steeringPressed or self.cut_timer < 85 and self.rate < 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
           spas_active = False
           lkas_active = True
           self.cut_timer += 1
@@ -83,9 +78,6 @@ class SpasRspaController:
 
     if not lkas_active:
       apply_steer = 0
-    
-    if CS.spas_enabled:
-      self.spas_active = spas_active
 
     can_sends = []
 
@@ -166,8 +158,15 @@ class SpasRspaController:
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
 
-      self.spas_active_last = spas_active
-      self.DTQL = abs(CS.out.steeringWheelTorque)
+      self.spas_active_last = self.spas_active
+      self.spas_active = spas_active
+      self.lastSteeringAngleDeg = CS.out.steeringAngleDeg
       return can_sends
+
+    
+      
+
+
+
 
 
