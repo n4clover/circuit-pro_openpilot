@@ -24,10 +24,11 @@ class SpasRspaController:
     self.mdps11_stat_last = 0
     self.lkas_active = False
     self.spas_active = False
-    self.spas_active_last = 0
+    self.spas_active_last = False
     self.dynamicSpas = Params().get_bool('DynamicSpas')
     self.ratelimit = 2.3 # Starting point - JPR
     self.rate = 0
+    self.lastSteeringAngleDeg = 0
 
   def update(self, c, enabled, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut):
     self.packer = packer
