@@ -93,9 +93,6 @@ class CarController():
 
     self.steer_rate_limited = new_steer != apply_steer
 
-    # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert)
-
     # Disable steering while turning blinker on and speed below min lane chnage speed
     if (CS.out.leftBlinker or CS.out.rightBlinker) and not self.keep_steering_turn_signals and not self.NoMinLaneChangeSpeed:
       self.turning_signal_timer = 1.5 / DT_CTRL  # Disable for 1.5 Seconds after blinker turned off
@@ -118,6 +115,9 @@ class CarController():
     self.lkas_active = lkas_active
 
     self.apply_steer_last = apply_steer
+
+    # SPAS and RSPA controller - JPR
+    self.spas_rspa_controller.update(self, c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
