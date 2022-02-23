@@ -25,7 +25,6 @@ class SpasRspaController:
     self.mdps11_stat_last = 0
     self.lkas_active = False
     self.spas_active = False
-    self.spas_active_last = False
     self.dynamicSpas = Params().get_bool('DynamicSpas')
     self.ratelimit = 2.3 # Starting point - JPR
     self.rate = 0
@@ -68,16 +67,16 @@ class SpasRspaController:
       spas_active = False
       self.startup_count += 1
 
-    if CS.spas_enabled:
-      if CS.out.steeringPressed:
-        self.cut_timer = 0
-      if CS.out.steeringPressed or self.cut_timer < 85 and self.rate < 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
-        spas_active = False
-        self.cut_timer += 1
-    
-      if turnsignalcut:
-        spas_active = False
+    if CS.out.steeringPressed:
+      self.cut_timer = 0
 
+    if CS.out.steeringPressed or self.cut_timer < 85 and self.rate > 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+      spas_active = False
+      self.cut_timer += 1
+    
+    if turnsignalcut:
+      spas_active = False
+      
    ############### SPAS STATES ############## JPR
    # State 1 : Start
    # State 2 : New Request
@@ -158,6 +157,5 @@ class SpasRspaController:
       if (frame % 5) == 0:
         can_sends.append(create_spas12(CS.mdps_bus))
       self.mdps11_stat_last = CS.mdps11_stat
-      self.spas_active_last = self.spas_active
       self.spas_active = spas_active
       self.lastSteeringAngleDeg = CS.out.steeringAngleDeg
