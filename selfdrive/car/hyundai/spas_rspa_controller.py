@@ -59,11 +59,6 @@ class SpasRspaController:
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
-      self.last_apply_angle = apply_angle
-
-    spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
-
-    if CS.spas_enabled:
       if (CS.out.steeringPressedSPAS or self.rate > 5): # Reset SPAS cut timer if steeringPressedSPAS is True or if the steering wheel is moving fast. - JPR
         self.cut_timer = 0
       if CS.out.steeringPressedSPAS or self.cut_timer < 85:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
@@ -73,12 +68,13 @@ class SpasRspaController:
       if turnsignalcut:
         spas_active = False
 
-    if CS.out.steeringPressedSPAS or self.cut_timer < 85 and self.rate > 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
-      spas_active = False
-      self.cut_timer += 1
-    
-    if turnsignalcut:
-      spas_active = False
+      if CS.out.steeringPressedSPAS or self.cut_timer < 85 and self.rate > 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+        spas_active = False
+        self.cut_timer += 1
+
+      self.last_apply_angle = apply_angle
+
+      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
       
    ############### SPAS STATES ############## JPR
    # State 1 : Start
@@ -91,51 +87,51 @@ class SpasRspaController:
    # State 8 : Failed to get ready to Assist (Steer)
    # ---------------------------------------------------
     if CS.spas_enabled:
-      if spas_active: # Spoof Speed on mdps11_stat 3, 4 and 5 JPR
-        if CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3:
-          spas_active_stat = True
-        else:
-          spas_active_stat = False
+      if spas_active and (CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3): # Spoof Speed on mdps11_stat 3, 4 and 5 JPR
+        spas_active_stat = True
+      else:
+        spas_active_stat = False
           
-        if emsType == 1:
-          can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
-          if Params().get_bool('SPASDebug'):
-            print("EMS_366")
-        elif emsType == 2:
-          can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
-          if Params().get_bool('SPASDebug'):
-            print("EMS_11")
-        elif emsType == 3:
-          can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
-          if Params().get_bool('SPASDebug'):
-            print("E_EMS11")
-
-
+      if emsType == 1:
+        can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("EMS_366")
+      elif emsType == 2:
+        can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("EMS_11")
+      elif emsType == 3:
+        can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("E_EMS11")
+      elif emsType == 0:
+        print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
       if (frame % 2) == 0:
+        ####### !!!! DO NOT MODIFY SPAS STATE MACHINE - JPR !!!! #######
         if CS.mdps11_stat == 7 and not self.mdps11_stat_last == 7:
-          self.en_spas = 7
+          self.en_spas = 7 # Acknowledge that MDPS is in State 7 - JPR
 
         if CS.mdps11_stat == 7 and self.mdps11_stat_last == 7:
-          self.en_spas = 3
+          self.en_spas = 3 # Tell MDPS to get ready for next steer. - JPR
 
         if CS.mdps11_stat == 2 and spas_active:
-          self.en_spas = 3 # Switch to State 3, and get Ready to Assist(Steer). JPR
+          self.en_spas = 3 # Switch to State 3, and get Ready to Assist(Steer). - JPR
 
         if CS.mdps11_stat == 3 and spas_active:
-          self.en_spas = 4
+          self.en_spas = 4 # Handshake Between MDPS and OpenPilot. - JPR
 
-        if CS.mdps11_stat == 4:
-          self.en_spas = 5
+        if CS.mdps11_stat == 4: 
+          self.en_spas = 5 # Ask MDPS to Steer using Angle. - JPR
 
-        if CS.mdps11_stat == 5 and not spas_active: # Disengage/Cancel SPAS - JPR
-          self.en_spas = 7
+        if CS.mdps11_stat == 5 and not spas_active:
+          self.en_spas = 7 # Disengage/Cancel SPAS - JPR
 
-        if CS.mdps11_stat == 6: # Failed to Assist and Steer, Set state back to 2 for a new request. JPR
-          self.en_spas = 2
+        if CS.mdps11_stat == 6:
+          self.en_spas = 2 # Failed to Assist and Steer, Set state back to 2 for a new request. - JPR
 
-        if CS.mdps11_stat == 8: #MDPS ECU Fails to get into state 3 and ready for state 5. JPR
-          self.en_spas = 2
+        if CS.mdps11_stat == 8:
+          self.en_spas = 2 #MDPS ECU Fails to get into state 3 and ready for state 5. - JPR
 
         if not spas_active:
           apply_angle = CS.mdps11_strang
@@ -148,18 +144,16 @@ class SpasRspaController:
         print("spas_active:", spas_active)
         print("apply angle:", apply_angle)
         print("driver torque:", CS.out.steeringWheelTorque)
-      if emsType == 0:
-        print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
       if CS.mdps11_stat == 6 or CS.mdps11_stat == 8:
         self.SteeringTempUnavailable = True
       else:
         self.SteeringTempUnavailable = False
 
-    # SPAS12 20Hz
-    if (frame % 5) == 0:
-      can_sends.append(create_spas12(CS.mdps_bus))
+      # SPAS12 20Hz
+      if (frame % 5) == 0:
+        can_sends.append(create_spas12(CS.mdps_bus))
 
-    self.mdps11_stat_last = CS.mdps11_stat
-    self.spas_active = spas_active
-    self.lastSteeringAngleDeg = CS.out.steeringAngleDeg
+      self.mdps11_stat_last = CS.mdps11_stat
+      self.spas_active = spas_active
+      self.lastSteeringAngleDeg = CS.out.steeringAngleDeg
