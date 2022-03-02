@@ -66,6 +66,8 @@ class CarController():
     self.gapsettingdance = 2
     self.gapsetting = 0
     self.gapcount = 0
+    self.lead_visible = False
+    self.lead_debounce = 0
 
     param = Params()
 
@@ -205,6 +207,14 @@ class CarController():
       d = CS.lead_distance
       self.gapsetting = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
 
+    if lead_visible:
+      self.lead_visible = True
+      self.lead_debounce = 50
+    elif self.lead_debounce > 0:
+      self.lead_debounce -= 1
+    else:
+      self.lead_visible = lead_visible
+
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
@@ -228,7 +238,7 @@ class CarController():
 
         jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
 
-        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), lead_visible, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable)) 
+        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable)) 
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5
