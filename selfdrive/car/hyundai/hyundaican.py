@@ -188,11 +188,12 @@ def create_acc_opt(packer, radarDisable):
   }
   commands.append(packer.make_can_msg("SCC13", 0, scc13_values))
 
-  fca12_values = {
-    "FCA_DrvSetState": 2,
-    "FCA_USM": 1 if radarDisable else 0, # AEB disabled
-  }
-  commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
+  if radarDisable:
+    fca12_values = {
+      "FCA_DrvSetState": 2,
+      "FCA_USM": 1, # AEB disabled
+    }
+    commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
 
   return commands
 
