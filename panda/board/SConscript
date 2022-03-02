@@ -68,9 +68,7 @@ if not os.path.exists("/EON"):
 BUILD_TYPE = "DEBUG"
 cert_fn = File("../certs/debug").srcnode().abspath
 common_flags += ["-DALLOW_DEBUG"]
-
-if os.getenv("DEBUG"):
-  common_flags += ["-DDEBUG"]
+common_flags += ["-DDEBUG"]
 
 includes = [
   "stm32fx/inc",
