@@ -534,14 +534,17 @@ class Controls:
     if not self.joystick_mode:
       # accel PID loop
       pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_kph * CV.KPH_TO_MS)
-      actuators.accel = self.LoC.update(self.active and CS.cruiseState.enabledAcc, CS, self.CP, long_plan, pid_accel_limits, self.sm['radarState'])
+      t_since_plan = (self.sm.frame - self.sm.rcv_frame['longitudinalPlan']) * DT_CTRL
+      actuators.accel = self.LoC.update(self.active and CS.cruiseState.enabledAcc, CS, self.CP, long_plan, pid_accel_limits, t_since_plan, self.sm['radarState'])
 
       # Steering PID loop and lateral MPC
       lat_active = self.active and not CS.steerWarning and not CS.steerError and CS.vEgo > self.CP.minSteerSpeed
+      t_since_plan = (self.sm.frame - self.sm.rcv_frame['lateralPlan']) * DT_CTRL
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
                                                                              lat_plan.psis,
                                                                              lat_plan.curvatures,
-                                                                             lat_plan.curvatureRates)
+                                                                             lat_plan.curvatureRates,
+                                                                             t_since_plan)
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(lat_active, CS, self.CP, self.VM, params, self.last_actuators,
                                                                              desired_curvature, desired_curvature_rate)
       if CS.vEgo < 0.3:
@@ -728,8 +731,6 @@ class Controls:
     controlsState.sccGasFactor = ntune_scc_get('sccGasFactor')
     controlsState.sccBrakeFactor = ntune_scc_get('sccBrakeFactor')
     controlsState.sccCurvatureFactor = ntune_scc_get('sccCurvatureFactor')
-    controlsState.longitudinalActuatorDelayLowerBound = ntune_scc_get('longitudinalActuatorDelayLowerBound')
-    controlsState.longitudinalActuatorDelayUpperBound = ntune_scc_get('longitudinalActuatorDelayUpperBound')
 
     lat_tuning = self.CP.lateralTuning.which()
     if self.joystick_mode:

@@ -46,7 +46,6 @@ def manager_init() -> None:
     # HKG
     ("UseClusterSpeed", "0"),
     ("LongControlEnabled", "0"),
-    ("RadarDisableEnabled", "0"),
     ("MadModeEnabled", "0"),
     ("IsLdwsCar", "0"),
     ("LaneChangeEnabled", "1"),
@@ -79,7 +78,6 @@ def manager_init() -> None:
     ("SteerLockout", "0"),
     ("spasEnabled", "0"),
     ("DynamicSpas", "0"),
-    ("SpasMode", "0"),
     ("SPASDebug", "0"),
   ]
   if not PC:

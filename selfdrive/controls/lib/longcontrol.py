@@ -48,7 +48,7 @@ class LongControl():
     self.long_control_state = LongCtrlState.off  # initialized to off
     self.pid = PIController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                            rate=1 / DT_CTRL)
+                            k_f = CP.longitudinalTuning.kf, rate=1 / DT_CTRL)
     self.v_pid = 0.0
     self.last_output_accel = 0.0
 
@@ -57,24 +57,21 @@ class LongControl():
     self.pid.reset()
     self.v_pid = v_pid
 
-  def update(self, active, CS, CP, long_plan, accel_limits, radarState):
+  def update(self, active, CS, CP, long_plan, accel_limits, t_since_plan, radarState):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Interp control trajectory
-    # TODO estimate car specific lag, use .15s for now
     speeds = long_plan.speeds
     if len(speeds) == CONTROL_N:
+      v_target = interp(t_since_plan, T_IDXS[:CONTROL_N], speeds)
+      a_target = interp(t_since_plan, T_IDXS[:CONTROL_N], long_plan.accels)
 
-      longitudinalActuatorDelayLowerBound = ntune_scc_get('longitudinalActuatorDelayLowerBound')
-      longitudinalActuatorDelayUpperBound = ntune_scc_get('longitudinalActuatorDelayUpperBound')
+      v_target_lower = interp(CP.longitudinalActuatorDelayLowerBound + t_since_plan, T_IDXS[:CONTROL_N], speeds)
+      a_target_lower = 2 * (v_target_lower - v_target) / CP.longitudinalActuatorDelayLowerBound - a_target
 
-      v_target_lower = interp(longitudinalActuatorDelayLowerBound, T_IDXS[:CONTROL_N], speeds)
-      a_target_lower = 2 * (v_target_lower - speeds[0])/longitudinalActuatorDelayLowerBound - long_plan.accels[0]
-
-      v_target_upper = interp(longitudinalActuatorDelayUpperBound, T_IDXS[:CONTROL_N], speeds)
-      a_target_upper = 2 * (v_target_upper - speeds[0])/longitudinalActuatorDelayUpperBound - long_plan.accels[0]
+      v_target_upper = interp(CP.longitudinalActuatorDelayUpperBound + t_since_plan, T_IDXS[:CONTROL_N], speeds)
+      a_target_upper = 2 * (v_target_upper - v_target) / CP.longitudinalActuatorDelayUpperBound - a_target
       a_target = min(a_target_lower, a_target_upper)
 
-      v_target = speeds[0]
       v_target_future = speeds[-1]
     else:
       v_target = 0.0
@@ -119,8 +116,7 @@ class LongControl():
     elif self.long_control_state == LongCtrlState.stopping:
       # Keep applying brakes until the car is stopped
       if not CS.standstill or output_accel > CP.stopAccel:
-        output_accel -= CP.stoppingDecelRate * DT_CTRL * \
-                        interp(output_accel, [CP.stopAccel, CP.stopAccel/2., CP.stopAccel/4., 0.], [0.3, 0.65, 1., 5.])
+        output_accel -= CP.stoppingDecelRate * DT_CTRL
       output_accel = clip(output_accel, accel_limits[0], accel_limits[1])
       self.reset(CS.vEgo)
 

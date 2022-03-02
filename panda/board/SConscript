@@ -64,16 +64,10 @@ if not os.path.exists("/EON"):
       "-DPANDA",
     ],
   }
-
-if os.getenv("RELEASE"):
-  BUILD_TYPE = "RELEASE"
-  cert_fn = os.getenv("CERT")
-  assert cert_fn is not None, 'No certificate file specified. Please set CERT env variable'
-  assert os.path.exists(cert_fn), 'Certificate file not found. Please specify absolute path'
-else:
-  BUILD_TYPE = "DEBUG"
-  cert_fn = File("../certs/debug").srcnode().abspath
-  common_flags += ["-DALLOW_DEBUG"]
+  
+BUILD_TYPE = "DEBUG"
+cert_fn = File("../certs/debug").srcnode().abspath
+common_flags += ["-DALLOW_DEBUG"]
 
 if os.getenv("DEBUG"):
   common_flags += ["-DDEBUG"]

@@ -296,10 +296,10 @@ void DevicePanel::updateCalibDescription() {
 }
 
 void DevicePanel::reboot() {
-  if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+  if (!uiState()->engaged()) {
     if (ConfirmationDialog::confirm("Are you sure you want to reboot?", this)) {
       // Check engaged again in case it changed while the dialog was open
-      if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+      if (!uiState()->engaged()) {
         Params().putBool("DoReboot", true);
       }
     }
@@ -309,10 +309,10 @@ void DevicePanel::reboot() {
 }
 
 void DevicePanel::poweroff() {
-  if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+  if (!uiState()->engaged()) {
     if (ConfirmationDialog::confirm("Are you sure you want to power off?", this)) {
       // Check engaged again in case it changed while the dialog was open
-      if (uiState()->status == UIStatus::STATUS_DISENGAGED) {
+      if (!uiState()->engaged()) {
         Params().putBool("DoShutdown", true);
       }
     }
@@ -708,12 +708,7 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_openpilot.png",
                                             this));
 
-  /*toggles.append(new ParamControl("TurnSignals",
-                                            "Neokii or Crwusiz on screen blinkers.",
-                                            "Your choice. No reboot required.",
-                                            "../assets/offroad/icon_openpilot.png",
-                                            this));
-*/
+
   toggles.append(new ParamControl("CustomLeadMark",
                                             "Use Custom Lead Mark",
                                             "",
@@ -773,12 +768,6 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "Enable Send Parking Assist Messages depending on situation and factors. Will not switch to SPAS above 60mph; Will only hold SPAS above this speed if wheel is above an angle of |3|.  Warning: It is !ALPHA!, be careful!!",
                                             "../assets/offroad/icon_road.png",
                                             this));   
-
-  toggles.append(new ParamControl("SpasMode",
-                                            "LKAS or Disengage on SPAS Override",
-                                            "Switch to LKAS on Steering Pressed or Disengage on override torque. !ALPHA!",
-                                            "../assets/offroad/icon_road.png",
-                                            this));  
 
   toggles.append(new ParamControl("NewRadarInterface",
                                             "Are Radar Tracks Enabled?",
