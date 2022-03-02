@@ -116,7 +116,7 @@ class CarState(CarStateBase):
     ret.steeringWheelTorque = cp_mdps.vl["MDPS11"]['CR_Mdps_DrvTq'] 
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + 155
+    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + 155 if self.mdps11_stat == 5 else abs(ret.steeringTorque) > STEER_THRESHOLD
 
     if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
       self.mdps_error_cnt += 1
