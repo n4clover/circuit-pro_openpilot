@@ -7,7 +7,6 @@ int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
 
-
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
     {0., 30., 60.}, //kph
     {19, 18., 17.}};  //deg
