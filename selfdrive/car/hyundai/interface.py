@@ -567,7 +567,7 @@ class CarInterface(CarInterfaceBase):
 
     if ret.openpilotLongitudinalControl and (ret.radarDisable or ret.radarOffCan):
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
-      Panda().set_heartbeat_disabled()
+      
     
     # SPAS
     ret.spasEnabled = Params().get_bool('spasEnabled')
