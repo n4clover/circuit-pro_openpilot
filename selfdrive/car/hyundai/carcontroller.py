@@ -214,7 +214,7 @@ class CarController():
     else:
       d = CS.lead_distance
       self.gapsetting = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
-      
+
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
@@ -238,7 +238,7 @@ class CarController():
 
         jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
 
-        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable)) 
+        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable, CS.has_scc14)) 
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5
@@ -256,7 +256,8 @@ class CarController():
 
     # 5 Hz ACC options
     if frame % 20 == 0 and CS.CP.openpilotLongitudinalControl:
-      can_sends.extend(create_acc_opt(self.packer, CS.CP.radarDisable))
+      if CS.CP.radarDisable or CS.has_scc13:
+        can_sends.extend(create_acc_opt(self.packer, CS.CP.radarDisable))
 
     # 2 Hz front radar options
     if frame % 50 == 0 and CS.CP.radarDisable:
