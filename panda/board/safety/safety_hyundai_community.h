@@ -124,6 +124,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
             break;
           case 4:  // cancel
             controls_allowed = 0;
+            puts("     Cancel Button     "); puts("\n");
             break;
           default:
             break;  // any other button is irrelevant
@@ -271,6 +272,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
   if (addr == 2000) {
     if ((GET_BYTES_04(to_send) != 0x00803E02U) || (GET_BYTES_48(to_send) != 0x0U)) {
       tx = 0;
+      puts("     UDS     "); puts("\n");
     }
   }
 
