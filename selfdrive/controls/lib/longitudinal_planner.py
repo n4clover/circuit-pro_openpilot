@@ -100,7 +100,7 @@ class Planner:
     accel_limits_turns[0] = min(accel_limits_turns[0], self.a_desired + 0.05)
     accel_limits_turns[1] = max(accel_limits_turns[1], self.a_desired - 0.05)
     self.mpc.set_weights(prev_accel_constraint)
-    self.mpc.set_accel_limits(-5., 2.)
+    self.mpc.set_accel_limits(-3.5, 2.)
     self.mpc.set_cur_state(self.v_desired_filter.x, self.a_desired)
     if (len(sm['modelV2'].position.x) == 33 and
          len(sm['modelV2'].velocity.x) == 33 and
