@@ -565,8 +565,8 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = ret.sccBus == -1
     ret.pcmCruise = not ret.radarOffCan or not ret.radarDisable
 
-    if ret.openpilotLongitudinalControl and (ret.radarDisable or ret.radarOffCan):
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
+    #if ret.openpilotLongitudinalControl and (ret.radarDisable or ret.radarOffCan):
+      #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
       
     
     # SPAS
