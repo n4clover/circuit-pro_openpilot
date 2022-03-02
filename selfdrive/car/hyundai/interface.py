@@ -10,7 +10,7 @@ from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 from common.params import Params
 from selfdrive.car.disable_ecu import disable_ecu
-import panda as Panda
+
 
 GearShifter = car.CarState.GearShifter
 EventName = car.CarEvent.EventName
