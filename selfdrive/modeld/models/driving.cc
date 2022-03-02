@@ -26,18 +26,20 @@ constexpr const kj::ArrayPtr<const T> to_kj_array_ptr(const std::array<T, size> 
   return kj::ArrayPtr(arr.data(), arr.size());
 }
 
-void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
+void model_init(ModelState* s, cl_device_id device_id, cl_context context, bool use_extra) {
   s->frame = new ModelFrame(device_id, context);
   s->wide_frame = new ModelFrame(device_id, context);
 
 #ifdef USE_THNEED
-  s->m = std::make_unique<ThneedModel>("../../models/supercombo.thneed",
+  s->m = std::make_unique<ThneedModel>(use_extra ? "../../models/big_supercombo.thneed" : "../../models/supercombo.thneed",
+   &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME, use_extra);
 #elif USE_ONNX_MODEL
-  s->m = std::make_unique<ONNXModel>("../../models/supercombo.onnx",
+  s->m = std::make_unique<ONNXModel>(use_extra ? "../../models/big_supercombo.onnx" : "../../models/supercombo.onnx",
+   &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME, use_extra);
 #else
-  s->m = std::make_unique<SNPEModel>("../../models/supercombo.dlc",
+  s->m = std::make_unique<SNPEModel>(use_extra ? "../../models/big_supercombo.dlc" : "../../models/supercombo.dlc",
+   &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME, use_extra);
 #endif
-   &s->output[0], NET_OUTPUT_SIZE, USE_GPU_RUNTIME, true);
 
 #ifdef TEMPORAL
   s->m->addRecurrent(&s->output[OUTPUT_SIZE], TEMPORAL_SIZE);
@@ -190,6 +192,7 @@ void fill_plan(cereal::ModelDataV2::Builder &framed, const ModelOutputPlanPredic
   std::array<float, TRAJECTORY_SIZE> pos_x, pos_y, pos_z;
   std::array<float, TRAJECTORY_SIZE> pos_x_std, pos_y_std, pos_z_std;
   std::array<float, TRAJECTORY_SIZE> vel_x, vel_y, vel_z;
+  std::array<float, TRAJECTORY_SIZE> accel_x, accel_y, accel_z;
   std::array<float, TRAJECTORY_SIZE> rot_x, rot_y, rot_z;
   std::array<float, TRAJECTORY_SIZE> rot_rate_x, rot_rate_y, rot_rate_z;
 
@@ -203,6 +206,9 @@ void fill_plan(cereal::ModelDataV2::Builder &framed, const ModelOutputPlanPredic
     vel_x[i] = plan.mean[i].velocity.x;
     vel_y[i] = plan.mean[i].velocity.y;
     vel_z[i] = plan.mean[i].velocity.z;
+    accel_x[i] = plan.mean[i].acceleration.x;
+    accel_y[i] = plan.mean[i].acceleration.y;
+    accel_z[i] = plan.mean[i].acceleration.z;
     rot_x[i] = plan.mean[i].rotation.x;
     rot_y[i] = plan.mean[i].rotation.y;
     rot_z[i] = plan.mean[i].rotation.z;
@@ -213,6 +219,7 @@ void fill_plan(cereal::ModelDataV2::Builder &framed, const ModelOutputPlanPredic
 
   fill_xyzt(framed.initPosition(), T_IDXS_FLOAT, pos_x, pos_y, pos_z, pos_x_std, pos_y_std, pos_z_std);
   fill_xyzt(framed.initVelocity(), T_IDXS_FLOAT, vel_x, vel_y, vel_z);
+  fill_xyzt(framed.initAcceleration(), T_IDXS_FLOAT, accel_x, accel_y, accel_z);
   fill_xyzt(framed.initOrientation(), T_IDXS_FLOAT, rot_x, rot_y, rot_z);
   fill_xyzt(framed.initOrientationRate(), T_IDXS_FLOAT, rot_rate_x, rot_rate_y, rot_rate_z);
 }
