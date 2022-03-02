@@ -10,6 +10,7 @@ from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 from common.params import Params
 from selfdrive.car.disable_ecu import disable_ecu
+import panda as Panda
 
 GearShifter = car.CarState.GearShifter
 EventName = car.CarEvent.EventName
@@ -566,6 +567,7 @@ class CarInterface(CarInterfaceBase):
 
     if ret.openpilotLongitudinalControl and (ret.radarDisable or ret.radarOffCan):
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
+      Panda().set_heartbeat_disabled()
     
     # SPAS
     ret.spasEnabled = Params().get_bool('spasEnabled')
