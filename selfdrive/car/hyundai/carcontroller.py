@@ -185,7 +185,15 @@ class CarController():
     if self.pcm_cnt == 20:
       self.pcm_cnt = 0 
 
-    if not lead_visible:
+    if lead_visible:
+      self.lead_visible = True
+      self.lead_debounce = 50
+    elif self.lead_debounce > 0:
+      self.lead_debounce -= 1
+    else:
+      self.lead_visible = lead_visible
+
+    if not self.lead_visible:
       self.animationSpeed = interp(CS.out.vEgo, CLUSTER_ANIMATION_BP, CLUSTER_ANIMATION_SPEED)
       self.gapcount += 1 # Dragon-Pilot; Adapted and adjusted by JPR. Searching for lead animation 
       if self.gapcount > self.animationSpeed and self.gapsettingdance == 2:
@@ -206,15 +214,7 @@ class CarController():
     else:
       d = CS.lead_distance
       self.gapsetting = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
-
-    if lead_visible:
-      self.lead_visible = True
-      self.lead_debounce = 50
-    elif self.lead_debounce > 0:
-      self.lead_debounce -= 1
-    else:
-      self.lead_visible = lead_visible
-
+      
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
