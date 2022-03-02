@@ -2,7 +2,7 @@
 import math
 import numpy as np
 from common.numpy_fast import interp
-
+from common.params import Params
 import cereal.messaging as messaging
 from common.filter_simple import FirstOrderFilter
 from common.realtime import DT_MDL
