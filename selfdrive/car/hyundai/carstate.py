@@ -8,7 +8,6 @@ from common.params import Params
 
 GearShifter = car.CarState.GearShifter
 
-
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
@@ -116,7 +115,7 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp_mdps.vl["MDPS12"]['CR_Mdps_OutTq'] / 10
     ret.steeringWheelTorque = cp_mdps.vl["MDPS11"]['CR_Mdps_DrvTq'] 
 
-    ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD + 150 if self.mdps11_stat == 5 else abs(ret.steeringTorque) > STEER_THRESHOLD
+    ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD + 155 if self.mdps11_stat == 5 else abs(ret.steeringTorque) > STEER_THRESHOLD
 
     if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
       self.mdps_error_cnt += 1
