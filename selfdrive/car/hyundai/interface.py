@@ -12,6 +12,7 @@ from common.params import Params
 from selfdrive.car.disable_ecu import disable_ecu
 import panda as Panda
 
+
 GearShifter = car.CarState.GearShifter
 EventName = car.CarEvent.EventName
 ButtonType = car.CarState.ButtonEvent.Type
@@ -40,11 +41,6 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisable = Params().get_bool('DisableRadar')
 
     ret.carName = "hyundai"
-    # these cars require a special panda safety mode due to missing counters and checksums in the messages
-    #if candidate in LEGACY_SAFETY_MODE_CAR:
-    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy, 0)]
-    #else:
-    #  ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundai, 0)]
 
     tire_stiffness_factor = 1.
     if Params().get_bool('SteerLockout'):
@@ -565,10 +561,9 @@ class CarInterface(CarInterfaceBase):
     ret.radarOffCan = ret.sccBus == -1
     ret.pcmCruise = not ret.radarOffCan or not ret.radarDisable
 
-    if ret.openpilotLongitudinalControl and (ret.radarDisable or ret.radarOffCan):
+    if ret.radarDisable or ret.openpilotLongitudinalControl and ret.radarOffCan:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
-      Panda().set_heartbeat_disabled()
-    
+      
     # SPAS
     ret.spasEnabled = Params().get_bool('spasEnabled')
 
