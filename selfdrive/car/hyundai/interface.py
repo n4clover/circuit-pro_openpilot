@@ -41,6 +41,7 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisable = Params().get_bool('DisableRadar')
 
     ret.carName = "hyundai"
+    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy, 0)]
 
     tire_stiffness_factor = 1.
     if Params().get_bool('SteerLockout'):
@@ -420,11 +421,11 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.7
     elif candidate == CAR.STINGER:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Stinger.png img_spinner_comma.png")
-      tire_stiffness_factor = 1.0
-      ret.mass = 1640.0 + STD_CARGO_KG
-      ret.wheelbase = 2.84
-      ret.steerRatio = 14.4 * 1.15   # 15% higher at the center seems reasonable - before was 14.44 
+      tire_stiffness_factor = 1.125 # LiveParameters (Tunder's 2020)
+      ret.mass = 1825.0 + STD_CARGO_KG
+      ret.wheelbase = 2.906
       ret.centerToFront = ret.wheelbase * 0.4
+      ret.steerRatio = 14.4 * 1.15   # 15% higher at the center seems reasonable - before was 14.44 
       ret.emsType = 1 
 
       if not UseLQR:
