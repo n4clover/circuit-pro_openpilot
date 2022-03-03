@@ -46,6 +46,8 @@ class SpasRspaController:
     if CS.spas_enabled:
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       apply_diff = abs(apply_angle - CS.out.steeringAngleDeg)
+      spas_active = c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)      
+      
       if apply_diff > 1.75 and c.active: # Rate limit for when steering angle is not apply_angle - JPR
         self.ratelimit = self.ratelimit + 0.03 # Increase each cycle - JPR
         rate_limit = max(self.ratelimit, 10) # Make sure not to go past +-10 on rate - JPR
@@ -59,9 +61,10 @@ class SpasRspaController:
           rate_limit = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
         apply_angle = clip(apply_angle, self.last_apply_angle - rate_limit, self.last_apply_angle + rate_limit)
 
-      if (CS.out.steeringPressedSPAS or self.rate > 5): # Reset SPAS cut timer if steeringPressedSPAS is True or if the steering wheel is moving fast. - JPR
+      if (CS.out.steeringPressedSPAS or self.rate > 1.4): # Reset SPAS cut timer if steeringPressedSPAS is True or if the steering wheel is moving fast. - JPR
         self.cut_timer = 0
-      if CS.out.steeringPressedSPAS or self.cut_timer < 85:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+        
+      if CS.out.steeringPressedSPAS or self.cut_timer <= 100:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
         spas_active = False
         self.cut_timer += 1
     
@@ -74,7 +77,7 @@ class SpasRspaController:
 
       self.last_apply_angle = apply_angle
 
-      spas_active = CS.spas_enabled and c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)
+
       
    ############### SPAS STATES ############## JPR
    # State 1 : Start
