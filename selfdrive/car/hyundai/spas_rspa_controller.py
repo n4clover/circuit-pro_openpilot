@@ -77,8 +77,6 @@ class SpasRspaController:
 
       self.last_apply_angle = apply_angle
 
-
-      
    ############### SPAS STATES ############## JPR
    # State 1 : Start
    # State 2 : New Request
