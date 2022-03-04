@@ -564,8 +564,11 @@ class CarInterface(CarInterfaceBase):
     if ret.radarDisable or ret.openpilotLongitudinalControl and ret.radarOffCan:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_LONG
       
-    # SPAS
-    ret.spasEnabled = Params().get_bool('spasEnabled')
+    # SPAS - JPR
+    ret.spasEnabled = Params().get_bool('SpasRspaEnabled')
+
+    # RSPA - JPR
+    ret.rspaEnabled = False # ret.spasEnabled and not candidate in LEGACY_SAFETY_MODE_CAR
 
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
     if ret.radarOffCan or ret.radarDisable or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled') or Params().get_bool('spasEnabled'):

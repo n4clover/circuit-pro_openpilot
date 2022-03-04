@@ -757,9 +757,9 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
                                             "../assets/offroad/icon_road.png",
                                             this)); 
  
-  toggles.append(new ParamControl("spasEnabled",
-                                            "Enable SPAS.",
-                                            "Enable Send Parking Assist Messages up to 38mph. Warning: It is beta, be careful!!",
+  toggles.append(new ParamControl("SpasRspaEnabled",
+                                            "Enable SPAS and RSPA.",
+                                            "Enable Send Parking Assist Messages. SPAS for 2016+ HKG MDPS : RSPA + SPAS 2019+ MDPS : Warning : It is beta, be careful!!",
                                             "../assets/offroad/icon_road.png",
                                             this));   
 

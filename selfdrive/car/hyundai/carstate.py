@@ -51,6 +51,7 @@ class CarState(CarStateBase):
     self.use_cluster_speed = Params().get_bool('UseClusterSpeed')
     self.long_control_enabled = Params().get_bool('LongControlEnabled')
     self.spas_enabled = CP.spasEnabled
+    self.rspa_enabled = CP.rspaEnabled
     self.mdps11_stat = 0
 
   def update(self, cp, cp2, cp_cam):
@@ -222,8 +223,10 @@ class CarState(CarStateBase):
       self.scc13 = cp_scc.vl["SCC13"]
     if self.has_scc14:
       self.scc14 = cp_scc.vl["SCC14"]
+    
+    #if self.rspa_enabled: # RSPA - JPR
 
-    if self.spas_enabled: # SPAS
+    if self.spas_enabled: # SPAS - JPR
       self.ems_366 = cp.vl["EMS_366"]
       self.ems11 = cp.vl["EMS11"]
       self.eems11 = cp.vl["E_EMS11"]

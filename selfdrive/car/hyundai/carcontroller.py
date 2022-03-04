@@ -6,7 +6,7 @@ from common.realtime import DT_CTRL
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_acc_opt, create_frt_radar_opt, create_acc_commands,\
-  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
+  create_mdps12, create_lfahda_mfc, create_hda_mfc
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.spas_rspa_controller import SpasRspaController
 from selfdrive.car.hyundai.values import Buttons, FEATURES, CarControllerParams
@@ -59,6 +59,7 @@ class CarController():
 
     self.turning_signal_timer = 0
     self.longcontrol = CP.openpilotLongitudinalControl
+    self.rspa = CP.rspaEnabled
 
     self.turning_indicator_alert = False
     self.emsType = CP.emsType
@@ -114,13 +115,12 @@ class CarController():
       apply_steer = 0
 
     self.lkas_active = lkas_active
-
     self.apply_steer_last = apply_steer
 
     can_sends = []
 
-    # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
+    # SPAS controller - JPR
+    self.spas_rspa_controller.SPAS_Controller(c, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
@@ -218,15 +218,19 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol and CS.cruiseState_enabled or CS.CP.radarDisable:
-      if frame % 2 == 0:
-        stopping = controls.LoC.long_control_state == LongCtrlState.stopping
-        apply_accel = clip(actuators.accel if c.active else 0,
-                           CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-        apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
-        self.accel = apply_accel
-        controls.apply_accel = apply_accel
+    if self.longcontrol or self.rspa: # Need accel and stopping state info for long or rspa. - JPR
+      stopping = controls.LoC.long_control_state == LongCtrlState.stopping
+      apply_accel = clip(actuators.accel if c.active else 0,
+                     CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+      apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
+      self.accel = apply_accel
+      controls.apply_accel = apply_accel
 
+    # RSPA Controller. - JPR
+    self.spas_rspa_controller.RSPA_Controller(c, CS, actuators, frame, self.packer, self.car_fingerprint, can_sends, apply_accel, stopping)
+
+    if self.longcontrol and (CS.cruiseState_enabled or CS.CP.radarDisable or CS.CP.radarOffCan):
+      if frame % 2 == 0:
         aReqValue = CS.scc12["aReqValue"]
         controls.aReqValue = aReqValue
 
