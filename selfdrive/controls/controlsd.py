@@ -204,7 +204,7 @@ class Controls:
 
     # Add startup event
     if self.startup_event is not None:
-      if Params().get_bool('spasEnabled'):
+      if Params().get_bool('SpasRspaEnabled'):
         self.events.add(EventName.spasStartup)
       else:
         self.events.add(self.startup_event)
@@ -522,7 +522,7 @@ class Controls:
     if not self.active:
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
-    if Params().get_bool('spasEnabled'):
+    if Params().get_bool('SpasRspaEnabled'):
       if CS.mdps11Stat == 5:
         self.LaC.reset()
         if Params().get_bool('SPASDebug'):
