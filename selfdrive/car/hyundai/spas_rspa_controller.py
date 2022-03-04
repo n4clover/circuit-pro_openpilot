@@ -144,18 +144,17 @@ class SpasRspaController:
 
       self.last_apply_angle = apply_angle
 
-   ############### SPAS STATES ############## JPR
-   # State 1 : Start
-   # State 2 : New Request
-   # State 3 : Ready to Assist(Steer)
-   # State 4 : Hand Shake between OpenPilot and MDPS ECU
-   # State 5 : Assisting (Steering)
-   # State 6 : Failed to Assist (Steer)
-   # State 7 : Cancel
-   # State 8 : Failed to get ready to Assist (Steer)
-   # ---------------------------------------------------
-    if CS.spas_enabled:
-      if spas_active and (CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3): # Spoof Speed on mdps11_stat 3, 4 and 5 JPR
+      ############### SPAS STATES ############## JPR
+      # State 1 : Start
+      # State 2 : New Request
+      # State 3 : Ready to Assist(Steer)
+      # State 4 : Hand Shake between OpenPilot and MDPS ECU
+      # State 5 : Assisting (Steering)
+      # State 6 : Failed to Assist (Steer)
+      # State 7 : Cancel
+      # State 8 : Failed to get ready to Assist (Steer)
+      # ---------------------------------------------------
+      if spas_active and (CS.mdps11_stat == 4 or CS.mdps11_stat == 5 or CS.mdps11_stat == 3): # Spoof Speed on mdps11_stat 3, 4 and 5. - JPR
         spas_active_stat = True
       else:
         spas_active_stat = False
