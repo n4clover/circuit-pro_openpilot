@@ -33,6 +33,7 @@ class SpasRspaController:
     self.lastSteeringAngleDeg = 0
     self.cut_timer = 0
     self.SteeringTempUnavailable = False
+    self.ens_rspa = 0
   
   @staticmethod
   def create_rspa11(packer, car_fingerprint, frame, en_rspa, bus, enabled, accel, stopping, gaspressed):
@@ -101,7 +102,12 @@ class SpasRspaController:
     if self.SteeringTempUnavailable:
         events.add(EventName.steerTempUnavailable)
 
-  def SPAS(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
+  def RSPA_Controller(self, c, CS, frame, packer, car_fingerprint, can_sends, accel, stopping):
+    if CS.rspa_enabled:
+      if (frame % 2) == 0: # Not sure rough guess for now... Will know when see cabana. - JPR
+        can_sends.append(SpasRspaController.create_rspa11(packer, car_fingerprint, frame, self.en_rspa, CS.mdps_bus, c.active, accel, stopping, CS.out.gasPressed))
+
+  def SPAS_Controller(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
     self.packer = packer
     self.car_fingerprint = car_fingerprint
     if CS.spas_enabled:

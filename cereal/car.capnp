@@ -506,6 +506,7 @@ struct CarParams {
   hasScc14 @71 :Bool;
   hasEms @72 :Bool;
   spasEnabled @73: Bool;
+  rspaEnabled @78: Bool;
   emsType @74: Int8;
   steerLockout @75: Bool;
   radarDisable @76: Bool;
