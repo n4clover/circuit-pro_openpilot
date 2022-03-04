@@ -120,7 +120,7 @@ class CarController():
     can_sends = []
 
     # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(c, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
+    self.spas_rspa_controller.SPAS(c, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,

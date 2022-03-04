@@ -101,11 +101,9 @@ class SpasRspaController:
     if self.SteeringTempUnavailable:
         events.add(EventName.steerTempUnavailable)
 
-  def update(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
+  def SPAS(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
     self.packer = packer
     self.car_fingerprint = car_fingerprint
-    
-    # SPAS
     if CS.spas_enabled:
       # Keep Track of SPAS State, Steering wheel rate, and other metrics. - JPR
       self.rate = abs(CS.out.steeringAngleDeg - self.lastSteeringAngleDeg)
@@ -144,7 +142,7 @@ class SpasRspaController:
 
       self.last_apply_angle = apply_angle
 
-      ############### SPAS STATES ############## JPR
+      ############### SPAS STATES ############## - JPR
       # State 1 : Start
       # State 2 : New Request
       # State 3 : Ready to Assist(Steer)
