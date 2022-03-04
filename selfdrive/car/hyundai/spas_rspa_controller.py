@@ -106,7 +106,7 @@ class SpasRspaController:
 
   def inject_events(self, events):
     if self.SteeringTempUnavailable:
-        events.add(EventName.steerTempUnavailable)
+      events.add(EventName.steerTempUnavailable)
 
   def RSPA_Controller(self, c, CS, frame, packer, car_fingerprint, can_sends, accel, stopping):
     if CS.rspa_enabled:
