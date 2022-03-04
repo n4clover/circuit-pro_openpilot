@@ -13,7 +13,7 @@ ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
 ANGLE_DELTA_VU = [1.29, 1.19, 1.14]   # unwind limit
 TQ = 290 # = TQ / 100 = NM is unit of measure for wheel.
 SPAS_SWITCH = 30 * CV.MPH_TO_MS # MPH - lowered Bc of model and overlearn steerRatio
-STEER_MAX_OFFSET = 106 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
+STEER_MAX_OFFSET = 105 # How far from MAX LKAS torque to engage Dynamic SPAS when under 60mph.
 ###### SPAS #######
 
 EventName = car.CarEvent.EventName
@@ -64,7 +64,7 @@ class SpasRspaController:
       if (CS.out.steeringPressedSPAS or self.rate > 1.4): # Reset SPAS cut timer if steeringPressedSPAS is True or if the steering wheel is moving fast. - JPR
         self.cut_timer = 0
         
-      if CS.out.steeringPressedSPAS or self.cut_timer <= 100:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+      if CS.out.steeringPressedSPAS or self.cut_timer <= 85:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
         spas_active = False
         self.cut_timer += 1
     
