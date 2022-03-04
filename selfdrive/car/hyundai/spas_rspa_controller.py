@@ -1,10 +1,12 @@
 # This is the work of JPR
 from cereal import car
 from common.params import Params
-from selfdrive.car.hyundai.hyundaican import create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
 from common.numpy_fast import clip, interp
 from selfdrive.config import Conversions as CV
 from common.realtime import DT_CTRL
+from selfdrive.car.hyundai.values import CAR, CHECKSUM, FEATURES, EV_HYBRID_CAR
+import crcmod
+hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
 ###### SPAS ###### - JPR
 STEER_ANG_MAX = 450 # SPAS Max Angle
@@ -31,6 +33,68 @@ class SpasRspaController:
     self.lastSteeringAngleDeg = 0
     self.cut_timer = 0
     self.SteeringTempUnavailable = False
+  
+  @staticmethod
+  def create_rspa11(packer, car_fingerprint, frame, en_rspa, bus, enabled, accel, stopping, gaspressed):
+    values = {
+      "CF_RSPA_State": en_rspa,
+      "CF_RSPA_Act": 0,
+      "CF_RSPA_DecCmd": 0,
+      "CF_RSPA_Trgt_Spd": 0, # Probably not needed bc either speed spoofed or using ACC. Depends on how testing goes...
+      "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0,
+      "CR_RSPA_EPB_Req": 0,
+      "CF_RSPA_ACC_ACT": 0,
+      "CF_RSPA_AliveCounter": frame % 0x200,
+      "CF_RSPA_CRC": 0,
+    }
+    dat = packer.make_can_msg("RSPA11", 0, values)[2]
+    if car_fingerprint in CHECKSUM["crc8"]:
+      dat = dat[:6]
+      values["CF_RSPA_CRC"] = hyundai_checksum(dat)
+    else:
+      values["CF_RSPA_CRC"] = sum(dat[:6]) % 256
+    return packer.make_can_msg("RSPA11", bus, values)
+
+  def create_spas11(packer, car_fingerprint, frame, en_spas, apply_steer, bus):
+    values = {
+      "CF_Spas_Stat": en_spas,
+      "CF_Spas_TestMode": 0,
+      "CR_Spas_StrAngCmd": apply_steer,
+      "CF_Spas_BeepAlarm": 0,
+      "CF_Spas_Mode_Seq": 2,
+      "CF_Spas_AliveCnt": frame % 0x200,
+      "CF_Spas_Chksum": 0,
+      "CF_Spas_PasVol": 0,
+    }
+    dat = packer.make_can_msg("SPAS11", 0, values)[2]
+    if car_fingerprint in CHECKSUM["crc8"]:
+      dat = dat[:6]
+      values["CF_Spas_Chksum"] = hyundai_checksum(dat)
+    else:
+      values["CF_Spas_Chksum"] = sum(dat[:6]) % 256
+    return packer.make_can_msg("SPAS11", bus, values)
+
+  def create_spas12(bus):
+    return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
+  
+  def create_ems_366(packer, ems_366, enabled):
+    values = ems_366
+    if enabled:
+      values["VS"] = 1
+    return packer.make_can_msg("EMS_366", 1, values)
+
+  def create_ems11(packer, ems11, enabled):
+    values = ems11
+    if enabled:
+      values["VS"] = 1
+    return packer.make_can_msg("EMS11", 1, values)
+
+  def create_eems11(packer, eems11, enabled):
+    values = eems11
+    if enabled:
+      values["Accel_Pedal_Pos"] = 1
+      values["CR_Vcu_AccPedDep_Pos"] = 1
+    return packer.make_can_msg("E_EMS11", 1, values)
 
   def inject_events(self, events):
     if self.SteeringTempUnavailable:
@@ -94,15 +158,15 @@ class SpasRspaController:
         spas_active_stat = False
           
       if emsType == 1:
-        can_sends.append(create_ems_366(self.packer, CS.ems_366, spas_active_stat))
+        can_sends.append(SpasRspaController.create_ems_366(self.packer, CS.ems_366, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("EMS_366")
       elif emsType == 2:
-        can_sends.append(create_ems11(self.packer, CS.ems11, spas_active_stat))
+        can_sends.append(SpasRspaController.create_ems11(self.packer, CS.ems11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("EMS_11")
       elif emsType == 3:
-        can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
+        can_sends.append(SpasRspaController.create_eems11(self.packer, CS.eems11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("E_EMS11")
       elif emsType == 0:
@@ -137,7 +201,7 @@ class SpasRspaController:
         if not spas_active:
           apply_angle = CS.mdps11_strang
 
-        can_sends.append(create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
+        can_sends.append(SpasRspaController.create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
 
       if Params().get_bool('SPASDebug'): # SPAS debugging - JPR
         print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
@@ -153,7 +217,7 @@ class SpasRspaController:
 
       # SPAS12 20Hz
       if (frame % 5) == 0:
-        can_sends.append(create_spas12(CS.mdps_bus))
+        can_sends.append(SpasRspaController.create_spas12(CS.mdps_bus))
 
       self.mdps11_stat_last = CS.mdps11_stat
       self.spas_active = spas_active
