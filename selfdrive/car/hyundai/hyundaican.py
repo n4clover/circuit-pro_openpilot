@@ -243,3 +243,9 @@ def create_eems11(packer, eems11, enabled):
     values["Accel_Pedal_Pos"] = 1
     values["CR_Vcu_AccPedDep_Pos"] = 1
   return packer.make_can_msg("E_EMS11", 1, values)
+  
+def create_clu11(packer, clu11, enabled):
+  values = clu11
+  if enabled:
+    values["CF_Clu_Vanz"] = 1
+  return packer.make_can_msg("CLU11", 1, values)

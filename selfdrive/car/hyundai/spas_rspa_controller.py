@@ -1,7 +1,7 @@
 # This is the work of JPR
 from cereal import car
 from common.params import Params
-from selfdrive.car.hyundai.hyundaican import create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
+from selfdrive.car.hyundai.hyundaican import create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11, create_clu11
 from common.numpy_fast import clip, interp
 from selfdrive.config import Conversions as CV
 from common.realtime import DT_CTRL
@@ -105,6 +105,10 @@ class SpasRspaController:
         can_sends.append(create_eems11(self.packer, CS.eems11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("E_EMS11")
+      elif emsType == 4:
+        can_sends.append(create_clu11(self.packer, CS.clu11, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("CLU11")
       elif emsType == 0:
         print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
