@@ -36,16 +36,16 @@ class SpasRspaController:
     self.ens_rspa = 0
   
   @staticmethod
-  def create_rspa11(packer, car_fingerprint, frame, en_rspa, bus, enabled, accel, stopping, gaspressed):
+  def create_rspa11(packer, car_fingerprint, frame, en_rspa, bus, enabled, setspeed, stopping, gaspressed):
     values = {
-      "CF_RSPA_State": en_rspa, # Assuming like SPAS state logic somehow...
-      "CF_RSPA_Act": 0, # Maybe which gear to be in?
-      "CF_RSPA_DecCmd": 0, # Wanna apply brakes? clip(accel, -2, 0)?
-      "CF_RSPA_Trgt_Spd": 0, # Probably not needed bc either speed spoofed or using ACC. Depends on how testing goes...
-      "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0,
-      "CR_RSPA_EPB_Req": 0, # Electronic Parking Brake
-      "CF_RSPA_ACC_ACT": 0, # Accel to target speed?
-      "CF_RSPA_AliveCounter": frame % 0x200, #Probably same or similar Alive Counter too SPAS
+      "CF_RSPA_State": en_rspa, # Match like SPAS state logic. - JPR
+      "CF_RSPA_Act": 1 if en_rspa == (4 or 5) else 0, # RSPA Active. - JPR
+      "CF_RSPA_DecCmd": 2 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
+      "CF_RSPA_Trgt_Spd": 0, #setspeed, # Probably not needed bc either speed spoofed or using ACC. Depends on how testing goes...
+      "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
+      "CR_RSPA_EPB_Req": 0, # Electronic Parking Brake - JPR
+      "CF_RSPA_ACC_ACT": 0, # Accel to target speed? Unknown mode maybe for higher speed?
+      "CF_RSPA_AliveCounter": frame % 0x200, # Probably same or similar Alive Counter too SPAS
       "CF_RSPA_CRC": 0,
     }
     # Handle RSPA CRC
@@ -98,20 +98,14 @@ class SpasRspaController:
       values["CR_Vcu_AccPedDep_Pos"] = 1
     return packer.make_can_msg("E_EMS11", 1, values)
 
-  def create_clu11(packer, clu11, enabled):
-    values = clu11
-    if enabled:
-      values["CF_Clu_Vanz"] = 1
-    return packer.make_can_msg("CLU11", 1, values)
-
   def inject_events(self, events):
     if self.SteeringTempUnavailable:
       events.add(EventName.steerTempUnavailable)
 
-  def RSPA_Controller(self, c, CS, frame, packer, car_fingerprint, can_sends, accel, stopping):
+  def RSPA_Controller(self, c, CS, frame, packer, car_fingerprint, can_sends, set_speed, stopping):
     if CS.rspa_enabled:
       if (frame % 2) == 0: # Not sure rough guess for now... Will know when see cabana. - JPR
-        can_sends.append(SpasRspaController.create_rspa11(packer, car_fingerprint, frame, self.en_rspa, CS.mdps_bus, c.active, accel, stopping, CS.out.gasPressed))
+        can_sends.append(SpasRspaController.create_rspa11(packer, car_fingerprint, frame, self.en_rspa, CS.mdps_bus, c.active, set_speed, stopping, CS.out.gasPressed))
 
   def SPAS_Controller(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
     self.packer = packer
@@ -181,10 +175,10 @@ class SpasRspaController:
         can_sends.append(SpasRspaController.create_eems11(self.packer, CS.eems11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("E_EMS11")
-      elif emsType == 4:
-        can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
-        if Params().get_bool('SPASDebug'):
-          print("CLU11")
+      #elif emsType == 4:
+        #can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
+        #if Params().get_bool('SPASDebug'):
+        #  print("CLU11")
       elif emsType == 0:
         print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
