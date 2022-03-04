@@ -37,16 +37,17 @@ class SpasRspaController:
   @staticmethod
   def create_rspa11(packer, car_fingerprint, frame, en_rspa, bus, enabled, accel, stopping, gaspressed):
     values = {
-      "CF_RSPA_State": en_rspa,
-      "CF_RSPA_Act": 0,
-      "CF_RSPA_DecCmd": 0,
+      "CF_RSPA_State": en_rspa, # Assuming like SPAS state logic somehow...
+      "CF_RSPA_Act": 0, # Maybe which gear to be in?
+      "CF_RSPA_DecCmd": 0, # Wanna apply brakes? clip(accel, -2, 0)?
       "CF_RSPA_Trgt_Spd": 0, # Probably not needed bc either speed spoofed or using ACC. Depends on how testing goes...
       "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0,
-      "CR_RSPA_EPB_Req": 0,
-      "CF_RSPA_ACC_ACT": 0,
-      "CF_RSPA_AliveCounter": frame % 0x200,
+      "CR_RSPA_EPB_Req": 0, # Electronic Parking Brake
+      "CF_RSPA_ACC_ACT": 0, # Accel to target speed?
+      "CF_RSPA_AliveCounter": frame % 0x200, #Probably same or similar Alive Counter too SPAS
       "CF_RSPA_CRC": 0,
     }
+    # Handle RSPA CRC
     dat = packer.make_can_msg("RSPA11", 0, values)[2]
     if car_fingerprint in CHECKSUM["crc8"]:
       dat = dat[:6]
