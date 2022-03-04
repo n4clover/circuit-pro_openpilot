@@ -6,7 +6,6 @@ int car_SCC_live = 0;
 int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
-bool radar_disable = false;
 
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
     {0., 30., 60.}, //kph
@@ -349,7 +348,6 @@ static const addr_checks* hyundai_community_init(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
   relay_malfunction_reset();
-
   radar_disable = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
 
   if (current_board->has_obd && HKG_forward_obd) {
