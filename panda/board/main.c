@@ -126,6 +126,7 @@ void set_safety_mode(uint16_t mode, int16_t param) {
 bool is_car_safety_mode(uint16_t mode) {
   return (mode != SAFETY_SILENT) &&
          (mode != SAFETY_NOOUTPUT) &&
+         (mode != SAFETY_HYUNDAI_COMMUNITY) &&
          (mode != SAFETY_ELM327);
 }
 
@@ -215,19 +216,19 @@ void tick_handler(void) {
         if (heartbeat_counter >= (check_started() ? HEARTBEAT_IGNITION_CNT_ON : HEARTBEAT_IGNITION_CNT_OFF)) {
           puts("device hasn't sent a heartbeat for 0x");
           puth(heartbeat_counter);
-          puts(" seconds. Safety is set to NOOUTPUT mode.\n");
-          if (controls_allowed_countdown > 0U) {
+          puts(" seconds. Safety is set to SAFETY_HYUNDAI_COMMUNITY mode.\n");
+          /*if (controls_allowed_countdown > 0U) {
             siren_countdown = 5U;
             controls_allowed_countdown = 0U;
-          }
+          }*/
 
           // set flag to indicate the heartbeat was lost
           if (is_car_safety_mode(current_safety_mode)) {
             heartbeat_lost = true;
           }
 
-          if (current_safety_mode != SAFETY_NOOUTPUT) {
-            set_safety_mode(SAFETY_NOOUTPUT, 0U);
+          if (current_safety_mode != SAFETY_HYUNDAI_COMMUNITY) {
+            set_safety_mode(SAFETY_HYUNDAI_COMMUNITY, 0U);
           }
 
           //if (power_save_status != POWER_SAVE_STATUS_ENABLED) {
