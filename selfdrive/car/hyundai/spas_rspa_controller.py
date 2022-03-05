@@ -185,8 +185,8 @@ class SpasRspaController:
         can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("CLU11")
-      elif emsType == 0:
-        print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
+      #elif emsType == 0:
+        #print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
       if (frame % 2) == 0:
         ####### !!!! DO NOT MODIFY SPAS STATE MACHINE - JPR !!!! #######
