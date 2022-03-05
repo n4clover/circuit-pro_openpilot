@@ -36,20 +36,20 @@ class SpasRspaController:
     self.ens_rspa = 0
   
   @staticmethod
-  def create_rspa11(packer, car_fingerprint, frame, en_rspa, bus, enabled, setspeed, stopping, gaspressed):
+  def create_rspa11(packer, frame, en_rspa, bus, enabled, setspeed, stopping, gaspressed):
     idx = int(frame / 2)
     values = {
       "CF_RSPA_State": en_rspa, # Match like SPAS state logic. - JPR
       "CF_RSPA_Act": 1 if en_rspa == (4 or 5) else 0, # RSPA Active. - JPR
       "CF_RSPA_DecCmd": 2 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
-      "CF_RSPA_Trgt_Spd": 1, #setspeed, # Probably not needed bc either speed spoofed or using ACC. Depends on how testing goes...
+      "CF_RSPA_Trgt_Spd": 0.5, # 0.5kph as a test for now as a slow roll :) setspeed, Maybe can null message and use SCC? 2019+ non legacy seems to want both messages there...
       "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
       "CR_RSPA_EPB_Req": 0, # Electronic Parking Brake - JPR
-      "CF_RSPA_ACC_ACT": 0, # Maybe high speed rspa test mode?
-      "CF_RSPA_AliveCounter": idx % 0x10, # Same as SCC11!!!! - JPR
+      "CF_RSPA_ACC_ACT": 0, # 0 low speed? 1 High speed?
+      "CF_RSPA_AliveCounter": idx % 0x10, # Happens to be same as SCC11! :) - JPR
       "CF_RSPA_CRC": 0,
     }
-    # Handle RSPA CRC - JPR
+    # Handle RSPA CRC :) - JPR
     dat = packer.make_can_msg("RSPA11", 0, values)[2]
     dat = dat[:6] + dat[7:8]
     values["CF_RSPA_CRC"] = hyundai_checksum(dat)
@@ -106,10 +106,10 @@ class SpasRspaController:
     if self.SteeringTempUnavailable:
       events.add(EventName.steerTempUnavailable)
 
-  def RSPA_Controller(self, c, CS, frame, packer, car_fingerprint, can_sends, set_speed, stopping):
+  def RSPA_Controller(self, c, CS, frame, packer, can_sends, set_speed, stopping):
     if CS.rspa_enabled:
       if (frame % 2) == 0: # Not sure rough guess for now... Will know when see cabana. - JPR
-        can_sends.append(SpasRspaController.create_rspa11(packer, car_fingerprint, frame, self.en_rspa, CS.mdps_bus, c.active, set_speed, stopping, CS.out.gasPressed))
+        can_sends.append(SpasRspaController.create_rspa11(packer, frame, self.en_rspa, CS.mdps_bus, c.active, set_speed, stopping, CS.out.gasPressed))
 
   def SPAS_Controller(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
     self.packer = packer

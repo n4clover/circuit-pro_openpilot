@@ -227,7 +227,7 @@ class CarController():
       controls.apply_accel = apply_accel
 
     # RSPA Controller. - JPR
-    #self.spas_rspa_controller.RSPA_Controller(c, CS, frame, self.packer, self.car_fingerprint, can_sends, set_speed, stopping)
+    #self.spas_rspa_controller.RSPA_Controller(c, CS, frame, self.packer, can_sends, set_speed, stopping)
 
     if self.longcontrol and (CS.cruiseState_enabled or CS.CP.radarDisable or CS.CP.radarOffCan):
       if frame % 2 == 0:
