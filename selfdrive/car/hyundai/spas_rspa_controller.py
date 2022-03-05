@@ -268,7 +268,33 @@ class SpasRspaController:
 
   #def park_assist_system(self): ultrasonic radar sensors PAS 
 
-  #def search_for_spot(self):
+  #def distance_traveled(self, CS):
+  #  self.VS = CS.out.vEgo # M/s
+  #  self.time = 1 / DT_CTRL # Time
+  #  if self.rising_edge == 1:
+  #    self.time_passed = 1 / DT_CTRL # Time Passed
+  #    self.distance_traveled = self.time_passed * self.VS
+  #  else:
+  #    self.time_passed = 0
+
+
+  #def search_for_spot(self, CS):
+  #  self.pas_fr_dif = self.pas_fr - self.pas_fr_last
+  #  if CS.out.rightBlinker: # Search Right Side
+  #    if self.pas_fr_dif > 2: # Edge detection 
+  #      if self.falling_edge == 0: # which came first?
+  #        self.rising_edge = 1
+  #      elif self.falling_edge == 1:
+  #        self.rising_edge = 2
+  #    elif self.pas_fr_dif > -2: # Edge detection
+  #      if self.rising_edge == 0: # which came first? 
+  #        self.falling_edge = 1
+  #      elif self.rising_edge == 1:
+  #        self.falling_edge = 2
+
+    #elif CS.out.leftBlinker: # Search Left Side
+      #if self.pas_fl >:
+
 
   #def perpedicular_park(self):
 
