@@ -248,7 +248,7 @@ class SpasRspaController:
 
         can_sends.append(SpasRspaController.create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
       
-      SpasRspaController.screen_controller(CS, can_sends, frame) # Access SPAS12 message controller for screen Prompts. - JPR
+      SpasRspaController.screen_controller(self, CS, can_sends, frame) # Access SPAS12 message controller for screen Prompts. - JPR
       
       if Params().get_bool('SPASDebug'): # SPAS debugging - JPR
         print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
