@@ -98,6 +98,12 @@ class SpasRspaController:
       values["CR_Vcu_AccPedDep_Pos"] = 1
     return packer.make_can_msg("E_EMS11", 1, values)
 
+  def create_clu11(packer, clu11, enabled):
+    values = clu11
+    if enabled:
+      values["CF_Clu_Vanz"] = 1
+    return packer.make_can_msg("CLU11", 1, values)
+
   def inject_events(self, events):
     if self.SteeringTempUnavailable:
       events.add(EventName.steerTempUnavailable)
@@ -175,10 +181,10 @@ class SpasRspaController:
         can_sends.append(SpasRspaController.create_eems11(self.packer, CS.eems11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("E_EMS11")
-      #elif emsType == 4:
-        #can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
-        #if Params().get_bool('SPASDebug'):
-        #  print("CLU11")
+      elif emsType == 4:
+        can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("CLU11")
       elif emsType == 0:
         print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
