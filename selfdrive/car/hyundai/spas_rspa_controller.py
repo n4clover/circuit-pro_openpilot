@@ -37,6 +37,7 @@ class SpasRspaController:
   
   @staticmethod
   def create_rspa11(packer, car_fingerprint, frame, en_rspa, bus, enabled, setspeed, stopping, gaspressed):
+    idx = int(frame / 2)
     values = {
       "CF_RSPA_State": en_rspa, # Match like SPAS state logic. - JPR
       "CF_RSPA_Act": 1 if en_rspa == (4 or 5) else 0, # RSPA Active. - JPR
@@ -45,16 +46,13 @@ class SpasRspaController:
       "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
       "CR_RSPA_EPB_Req": 0, # Electronic Parking Brake - JPR
       "CF_RSPA_ACC_ACT": 0, # Maybe high speed rspa test mode?
-      "CF_RSPA_AliveCounter": frame % 0x200, # Probably same or similar Alive Counter too SPAS
+      "CF_RSPA_AliveCounter": idx % 0x10, # Same as SCC11!!!! - JPR
       "CF_RSPA_CRC": 0,
     }
-    # Handle RSPA CRC
+    # Handle RSPA CRC - JPR
     dat = packer.make_can_msg("RSPA11", 0, values)[2]
-    if car_fingerprint in CHECKSUM["crc8"]:
-      dat = dat[:6]
-      values["CF_RSPA_CRC"] = hyundai_checksum(dat)
-    else:
-      values["CF_RSPA_CRC"] = sum(dat[:6]) % 256
+    dat = dat[:6] + dat[7:8]
+    values["CF_RSPA_CRC"] = hyundai_checksum(dat)
     return packer.make_can_msg("RSPA11", bus, values)
 
   def create_spas11(packer, car_fingerprint, frame, en_spas, apply_steer, bus):
@@ -64,7 +62,7 @@ class SpasRspaController:
       "CR_Spas_StrAngCmd": apply_steer,
       "CF_Spas_BeepAlarm": 0,
       "CF_Spas_Mode_Seq": 2,
-      "CF_Spas_AliveCnt": frame % 0x200,
+      "CF_Spas_AliveCnt": frame % 0x200, 
       "CF_Spas_Chksum": 0,
       "CF_Spas_PasVol": 0,
     }
