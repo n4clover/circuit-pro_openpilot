@@ -58,7 +58,7 @@ class SpasRspaController:
   def create_spas11(packer, car_fingerprint, frame, en_spas, apply_steer, bus):
     values = {
       "CF_Spas_Stat": en_spas,
-      "CF_Spas_TestMode": 0,
+      "CF_Spas_TestMode": 0, # Maybe if set to 1 will ignore VS... needs testing.
       "CR_Spas_StrAngCmd": apply_steer,
       "CF_Spas_BeepAlarm": 0,
       "CF_Spas_Mode_Seq": 2,
