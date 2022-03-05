@@ -264,7 +264,7 @@ class SpasRspaController:
   def screen_controller(self, CS, can_sends, frame):
     # SPAS12 20Hz
       if (frame % 5) == 0:
-        can_sends.append(SpasRspaController.create_spas12(can_sends, CS.mdps_bus))
+        can_sends.append(SpasRspaController.create_spas12(self.packer, CS.mdps_bus))
 
   #def park_assist_system(self): ultrasonic radar sensors PAS 
 
