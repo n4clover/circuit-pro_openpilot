@@ -74,8 +74,34 @@ class SpasRspaController:
       values["CF_Spas_Chksum"] = sum(dat[:6]) % 256
     return packer.make_can_msg("SPAS11", bus, values)
 
-  def create_spas12(bus):
-    return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
+  def create_spas12(packer, bus):
+    values = {
+    "CF_Spas_HMI_Stat": 0,
+    "CF_Spas_Disp": 0,
+    "CF_Spas_FIL_Ind": 0,
+    "CF_Spas_FIR_Ind": 0, 
+    "CF_Spas_FOL_Ind": 0,
+    "CF_Spas_FOR_Ind": 0,
+    "CF_Spas_VolDown": 0,
+    "CF_Spas_RIL_Ind": 0,
+    "CF_Spas_RIR_Ind": 0,
+    "CF_Spas_FLS_Alarm": 0,
+    "CF_Spas_ROL_Ind": 0,
+    "CF_Spas_ROR_Ind": 0,
+    "CF_Spas_FCS_Alarm": 0,
+    "CF_Spas_FI_Ind": 0,
+    "CF_Spas_RI_Ind": 0,
+    "CF_Spas_FRS_Alarm": 0,
+    "CF_Spas_FR_Alarm": 0,
+    "CF_Spas_RR_Alarm": 0,
+    "CF_Spas_BEEP_Alarm": 0,
+    "CF_Spas_StatAlarm": 0,
+    "CF_Spas_RLS_Alarm": 0,
+    "CF_Spas_RCS_Alarm": 0,
+    "CF_Spas_RRS_Alarm": 0,
+    }
+    return packer.make_can_msg("SPAS12", bus, values)
+    #return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
   
   def create_ems_366(packer, ems_366, enabled):
     values = ems_366
@@ -221,7 +247,9 @@ class SpasRspaController:
           apply_angle = CS.mdps11_strang
 
         can_sends.append(SpasRspaController.create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
-
+      
+      SpasRspaController.screen_controller(CS, can_sends, frame) # Access SPAS12 message controller for screen Prompts. - JPR
+      
       if Params().get_bool('SPASDebug'): # SPAS debugging - JPR
         print("MDPS SPAS State: ", CS.mdps11_stat) # SPAS STATE DEBUG
         print("OP SPAS State: ", self.en_spas) # OpenPilot Ask MDPS to switch to state.
@@ -229,10 +257,21 @@ class SpasRspaController:
         print("apply angle:", apply_angle)
         print("driver torque:", CS.out.steeringWheelTorque)
 
-      # SPAS12 20Hz
-      if (frame % 5) == 0:
-        can_sends.append(SpasRspaController.create_spas12(CS.mdps_bus))
-
       self.mdps11_stat_last = CS.mdps11_stat
       self.spas_active = spas_active
       self.lastSteeringAngleDeg = CS.out.steeringAngleDeg
+
+  def screen_controller(self, CS, can_sends, frame):
+    # SPAS12 20Hz
+      if (frame % 5) == 0:
+        can_sends.append(SpasRspaController.create_spas12(CS.mdps_bus))
+
+  #def park_assist_system(self): ultrasonic radar sensors PAS 
+
+  #def search_for_spot(self):
+
+  #def perpedicular_park(self):
+
+  #def parallel_park(self):
+  
+  #def update(self):  # TODO move RSPA and SPAS to be called here
