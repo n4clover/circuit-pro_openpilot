@@ -41,10 +41,10 @@ class SpasRspaController:
       "CF_RSPA_State": en_rspa, # Match like SPAS state logic. - JPR
       "CF_RSPA_Act": 1 if en_rspa == (4 or 5) else 0, # RSPA Active. - JPR
       "CF_RSPA_DecCmd": 2 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
-      "CF_RSPA_Trgt_Spd": 0, #setspeed, # Probably not needed bc either speed spoofed or using ACC. Depends on how testing goes...
+      "CF_RSPA_Trgt_Spd": 1, #setspeed, # Probably not needed bc either speed spoofed or using ACC. Depends on how testing goes...
       "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
       "CR_RSPA_EPB_Req": 0, # Electronic Parking Brake - JPR
-      "CF_RSPA_ACC_ACT": 0, # Accel to target speed? Unknown mode maybe for higher speed?
+      "CF_RSPA_ACC_ACT": 0, # Maybe high speed rspa test mode?
       "CF_RSPA_AliveCounter": frame % 0x200, # Probably same or similar Alive Counter too SPAS
       "CF_RSPA_CRC": 0,
     }
