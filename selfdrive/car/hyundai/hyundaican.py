@@ -124,7 +124,7 @@ def create_mdps12(packer, frame, mdps12):
 
   return packer.make_can_msg("MDPS12", 2, values)
 
-def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, lead_dist, set_speed, stopping, gapsetting, gaspressed, radarDisable, scc14):
+def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, lead_dist, set_speed, stopping, gapsetting, gaspressed, radarDisable, scc14, warning):
   commands = []
 
   scc11_values = {
@@ -137,6 +137,11 @@ def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, lead_di
     "ACC_ObjLatPos": 0,
     "ACC_ObjRelSpd": 0,
     "ACC_ObjDist": 0,
+    "Navi_SCC_Curve_Status": 2,
+    "Navi_SCC_Curve_Act": 0,
+    "Navi_SCC_Camera_Act": 0,
+    "Navi_SCC_Camera_Status": 0,
+    "DriverAlertDisplay": 1 if warning else 0,
   }
   commands.append(packer.make_can_msg("SCC11", 0, scc11_values))
 
