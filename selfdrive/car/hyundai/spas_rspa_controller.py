@@ -101,7 +101,7 @@ class SpasRspaController:
     "CF_Spas_RCS_Alarm": 0,
     "CF_Spas_RRS_Alarm": 0,
     }
-    #return packer.make_can_msg("SPAS12", bus, values)
+    #return packer.make_can_msg("SPAS12", bus, values) # When we want to do somthing with the SPAS prompts. - JPR
     return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
   
   def create_ems_366(packer, ems_366, enabled):
@@ -117,10 +117,10 @@ class SpasRspaController:
     return packer.make_can_msg("EMS11", 1, values)
 
   def create_eems11(packer, eems11, enabled):
-    values = copy.copy(eems11)
+    #values = copy.copy(eems11)
     if enabled:
-      values["Accel_Pedal_Pos"] = 1
-      values["CR_Vcu_AccPedDep_Pos"] = 1
+      #values["Accel_Pedal_Pos"] = 1
+      #values["CR_Vcu_AccPedDep_Pos"] = 1
       values = {
         "Brake_Pedal_Pos": 0,
         "IG_Reactive_Stat": 0,
@@ -208,10 +208,10 @@ class SpasRspaController:
         can_sends.append(SpasRspaController.create_ems11(self.packer, CS.ems11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("EMS_11")
-      #elif emsType == 3:
-        #can_sends.append(SpasRspaController.create_eems11(self.packer, CS.eems11, spas_active_stat))
-        #if Params().get_bool('SPASDebug'):
-          #print("E_EMS11")
+      elif emsType == 3:
+        can_sends.append(SpasRspaController.create_eems11(self.packer, CS.eems11, spas_active_stat))
+        if Params().get_bool('SPASDebug'):
+          print("E_EMS11")
       #elif emsType == 4:
         #can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
         #if Params().get_bool('SPASDebug'):
