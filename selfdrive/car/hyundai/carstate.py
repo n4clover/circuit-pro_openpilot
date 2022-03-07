@@ -587,7 +587,6 @@ class CarState(CarStateBase):
             ("CR_Mdps_StrAng", "MDPS11", 0),
             ("CF_Mdps_Stat", "MDPS11", 0),
           ]
-          checks += [("MDPS11", 100)]
 
     if Params().get_bool("HyundaiNaviSL"):
       signals += [
@@ -628,9 +627,6 @@ class CarState(CarStateBase):
       signals += [
         ("CR_Mdps_StrAng", "MDPS11", 0),
         ("CF_Mdps_Stat", "MDPS11", 0),
-      ]
-      checks += [
-        ("MDPS11", 100),
       ]
 
     if CP.sasBus == 1:
