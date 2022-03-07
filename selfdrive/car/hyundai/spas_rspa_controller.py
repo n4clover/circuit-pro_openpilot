@@ -201,14 +201,14 @@ class SpasRspaController:
         can_sends.append(SpasRspaController.create_ems11(self.packer, CS.ems11, spas_active_stat))
         if Params().get_bool('SPASDebug'):
           print("EMS_11")
-      elif emsType == 3:
-        can_sends.append(SpasRspaController.create_eems11(self.packer, CS.eems11, spas_active_stat))
-        if Params().get_bool('SPASDebug'):
-          print("E_EMS11")
-      elif emsType == 4:
-        can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
-        if Params().get_bool('SPASDebug'):
-          print("CLU11")
+      #elif emsType == 3:
+        #can_sends.append(SpasRspaController.create_eems11(self.packer, CS.eems11, spas_active_stat))
+        #if Params().get_bool('SPASDebug'):
+          #print("E_EMS11")
+      #elif emsType == 4:
+        #can_sends.append(SpasRspaController.create_clu11(self.packer, CS.clu11, spas_active_stat))
+        #if Params().get_bool('SPASDebug'):
+          #print("CLU11")
       #elif emsType == 0:
         #print("Please add a car parameter called ret.emsType = (your EMS type) in interface.py : EMS_366 = 1 : EMS_11 = 2 : E_EMS11 = 3")
 
