@@ -100,7 +100,7 @@ GAS pedal press will **NOT** disengage openpilot ALC or ACC/SCC
 **RSPA**
 -------------
 
-!! COMING SOON !!
+!! WIP !!
 
 **SPAS**
 -------------
