@@ -45,7 +45,7 @@ class SpasRspaController:
       "CF_RSPA_Trgt_Spd": 0.5, # 0.5kph as a test for now as a slow roll :) setspeed, Maybe can null message and use SCC? 2019+ non legacy seems to want both messages there...
       "CF_RSPA_StopReq": 1 if enabled and stopping and not gaspressed else 0, # Are we stopping? - JPR
       "CR_RSPA_EPB_Req": 0, # Electronic Parking Brake - JPR
-      "CF_RSPA_ACC_ACT": 0, # 0 low speed? 1 High speed?
+      "CF_RSPA_ACC_ACT": 0, # 0 low speed? 1 High speed? Need Test
       "CF_RSPA_AliveCounter": idx % 0x10, # Happens to be same as SCC11! :) - JPR
       "CF_RSPA_CRC": 0,
     }
@@ -134,7 +134,7 @@ class SpasRspaController:
 
   def RSPA_Controller(self, c, CS, frame, packer, can_sends, set_speed, stopping):
     if CS.rspa_enabled:
-      if (frame % 1) == 0: # RSPA11 at 100hz. - JPR
+      if (frame % 1) == 0: # RSPA11 at 100hz. :) - JPR
         can_sends.append(SpasRspaController.create_rspa11(packer, frame, self.en_rspa, CS.mdps_bus, c.active, set_speed, stopping, CS.out.gasPressed))
 
   def SPAS_Controller(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
