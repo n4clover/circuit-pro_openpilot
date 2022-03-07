@@ -273,7 +273,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
   if (addr == 593) {OP_MDPS_live = 20;}
   if (addr == 1265 && bus == 1) {OP_CLU_live = 20;} // only count mesage created for MDPS
   if (addr == 1057) {OP_SCC_live = 20; if (car_SCC_live > 0) {car_SCC_live -= 1;}}
-  if (addr == 870 || addr == 790 || addr == 881 || addr== 1265) {OP_EMS_live = 20;}
+  if (addr == 870 || addr == 790 || addr == 881) {OP_EMS_live = 20;}
   // 1 allows the message through
   return tx;
 }
@@ -290,7 +290,7 @@ static int hyundai_community_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
     if (bus_num == 0) {
       if (!OP_CLU_live || addr != 1265 || HKG_mdps_bus == 0) {
         if (!OP_MDPS_live || addr != 593) {
-          if (!OP_EMS_live || (addr != 870 && addr != 790 && addr != 881 && addr != 1265)) {
+          if (!OP_EMS_live || (addr != 870 && addr != 790 && addr != 881)) {
             bus_fwd = fwd_to_bus1 == 1 ? 12 : 2;
           } else {
             bus_fwd = 2;  // Comma create EMS366, EMS11, E_EMS11, and CLU11 for MDPS
