@@ -1,4 +1,4 @@
-# This is the work of JPR
+# This is the work of JPR. "God I love them Korean Cars!"
 import copy
 from cereal import car
 from common.params import Params
