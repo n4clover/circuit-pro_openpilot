@@ -241,7 +241,7 @@ class CarController():
           controls.aReqValueMax = controls.aReqValue
 
         jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
-        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, CS.lead_distance, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable, CS.has_scc14, sys_warning)) 
+        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, CS.lead_distance, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable, CS.has_scc14, sys_warning, CS.scc12)) 
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5

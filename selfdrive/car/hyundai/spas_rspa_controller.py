@@ -1,4 +1,5 @@
 # This is the work of JPR
+import copy
 from cereal import car
 from common.params import Params
 from common.numpy_fast import clip, interp
@@ -104,26 +105,26 @@ class SpasRspaController:
     #return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
   
   def create_ems_366(packer, ems_366, enabled):
-    values = ems_366
+    values = copy.copy(ems_366)
     if enabled:
       values["VS"] = 1
     return packer.make_can_msg("EMS_366", 1, values)
 
   def create_ems11(packer, ems11, enabled):
-    values = ems11
+    values = copy.copy(ems11)
     if enabled:
       values["VS"] = 1
     return packer.make_can_msg("EMS11", 1, values)
 
   def create_eems11(packer, eems11, enabled):
-    values = eems11
+    values = copy.copy(eems11)
     if enabled:
       values["Accel_Pedal_Pos"] = 1
       values["CR_Vcu_AccPedDep_Pos"] = 1
     return packer.make_can_msg("E_EMS11", 1, values)
 
   def create_clu11(packer, clu11, enabled):
-    values = clu11
+    values = copy.copy(clu11)
     if enabled:
       values["CF_Clu_Vanz"] = 1
     return packer.make_can_msg("CLU11", 1, values)
