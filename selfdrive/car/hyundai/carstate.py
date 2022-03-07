@@ -539,6 +539,7 @@ class CarState(CarStateBase):
 
     if CP.spasEnabled:
       if CP.mdpsBus == 1:
+        print("1")
         signals += [
           ("CR_Mdps_StrAng", "MDPS11", 0),
           ("CF_Mdps_Stat", "MDPS11", 0),
@@ -581,11 +582,13 @@ class CarState(CarStateBase):
           ]
           checks += [("E_EMS11", 100)]
         elif CP.mdpsBus == 0:
+          print("2")
           signals += [
             ("CR_Mdps_StrAng", "MDPS11", 0),
             ("CF_Mdps_Stat", "MDPS11", 0),
           ]
           checks += [("MDPS11", 100)]
+
     if Params().get_bool("HyundaiNaviSL"):
       signals += [
         ("SpeedLim_Nav_Clu", "Navi_HU", 0),
@@ -619,14 +622,17 @@ class CarState(CarStateBase):
         ("MDPS12", 50),
         ("MDPS11", 100),
       ]
-      if CP.spasEnabled:
-        signals += [
-          ("CR_Mdps_StrAng", "MDPS11", 0),
-          ("CF_Mdps_Stat", "MDPS11", 0),
-        ]
-        checks += [
-          ("MDPS11", 100),
-        ]
+      
+    if CP.spasEnabled:
+      print("3")
+      signals += [
+        ("CR_Mdps_StrAng", "MDPS11", 0),
+        ("CF_Mdps_Stat", "MDPS11", 0),
+      ]
+      checks += [
+        ("MDPS11", 100),
+      ]
+
     if CP.sasBus == 1:
       signals += [
         ("SAS_Angle", "SAS11"),
@@ -721,6 +727,8 @@ class CarState(CarStateBase):
     checks = [
       ("LKAS11", 100)
     ]
+
+
     if CP.sccBus == 2:
       signals += [
         ("MainMode_ACC", "SCC11"),
