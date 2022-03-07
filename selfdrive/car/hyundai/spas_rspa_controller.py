@@ -134,7 +134,7 @@ class SpasRspaController:
 
   def RSPA_Controller(self, c, CS, frame, packer, can_sends, set_speed, stopping):
     if CS.rspa_enabled:
-      if (frame % 2) == 0: # Not sure rough guess for now... Will know when see cabana. - JPR
+      if (frame % 1) == 0: # RSPA11 at 100hz. - JPR
         can_sends.append(SpasRspaController.create_rspa11(packer, frame, self.en_rspa, CS.mdps_bus, c.active, set_speed, stopping, CS.out.gasPressed))
 
   def SPAS_Controller(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
