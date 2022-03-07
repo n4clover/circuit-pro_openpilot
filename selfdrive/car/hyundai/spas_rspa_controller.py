@@ -165,17 +165,14 @@ class SpasRspaController:
 
       if (CS.out.steeringPressedSPAS or self.rate > 1.4): # Reset SPAS cut timer if steeringPressedSPAS is True or if the steering wheel is moving fast. - JPR
         self.cut_timer = 0
+        spas_active = False
         
-      if CS.out.steeringPressedSPAS or self.cut_timer <= 85:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
+      if CS.out.steeringPressedSPAS or self.cut_timer <= 80:# Keep SPAS cut for 80 cycles after steering pressed to prevent unintentional fighting. - JPR
         spas_active = False
         self.cut_timer += 1
     
       if turnsignalcut:
         spas_active = False
-
-      if CS.out.steeringPressedSPAS or self.cut_timer < 85 and self.rate > 5:# Keep SPAS cut for 50 cycles after steering pressed to prevent unintentional fighting. - JPR
-        spas_active = False
-        self.cut_timer += 1
 
       self.last_apply_angle = apply_angle
 
