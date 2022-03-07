@@ -124,7 +124,7 @@ def create_mdps12(packer, frame, mdps12):
 
   return packer.make_can_msg("MDPS12", 2, values)
 
-def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, lead_dist, set_speed, stopping, gapsetting, gaspressed, radarDisable, scc14, warning):
+def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, lead_dist, set_speed, stopping, gapsetting, gaspressed, radarDisable, scc14, warning, scc12):
   commands = []
 
   scc11_values = {
@@ -144,7 +144,8 @@ def create_acc_commands(packer, enabled, accel, jerk, idx, lead_visible, lead_di
     "DriverAlertDisplay": 1 if warning else 0,
   }
   commands.append(packer.make_can_msg("SCC11", 0, scc11_values))
-
+  if not radarDisable:
+    scc12_values = copy.copy(scc12)
   scc12_values = {
     "ACCMode": 2 if enabled and gaspressed else 1 if enabled else 0,
     "StopReq": 1 if enabled and stopping and not gaspressed else 0,
