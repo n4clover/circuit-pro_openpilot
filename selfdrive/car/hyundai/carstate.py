@@ -543,7 +543,6 @@ class CarState(CarStateBase):
           ("CR_Mdps_StrAng", "MDPS11", 0),
           ("CF_Mdps_Stat", "MDPS11", 0),
         ]
-        checks += [("MDPS11", 100)]
         if CP.emsType == 1:
           signals += [
             ("TQI_1", "EMS_366", 0),
