@@ -420,23 +420,21 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.7
     elif candidate == CAR.STINGER:
       os.system("cd /data/openpilot/selfdrive/assets && rm -rf img_spinner_comma.png && cp Stinger.png img_spinner_comma.png")
+      ret.steerActuatorDelay = 0.08 # Stinger GT Limited AWD 3.3T stock value (Tunder's 2020)
+      ret.steerLimitTimer = 0.4 # stock is 0.01 but 0.04 seems to work well
       tire_stiffness_factor = 1.125 # LiveParameters (Tunder's 2020)
+      ret.steerRateCost = 1.0
       ret.mass = 1825.0 + STD_CARGO_KG
-      ret.wheelbase = 2.906
-      ret.centerToFront = ret.wheelbase * 0.4
-      ret.steerRatio = 14.4 * 1.15   # 15% higher at the center seems reasonable - before was 14.44 
+      ret.wheelbase = 2.906 # https://www.kia.com/us/en/stinger/specs
+      ret.steerRatio = 13.56   # 10.28 measured by wheel alignment machine/reported steering angle by OP. 2020 GT Limited AWD has a variable steering ratio ultimately ending in 10.28.  13.56 after 1200km in LiveParamaters (Tunder)
       ret.emsType = 1 
 
       if not UseLQR:
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGainBP = [0.]
-        ret.lateralTuning.indi.innerLoopGainV = [3.62]
-        ret.lateralTuning.indi.outerLoopGainBP = [0.]
-        ret.lateralTuning.indi.outerLoopGainV = [2.5]
-        ret.lateralTuning.indi.timeConstantBP = [0.]
-        ret.lateralTuning.indi.timeConstantV = [1.4]
-        ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
-        ret.lateralTuning.indi.actuatorEffectivenessV = [2.]
+        ret.lateralTuning.indi.innerLoopGain = 3.0
+        ret.lateralTuning.indi.outerLoopGain = 2.0
+        ret.lateralTuning.indi.timeConstant = 1.0
+        ret.lateralTuning.indi.actuatorEffectiveness = 1.5 
       
       ret.longitudinalTuning.kpBP = [0, 10. * CV.KPH_TO_MS, 20. * CV.KPH_TO_MS, 40. * CV.KPH_TO_MS, 70. * CV.KPH_TO_MS, 100. * CV.KPH_TO_MS, 130. * CV.KPH_TO_MS]
       ret.longitudinalTuning.kpV = [1.22, 1.155, 1.07, 0.98, 0.92, 0.87, 0.82]
