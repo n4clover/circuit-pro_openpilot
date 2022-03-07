@@ -101,8 +101,8 @@ class SpasRspaController:
     "CF_Spas_RCS_Alarm": 0,
     "CF_Spas_RRS_Alarm": 0,
     }
-    return packer.make_can_msg("SPAS12", bus, values)
-    #return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
+    #return packer.make_can_msg("SPAS12", bus, values)
+    return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
   
   def create_ems_366(packer, ems_366, enabled):
     values = copy.copy(ems_366)
