@@ -121,6 +121,15 @@ class SpasRspaController:
     if enabled:
       values["Accel_Pedal_Pos"] = 1
       values["CR_Vcu_AccPedDep_Pos"] = 1
+      values = {
+        "Brake_Pedal_Pos": 0,
+        "IG_Reactive_Stat": 0,
+        "Gear_Change": 0,
+        "Cruise_Limit_Status": 0,
+        "Cruise_Limit_Target": 0,
+        "Accel_Pedal_Pos": 0,
+        "CR_Vcu_AccPedDep_Pos": 0,
+      }
     return packer.make_can_msg("E_EMS11", 1, values)
 
   def create_clu11(packer, clu11, enabled):
