@@ -1,6 +1,6 @@
 import copy
 import crcmod
-from selfdrive.car.hyundai.values import CAR, CHECKSUM, FEATURES, EV_HYBRID_CAR
+from selfdrive.car.hyundai.values import CAR, CHECKSUM, FEATURES
 
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
