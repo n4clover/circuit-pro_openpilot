@@ -5,7 +5,7 @@ from common.params import Params
 from common.numpy_fast import clip, interp
 from selfdrive.config import Conversions as CV
 from common.realtime import DT_CTRL
-from selfdrive.car.hyundai.values import CAR, CHECKSUM, FEATURES, EV_HYBRID_CAR
+from selfdrive.car.hyundai.values import CHECKSUM, LEGACY_SAFETY_MODE_CAR
 import crcmod
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
@@ -62,7 +62,7 @@ class SpasRspaController:
       "CF_Spas_TestMode": 0, # Maybe if set to 1 will ignore VS... needs testing.
       "CR_Spas_StrAngCmd": apply_steer,
       "CF_Spas_BeepAlarm": 0,
-      "CF_Spas_Mode_Seq": 2,
+      "CF_Spas_Mode_Seq": 2 if LEGACY_SAFETY_MODE_CAR else 1,
       "CF_Spas_AliveCnt": frame % 0x200, 
       "CF_Spas_Chksum": 0,
       "CF_Spas_PasVol": 0,
@@ -75,7 +75,7 @@ class SpasRspaController:
       values["CF_Spas_Chksum"] = sum(dat[:6]) % 256
     return packer.make_can_msg("SPAS11", bus, values)
 
-  def create_spas12(packer, bus):
+  def create_spas12(packer, bus): # SPAS Screen Prompts. - JPR
     values = {
     "CF_Spas_HMI_Stat": 0,
     "CF_Spas_Disp": 0,
