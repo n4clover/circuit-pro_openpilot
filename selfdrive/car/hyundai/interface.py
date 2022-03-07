@@ -4,7 +4,7 @@ from cereal import car
 from panda import Panda
 from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
-from selfdrive.car.hyundai.values import CAR, Buttons, CarControllerParams
+from selfdrive.car.hyundai.values import CAR, Buttons, CarControllerParams, LEGACY_SAFETY_MODE_CAR
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint, get_safety_config
 from selfdrive.car.interfaces import CarInterfaceBase
 from selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
@@ -568,7 +568,7 @@ class CarInterface(CarInterfaceBase):
     ret.spasEnabled = Params().get_bool('SpasRspaEnabled')
 
     # RSPA - JPR
-    ret.rspaEnabled = False # ret.spasEnabled and not candidate in LEGACY_SAFETY_MODE_CAR
+    ret.rspaEnabled = ret.spasEnabled and not candidate in LEGACY_SAFETY_MODE_CAR
 
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
     if ret.radarOffCan or ret.radarDisable or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled') or ret.spasEnabled:
