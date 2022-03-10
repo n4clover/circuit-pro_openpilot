@@ -56,7 +56,7 @@ class CarState(CarStateBase):
     self.mdps11_stat = 0
 
     self.angle_delta_bp = [0., 50., 100., 150., 200., 250., 300.] # Angle that SAS11 is reporting the rate in deg. - JPR
-    self.angle_delta_v = [1., 1.05, 1.1, 1.15, 1.2, 1.25, 1.3]  # How much the angle factor should be. - JPR
+    self.angle_delta_v = [1., 1.07, 1.12, 1.16, 1.22, 1.27, 1.32]  # How much the angle factor should be. - JPR
 
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdps_bus else cp
@@ -71,7 +71,7 @@ class CarState(CarStateBase):
     ret = car.CarState.new_message()
 
     if self.spas_enabled:
-     ANGLE_FACTOR = clip(interp(abs(cp_sas.vl["SAS11"]['SAS_Angle']), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.3) # Don't Let angle factor get above 1.3! - JPR
+     ANGLE_FACTOR = clip(interp(abs(cp_sas.vl["SAS11"]['SAS_Angle']), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.4) # Don't Let angle factor get above 1.4! - JPR
 
     ret.doorOpen = any([cp.vl["CGW1"]["CF_Gway_DrvDrSw"], cp.vl["CGW1"]["CF_Gway_AstDrSw"],
                         cp.vl["CGW2"]["CF_Gway_RLDrSw"], cp.vl["CGW2"]["CF_Gway_RRDrSw"]])
@@ -124,7 +124,7 @@ class CarState(CarStateBase):
     ret.steeringWheelTorque = cp_mdps.vl["MDPS11"]['CR_Mdps_DrvTq'] 
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (155 * ANGLE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
+    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (160 * ANGLE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
     if Params().get_bool('SPASDebug'):
       print("Angle Factor  : ", ANGLE_FACTOR)
 
