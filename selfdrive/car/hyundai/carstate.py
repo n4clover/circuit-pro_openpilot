@@ -581,12 +581,12 @@ class CarState(CarStateBase):
             ("CR_Vcu_AccPedDep_Pos", "E_EMS11", 0),
           ]
           checks += [("E_EMS11", 100)]
-        elif CP.mdpsBus == 0:
-          print("2")
-          signals += [
-            ("CR_Mdps_StrAng", "MDPS11", 0),
-            ("CF_Mdps_Stat", "MDPS11", 0),
-          ]
+      elif CP.mdpsBus == 0:
+        print("2")
+        signals += [
+          ("CR_Mdps_StrAng", "MDPS11", 0),
+          ("CF_Mdps_Stat", "MDPS11", 0),
+        ]
 
     if Params().get_bool("HyundaiNaviSL"):
       signals += [
