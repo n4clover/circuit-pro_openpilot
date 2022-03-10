@@ -5,6 +5,7 @@ from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
 from selfdrive.config import Conversions as CV
 from common.params import Params
+from common.numpy_fast import interp
 
 GearShifter = car.CarState.GearShifter
 
@@ -54,6 +55,9 @@ class CarState(CarStateBase):
     self.rspa_enabled = CP.rspaEnabled
     self.mdps11_stat = 0
 
+    self.angle_delta_bp = [0., 2., 4.]
+    self.angle_delta_v = [1., 1.05, 1.1]  
+
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdps_bus else cp
     cp_sas = cp2 if self.sas_bus else cp
@@ -65,6 +69,8 @@ class CarState(CarStateBase):
     self.prev_right_blinker = self.rightBlinker
     self.prev_lkas_button = self.lkas_button_on
     ret = car.CarState.new_message()
+
+    ANGLE_FACTOR = interp(abs(ret.steeringRateDeg), self.angle_delta_bp, self.angle_delta_v)
 
     ret.doorOpen = any([cp.vl["CGW1"]["CF_Gway_DrvDrSw"], cp.vl["CGW1"]["CF_Gway_AstDrSw"],
                         cp.vl["CGW2"]["CF_Gway_RLDrSw"], cp.vl["CGW2"]["CF_Gway_RRDrSw"]])
@@ -117,7 +123,7 @@ class CarState(CarStateBase):
     ret.steeringWheelTorque = cp_mdps.vl["MDPS11"]['CR_Mdps_DrvTq'] 
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + 155 if self.mdps11_stat == 5 else abs(ret.steeringTorque) > STEER_THRESHOLD
+    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (155 * ANGLE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
 
     if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
       self.mdps_error_cnt += 1
