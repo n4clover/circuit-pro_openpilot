@@ -70,7 +70,8 @@ class CarState(CarStateBase):
     self.prev_lkas_button = self.lkas_button_on
     ret = car.CarState.new_message()
 
-    RATE_FACTOR = clip(interp(abs(ret.steeringRateDeg), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.3) # Don't Let angle factor get above 1.3! - JPR
+    if self.spas_enabled:
+      RATE_FACTOR = clip(interp(abs(cp_sas.vl["SAS11"]['SAS_Speed']), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.3) # Don't Let angle factor get above 1.3! - JPR
 
     ret.doorOpen = any([cp.vl["CGW1"]["CF_Gway_DrvDrSw"], cp.vl["CGW1"]["CF_Gway_AstDrSw"],
                         cp.vl["CGW2"]["CF_Gway_RLDrSw"], cp.vl["CGW2"]["CF_Gway_RRDrSw"]])
@@ -124,6 +125,8 @@ class CarState(CarStateBase):
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
     ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (155 * RATE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
+    if Params().get_bool('SPASDebug'):
+      print("Rate Factor  : ", RATE_FACTOR)
 
     if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
       self.mdps_error_cnt += 1
@@ -509,7 +512,7 @@ class CarState(CarStateBase):
             ("CR_Vcu_AccPedDep_Pos", "E_EMS11", 0),
           ]
           checks += [("E_EMS11", 100)]
-          
+
     if CP.sasBus == 0:
       signals += [
         ("SAS_Angle", "SAS11"),
