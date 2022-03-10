@@ -470,14 +470,8 @@ class CarState(CarStateBase):
           ("CF_Mdps_Stat", "MDPS11", 0),
         ]
         checks += [("MDPS11", 100)]
-    elif CP.mdpsBus == 1:
-      if CP.spasEnabled:
-        signals += [
-          ("CR_Mdps_StrAng", "MDPS11", 0),
-          ("CF_Mdps_Stat", "MDPS11", 0),
-        ]
-        checks += [("MDPS11", 100)]
-        
+    elif CP.mdpsBus == 1: # If MDPS bus is 1 do this for bus 0. I.E. Going to spoof! - JPR
+      if CP.spasEnabled:        
         if CP.emsType == 1:
           signals += [
             ("TQI_1", "EMS_366", 0),
@@ -515,6 +509,7 @@ class CarState(CarStateBase):
             ("CR_Vcu_AccPedDep_Pos", "E_EMS11", 0),
           ]
           checks += [("E_EMS11", 100)]
+          
     if CP.sasBus == 0:
       signals += [
         ("SAS_Angle", "SAS11"),
@@ -609,6 +604,11 @@ class CarState(CarStateBase):
     signals = []
     checks = []
     if CP.mdpsBus == 1:
+      if CP.spasEnabled: # Need Check this and get signal from bus 1 if MDPS on bus 1. - JPR
+        signals += [
+          ("CR_Mdps_StrAng", "MDPS11", 0),
+          ("CF_Mdps_Stat", "MDPS11", 0),
+        ]
       signals += [
         ("CR_Mdps_StrColTq", "MDPS12", 0),
         ("CF_Mdps_Def", "MDPS12", 0),
