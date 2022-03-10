@@ -55,8 +55,8 @@ class CarState(CarStateBase):
     self.rspa_enabled = CP.rspaEnabled
     self.mdps11_stat = 0
 
-    self.angle_delta_bp = [0., 2., 4.]
-    self.angle_delta_v = [1., 1.05, 1.1]  
+    self.angle_delta_bp = [0., 2., 4.] # How Fast is SAS11 is reporting the rate. - JPR
+    self.angle_delta_v = [1., 1.05, 1.1]  # How much the rate factor should be. - JPR
 
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdps_bus else cp
@@ -70,7 +70,7 @@ class CarState(CarStateBase):
     self.prev_lkas_button = self.lkas_button_on
     ret = car.CarState.new_message()
 
-    ANGLE_FACTOR = clip(interp(abs(ret.steeringRateDeg), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.3) # Don't Let angle factor get above 1.3! - JPR
+    RATE_FACTOR = clip(interp(abs(ret.steeringRateDeg), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.3) # Don't Let angle factor get above 1.3! - JPR
 
     ret.doorOpen = any([cp.vl["CGW1"]["CF_Gway_DrvDrSw"], cp.vl["CGW1"]["CF_Gway_AstDrSw"],
                         cp.vl["CGW2"]["CF_Gway_RLDrSw"], cp.vl["CGW2"]["CF_Gway_RRDrSw"]])
@@ -123,7 +123,7 @@ class CarState(CarStateBase):
     ret.steeringWheelTorque = cp_mdps.vl["MDPS11"]['CR_Mdps_DrvTq'] 
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (155 * ANGLE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
+    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (155 * RATE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
 
     if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
       self.mdps_error_cnt += 1
