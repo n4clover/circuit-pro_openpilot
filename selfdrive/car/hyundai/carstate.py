@@ -126,7 +126,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
     ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (215 * ANGLE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
     if Params().get_bool('SPASDebug'):
-      print("Angle Factor  : ", ANGLE_FACTOR)
+      print("Rate Factor  : ", RATE_FACTOR)
 
     if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
       self.mdps_error_cnt += 1
