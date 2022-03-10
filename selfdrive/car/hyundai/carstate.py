@@ -5,7 +5,7 @@ from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
 from selfdrive.config import Conversions as CV
 from common.params import Params
-from common.numpy_fast import interp
+from common.numpy_fast import interp, clip
 
 GearShifter = car.CarState.GearShifter
 
@@ -70,7 +70,7 @@ class CarState(CarStateBase):
     self.prev_lkas_button = self.lkas_button_on
     ret = car.CarState.new_message()
 
-    ANGLE_FACTOR = interp(abs(ret.steeringRateDeg), self.angle_delta_bp, self.angle_delta_v)
+    ANGLE_FACTOR = clip(interp(abs(ret.steeringRateDeg), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.3) # Don't Let angle factor get above 1.3! - JPR
 
     ret.doorOpen = any([cp.vl["CGW1"]["CF_Gway_DrvDrSw"], cp.vl["CGW1"]["CF_Gway_AstDrSw"],
                         cp.vl["CGW2"]["CF_Gway_RLDrSw"], cp.vl["CGW2"]["CF_Gway_RRDrSw"]])
