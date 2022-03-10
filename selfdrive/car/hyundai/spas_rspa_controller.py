@@ -10,7 +10,7 @@ import crcmod
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
 ###### SPAS ###### - JPR
-STEER_ANG_MAX = 550 # SPAS Max Angle
+STEER_ANG_MAX = 360 # SPAS Max Angle
 ANGLE_DELTA_BP = [0., 10., 20.]
 ANGLE_DELTA_V = [1.19, 1.14, 1.09]    # windup limit
 ANGLE_DELTA_VU = [1.29, 1.19, 1.14]   # unwind limit
