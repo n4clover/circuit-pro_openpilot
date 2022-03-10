@@ -56,7 +56,7 @@ class CarState(CarStateBase):
     self.mdps11_stat = 0
 
     self.angle_delta_bp = [0., 50., 100., 150., 200., 250., 300.] # Angle that SAS11 is reporting the rate in deg. - JPR
-    self.angle_delta_v = [1., 1.05, 1.1, 1.15, 1.2, 1.25, 1.3]  # How much the rate factor should be. - JPR
+    self.angle_delta_v = [1., 1.05, 1.1, 1.15, 1.2, 1.25, 1.3]  # How much the angle factor should be. - JPR
 
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdps_bus else cp
@@ -126,7 +126,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
     ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (155 * ANGLE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
     if Params().get_bool('SPASDebug'):
-      print("Rate Factor  : ", RATE_FACTOR)
+      print("Angle Factor  : ", ANGLE_FACTOR)
 
     if not ret.standstill and cp_mdps.vl["MDPS12"]["CF_Mdps_ToiUnavail"] != 0:
       self.mdps_error_cnt += 1
