@@ -55,8 +55,8 @@ class CarState(CarStateBase):
     self.rspa_enabled = CP.rspaEnabled
     self.mdps11_stat = 0
 
-    self.angle_delta_bp = [0., 10., 20., 30, 40] # How Fast is SAS11 is reporting the rate in deg. - JPR
-    self.angle_delta_v = [1., 1.05, 1.1, 1.15, 1.2]  # How much the rate factor should be. - JPR
+    self.angle_delta_bp = [0., 10., 20., 30, 40, 50, 60] # How Fast is SAS11 is reporting the rate in deg. - JPR
+    self.angle_delta_v = [1., 1.05, 1.1, 1.15, 1.2, 1.25, 1.3]  # How much the rate factor should be. - JPR
 
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdps_bus else cp
