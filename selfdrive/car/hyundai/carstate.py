@@ -1,5 +1,5 @@
 from cereal import car
-from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, CAR, HYBRID_CAR, EV_HYBRID_CAR
+from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, CAR, HYBRID_CAR, EV_HYBRID_CAR, LEGACY_SAFETY_MODE_CAR
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
@@ -51,12 +51,15 @@ class CarState(CarStateBase):
 
     self.use_cluster_speed = Params().get_bool('UseClusterSpeed')
     self.long_control_enabled = Params().get_bool('LongControlEnabled')
+
     self.spas_enabled = CP.spasEnabled
     self.rspa_enabled = CP.rspaEnabled
     self.mdps11_stat = 0
+    self.spas_mode_sequence = 2 if LEGACY_SAFETY_MODE_CAR else 1
 
-    self.angle_delta_bp = [0., 10., 20., 30, 40, 50, 60] # How Fast is SAS11 is reporting the rate in deg. - JPR
-    self.angle_delta_v = [1., 1.1, 1.15, 1.2, 1.25, 1.3, 1.35]  # How much the rate factor should be. - JPR
+    # Wheel Momentum/Rate Factor. - JPR
+    self.angle_delta_bp = [0., 10., 20., 30, 40, 50, 60, 70, 80] # How Fast is SAS11 is reporting the rate in deg. - JPR
+    self.angle_delta_v = [1., 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45]  # How much the rate factor should be. - JPR
 
   def update(self, cp, cp2, cp_cam):
     cp_mdps = cp2 if self.mdps_bus else cp
@@ -71,7 +74,7 @@ class CarState(CarStateBase):
     ret = car.CarState.new_message()
 
     if self.spas_enabled:
-      RATE_FACTOR = clip(interp(abs(cp_sas.vl["SAS11"]['SAS_Speed']), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.4) # Don't Let angle factor get above 1.3! - JPR
+      RATE_FACTOR = clip(interp(abs(cp_sas.vl["SAS11"]['SAS_Speed']), self.angle_delta_bp, self.angle_delta_v), 1.0, 1.45) # Don't Let angle factor get above 1.45! - JPR
 
     ret.doorOpen = any([cp.vl["CGW1"]["CF_Gway_DrvDrSw"], cp.vl["CGW1"]["CF_Gway_AstDrSw"],
                         cp.vl["CGW2"]["CF_Gway_RLDrSw"], cp.vl["CGW2"]["CF_Gway_RRDrSw"]])
@@ -124,7 +127,7 @@ class CarState(CarStateBase):
     ret.steeringWheelTorque = cp_mdps.vl["MDPS11"]['CR_Mdps_DrvTq'] 
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (215 * RATE_FACTOR) if self.mdps11_stat == (4 or 5) else abs(ret.steeringTorque) > STEER_THRESHOLD
+    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (210 * RATE_FACTOR) if self.mdps11_stat == 5 else abs(ret.steeringTorque) > STEER_THRESHOLD
     if Params().get_bool('SPASDebug'):
       print("Rate Factor  : ", RATE_FACTOR)
 

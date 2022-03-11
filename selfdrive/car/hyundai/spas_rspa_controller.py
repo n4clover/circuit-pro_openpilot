@@ -173,7 +173,7 @@ class SpasRspaController:
         else:
           apply_angle = CS.mdps11_strang
 
-      if (CS.out.steeringPressedSPAS or self.rate > 1.4): # Reset SPAS cut timer if steeringPressedSPAS is True or if the steering wheel is moving fast. - JPR
+      if (CS.out.steeringPressedSPAS or self.rate > 2): # Reset SPAS cut timer if steeringPressedSPAS is True or if the steering wheel is moving fast. - JPR
         self.cut_timer = 0
         spas_active = False
         
