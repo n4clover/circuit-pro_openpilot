@@ -177,7 +177,7 @@ class SpasRspaController:
         self.cut_timer = 0
         spas_active = False
         
-      if CS.out.steeringPressedSPAS or self.cut_timer <= 80:# Keep SPAS cut for 80 cycles after steering pressed to prevent unintentional fighting. - JPR
+      if CS.out.steeringPressedSPAS or self.cut_timer <= 100:# Keep SPAS cut for 80 cycles after steering pressed to prevent unintentional fighting. - JPR
         spas_active = False
         self.cut_timer += 1
     
