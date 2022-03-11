@@ -58,7 +58,7 @@ class CarState(CarStateBase):
     self.spas_mode_sequence = 2 if LEGACY_SAFETY_MODE_CAR else 1
 
     # Wheel Momentum/Rate Factor. - JPR
-    self.angle_delta_bp = [0., 10., 20., 30, 40, 50, 60, 70, 80] # How Fast is SAS11 is reporting the rate in deg. - JPR
+    self.angle_delta_bp = [0., 5., 10., 20., 30, 40, 50, 60, 70] # How Fast is SAS11 is reporting the rate in deg. - JPR
     self.angle_delta_v = [1., 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45]  # How much the rate factor should be. - JPR
 
   def update(self, cp, cp2, cp_cam):
@@ -127,7 +127,7 @@ class CarState(CarStateBase):
     ret.steeringWheelTorque = cp_mdps.vl["MDPS11"]['CR_Mdps_DrvTq'] 
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
-    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (200 * RATE_FACTOR) if self.mdps11_stat == 5 else abs(ret.steeringTorque) > STEER_THRESHOLD
+    ret.steeringPressedSPAS = abs(ret.steeringTorque) > STEER_THRESHOLD + (205 * RATE_FACTOR) if self.mdps11_stat == 5 else abs(ret.steeringTorque) > STEER_THRESHOLD
     if Params().get_bool('SPASDebug'):
       print("Rate Factor  : ", RATE_FACTOR)
 
