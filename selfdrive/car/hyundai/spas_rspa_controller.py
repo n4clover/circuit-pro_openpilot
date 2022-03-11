@@ -35,6 +35,7 @@ class SpasRspaController:
     self.cut_timer = 0
     self.SteeringTempUnavailable = False
     self.ens_rspa = 0
+    self.spas_mode_sequence = 2 if LEGACY_SAFETY_MODE_CAR else 1
   
   @staticmethod
   def create_rspa11(packer, frame, en_rspa, bus, enabled, setspeed, stopping, gaspressed):
@@ -56,13 +57,13 @@ class SpasRspaController:
     values["CF_RSPA_CRC"] = hyundai_checksum(dat)
     return packer.make_can_msg("RSPA11", bus, values)
 
-  def create_spas11(packer, car_fingerprint, frame, en_spas, apply_steer, bus):
+  def create_spas11(packer, car_fingerprint, frame, en_spas, apply_steer, bus, spas_mode_sequence):
     values = {
       "CF_Spas_Stat": en_spas,
       "CF_Spas_TestMode": 0, # Maybe if set to 1 will ignore VS... needs testing.
       "CR_Spas_StrAngCmd": apply_steer,
       "CF_Spas_BeepAlarm": 0,
-      "CF_Spas_Mode_Seq": 2 if LEGACY_SAFETY_MODE_CAR else 1,
+      "CF_Spas_Mode_Seq": spas_mode_sequence, # 2 if LEGACY_SAFETY_MODE_CAR else 1,
       "CF_Spas_AliveCnt": frame % 0x200, 
       "CF_Spas_Chksum": 0,
       "CF_Spas_PasVol": 0,
@@ -251,9 +252,9 @@ class SpasRspaController:
           self.SteeringTempUnavailable = False
 
         if not spas_active:
-          apply_angle = CS.mdps11_strang
+          apply_angle = CS.mdps11_strang if self.spas_mode_sequence == 2 else CS.sas11_angle
 
-        can_sends.append(SpasRspaController.create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus))
+        can_sends.append(SpasRspaController.create_spas11(self.packer, self.car_fingerprint, (frame // 2), self.en_spas, apply_angle, CS.mdps_bus, self.spas_mode_sequence))
       
       SpasRspaController.screen_controller(self, CS, can_sends, frame) # Access SPAS12 message controller for screen Prompts. - JPR
       
