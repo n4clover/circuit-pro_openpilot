@@ -5,7 +5,7 @@ from common.params import Params
 from common.numpy_fast import clip, interp
 from selfdrive.config import Conversions as CV
 from common.realtime import DT_CTRL
-from selfdrive.car.hyundai.values import CHECKSUM, LEGACY_SAFETY_MODE_CAR
+from selfdrive.car.hyundai.values import CHECKSUM, SPAS_SAS11_CAR
 import crcmod
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
@@ -35,7 +35,7 @@ class SpasRspaController:
     self.cut_timer = 0
     self.SteeringTempUnavailable = False
     self.ens_rspa = 0
-    self.spas_mode_sequence = 2 if LEGACY_SAFETY_MODE_CAR else 1
+    self.spas_mode_sequence = 2 if SPAS_SAS11_CAR else 1
   
   @staticmethod
   def create_rspa11(packer, frame, en_rspa, bus, enabled, setspeed, stopping, gaspressed):
