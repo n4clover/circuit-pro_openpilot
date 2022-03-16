@@ -3,7 +3,7 @@ from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, CAR, HY
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from selfdrive.config import Conversions as CV
+from common.conversions import Conversions as CV
 from common.params import Params
 from common.numpy_fast import interp, clip
 
@@ -136,7 +136,7 @@ class CarState(CarStateBase):
     else:
       self.mdps_error_cnt = 0
 
-    ret.steerWarning = self.mdps_error_cnt > 50
+    ret.steerFaultTemporary = self.mdps_error_cnt > 50
 
     if self.CP.enableAutoHold:
       ret.autoHold = cp.vl["ESP11"]["AVH_STAT"]
@@ -171,6 +171,8 @@ class CarState(CarStateBase):
     ret.brake = 0
     ret.brakePressed = cp.vl["TCS13"]["DriverBraking"] != 0
     ret.brakeHoldActive = cp.vl["TCS15"]["AVH_LAMP"] == 2  # 0 OFF, 1 ERROR, 2 ACTIVE, 3 READY
+    ret.parkingBrake = cp.vl["TCS13"]["PBRAKE_ACT"] == 1
+    #ret.parkingBrake = cp.vl["CGW1"]["CF_Gway_ParkBrakeSw"]
 
     # TODO: Check this
     ret.brakeLights = bool(cp.vl["TCS13"]["BrakeLight"] or ret.brakePressed)

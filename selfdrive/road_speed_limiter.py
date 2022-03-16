@@ -10,7 +10,7 @@ from threading import Thread
 from cereal import messaging
 from common.numpy_fast import clip
 from common.realtime import sec_since_boot
-from selfdrive.config import Conversions as CV
+from common.conversions import Conversions as CV
 
 CAMERA_SPEED_FACTOR = 1.05
 
@@ -36,9 +36,9 @@ class RoadLimitSpeedServer:
     broadcast.setDaemon(True)
     broadcast.start()
 
-    # gps = Thread(target=self.gps_thread, args=[])
-    # gps.setDaemon(True)
-    # gps.start()
+    gps = Thread(target=self.gps_thread, args=[])
+    gps.setDaemon(True)
+    gps.start()
 
   def gps_thread(self):
 
@@ -49,7 +49,7 @@ class RoadLimitSpeedServer:
           sm.update()
           if self.remote_addr is not None and sm.updated['gpsLocationExternal']:
             location = sm['gpsLocationExternal']
-            json_location = json.dumps([
+            json_location = json.dumps({"location": [
               location.latitude,
               location.longitude,
               location.altitude,
@@ -62,7 +62,7 @@ class RoadLimitSpeedServer:
               location.verticalAccuracy,
               location.bearingAccuracyDeg,
               location.speedAccuracy,
-            ])
+            ]})
 
             address = (self.remote_addr[0], Port.LOCATION_PORT)
             sock.sendto(json_location.encode(), address)
@@ -285,10 +285,10 @@ class RoadSpeedLimiter:
           MIN_LIMIT = 40
           MAX_LIMIT = 120
         else:
-          MIN_LIMIT = 30
+          MIN_LIMIT = 20
           MAX_LIMIT = 100
       else:
-        MIN_LIMIT = 30
+        MIN_LIMIT = 20
         MAX_LIMIT = 120
 
       if cam_type == 22:  # speed bump

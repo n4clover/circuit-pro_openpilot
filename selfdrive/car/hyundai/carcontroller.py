@@ -11,7 +11,7 @@ from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.spas_rspa_controller import SpasRspaController
 from selfdrive.car.hyundai.values import Buttons, FEATURES, CarControllerParams
 from opendbc.can.packer import CANPacker
-from selfdrive.config import Conversions as CV
+from common.conversions import Conversions as CV
 from common.params import Params
 from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.road_speed_limiter import road_speed_limiter_get_active
@@ -84,8 +84,8 @@ class CarController():
     self.last_blinker_frame = 0
     self.prev_active_cam = False
     self.active_cam_timer = 0
-    
-  def update(self, c, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
+
+  def update(self, c, CS, frame, actuators, pcm_cancel_cmd, visual_alert,
              left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
     # Steering Torque
@@ -93,12 +93,11 @@ class CarController():
     apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque,
                                                 CarControllerParams)
 
-    self.steer_rate_limited = new_steer != apply_steer
-
+    # disable when temp fault is active, or below LKA minimum speed
     if CS.spas_enabled:
-      lkas_active = c.active and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg and not CS.mdps11_stat == 5
+      lkas_active = c.latActive and not CS.mdps11_stat == 5
     else:
-      lkas_active = c.active and not CS.out.steerWarning and not self.low_speed_alert and abs(CS.out.steeringAngleDeg) < CS.CP.maxSteeringAngleDeg
+      lkas_active = c.latActive
 
     if abs(CS.out.steeringAngleDeg) > 90 and CS.CP.steerLockout:
       lkas_active = False
@@ -123,14 +122,16 @@ class CarController():
     self.spas_rspa_controller.SPAS_Controller(c, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
-      process_hud_alert(enabled, self.car_fingerprint, visual_alert,
+      process_hud_alert(c.enabled, self.car_fingerprint, visual_alert,
                         left_lane, right_lane, left_lane_depart, right_lane_depart)
 
     if self.haptic_feedback_speed_camera:
       if self.prev_active_cam != self.scc_smoother.active_cam:
         self.prev_active_cam = self.scc_smoother.active_cam
         if self.scc_smoother.active_cam:
-          self.active_cam_timer = int(1.5 / DT_CTRL)
+          if (frame - self.last_active_cam_frame) * DT_CTRL > 10.0:
+            self.active_cam_timer = int(1.5 / DT_CTRL)
+            self.last_active_cam_frame = frame
 
       if self.active_cam_timer > 0:
         self.active_cam_timer -= 1
@@ -158,12 +159,12 @@ class CarController():
         can_sends.append([0x7D0, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 0])
 
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
-                                   CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
+                                   CS.lkas11, sys_warning, sys_state, c.enabled, left_lane, right_lane,
                                    left_lane_warning, right_lane_warning, 0, self.ldws_opt))
 
     if CS.mdps_bus or CS.scc_bus == 1:  # send lkas11 bus 1 if mdps or scc is on bus 1
       can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
-                                     CS.lkas11, sys_warning, sys_state, enabled, left_lane, right_lane,
+                                     CS.lkas11, sys_warning, sys_state, c.enabled, left_lane, right_lane,
                                      left_lane_warning, right_lane_warning, 1, self.ldws_opt))
 
     if frame % 2 and CS.mdps_bus: # send clu11 to mdps if it is not on bus 0
@@ -215,8 +216,11 @@ class CarController():
       d = CS.lead_distance
       self.gapsetting = 1 if d < 25 else 2 if d < 40 else 3 if d < 60 else 4
 
+    if CS.mdps_bus or self.car_fingerprint in FEATURES["send_mdps12"]:  # send mdps12 to LKAS to prevent LKAS error
+      can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))
+
     # scc smoother
-    self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
+    self.scc_smoother.update(c.enabled, can_sends, self.packer, c, CS, frame, controls)
 
     if self.longcontrol or self.rspa: # Need accel and stopping state info for long or rspa. - JPR
       stopping = controls.LoC.long_control_state == LongCtrlState.stopping
@@ -241,19 +245,14 @@ class CarController():
           controls.aReqValueMax = controls.aReqValue
 
         jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
-        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, CS.lead_distance, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable, CS.has_scc14, sys_warning, CS.scc12)) 
-      
-    if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
-      warning = 5
-    else:
-      warning = 0
+        can_sends.extend(create_acc_commands(self.packer, c.enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, CS.lead_distance, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable, CS.has_scc14, sys_warning, CS.scc12)) 
 
     # 20 Hz LFA MFA message
     if frame % 5 == 0:
       activated_hda = road_speed_limiter_get_active()
       # activated_hda: 0 - off, 1 - main road, 2 - highway
       if self.car_fingerprint in FEATURES["send_lfa_mfa"]:
-        can_sends.append(create_lfahda_mfc(self.packer, enabled, activated_hda, warning))
+        can_sends.append(create_lfahda_mfc(self.packer, c.enabled, activated_hda))
       elif CS.has_lfa_hda:
         can_sends.append(create_hda_mfc(self.packer, activated_hda, CS, left_lane, right_lane))
 
