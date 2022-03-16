@@ -20,7 +20,7 @@ VisualAlert = car.CarControl.HUDControl.VisualAlert
 min_set_speed = 30 * CV.KPH_TO_MS
 
 CLUSTER_ANIMATION_BP = [0., 1., 10., 20., 30., 40., 50.]
-CLUSTER_ANIMATION_SPEED= [0., 100., 40., 30., 20., 10., 3.]
+CLUSTER_ANIMATION_SPEED= [0., 100., 40., 30., 20., 10., 4.]
 
 def process_hud_alert(enabled, fingerprint, visual_alert, left_lane, right_lane,
                       left_lane_depart, right_lane_depart):
