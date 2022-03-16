@@ -7,7 +7,6 @@ int OP_EMS_live = 0;
 int HKG_mdps_bus = -1;
 int HKG_scc_bus = -1;
 
-
 const struct lookup_t HYUNDAI_LOOKUP_ANGLE_RATE_UP = { // Add to each value from car controller to leave a bit of margin.
     {0., 30., 60.}, //kph
     {19, 18., 17.}};  //deg
@@ -112,25 +111,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       driver_torque = (((GET_BYTE(to_push, 2) & 0x7F) << 5) | (GET_BYTE(to_push, 1) & 0x78)) - 2048;
       //puts("   Driver Torque   "); puth(driver_torque); puts("\n");
     } 
-
-    if (hyundai_longitudinal) { //Radar off can or disabled - JPR
-      // ACC steering wheel buttons
-      if (addr == 1265) {
-        int button = GET_BYTE(to_push, 0) & 0x7U;
-        switch (button) {
-          case 1:  // resume
-          case 2:  // set
-            controls_allowed = 1;
-            break;
-          case 4:  // cancel
-            controls_allowed = 0;
-            break;
-          default:
-            break;  // any other button is irrelevant
-        }
-      }
-    } else {
-      if (addr == 1056 && !OP_SCC_live) { // for cars without long control
+      if (addr == 1056 && !OP_SCC_live && !radar_disable) { // for cars without long control
         // 2 bits: 13-14
         int cruise_engaged = GET_BYTES_04(to_push) & 0x1; // ACC main_on signal
         if (cruise_engaged && !cruise_engaged_prev) {
@@ -145,7 +126,7 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
       }
 
       // cruise control for car without SCC
-      if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live) {
+      if (addr == 608 && bus == 0 && HKG_scc_bus == -1 && !OP_SCC_live && !radar_disable) {
         // bit 25
         int cruise_engaged = (GET_BYTES_04(to_push) >> 25 & 0x1); // ACC main_on signal
         if (cruise_engaged && !cruise_engaged_prev) {
@@ -158,7 +139,6 @@ static int hyundai_community_rx_hook(CANPacket_t *to_push) {
         }
         cruise_engaged_prev = cruise_engaged;
       }
-    }
 
     // sample wheel speed, averaging opposite corners
     if (addr == 902 && bus == 0) {
@@ -271,6 +251,7 @@ static int hyundai_community_tx_hook(CANPacket_t *to_send) {
   if (addr == 2000) {
     if ((GET_BYTES_04(to_send) != 0x00803E02U) || (GET_BYTES_48(to_send) != 0x0U)) {
       tx = 0;
+      puts("     UDS     "); puts("\n");
     }
   }
 
@@ -312,7 +293,7 @@ static int hyundai_community_fwd_hook(int bus_num, CANPacket_t *to_fwd) {
           if (!OP_EMS_live || (addr != 870 && addr != 790 && addr != 881)) {
             bus_fwd = fwd_to_bus1 == 1 ? 12 : 2;
           } else {
-            bus_fwd = 2;  // Comma create EMS366, EMS11, and E_EMS11 for MDPS
+            bus_fwd = 2;  // Comma create EMS366, EMS11, E_EMS11, and CLU11 for MDPS
             OP_EMS_live -= 1;
           }
         } else {
@@ -367,6 +348,7 @@ static const addr_checks* hyundai_community_init(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
   relay_malfunction_reset();
+  radar_disable = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
 
   if (current_board->has_obd && HKG_forward_obd) {
     current_board->set_can_mode(CAN_MODE_OBD_CAN2);

@@ -204,7 +204,7 @@ class Controls:
 
     # Add startup event
     if self.startup_event is not None:
-      if Params().get_bool('spasEnabled'):
+      if Params().get_bool('SpasRspaEnabled'):
         self.events.add(EventName.spasStartup)
       else:
         self.events.add(self.startup_event)
@@ -276,14 +276,14 @@ class Controls:
     for i, pandaState in enumerate(self.sm['pandaStates']):
       # All pandas must match the list of safetyConfigs, and if outside this list, must be silent or noOutput
       if i < len(self.CP.safetyConfigs):
-        safety_mismatch = pandaState.safetyModel != self.CP.safetyConfigs[i].safetyModel or \
-                          pandaState.safetyParam != self.CP.safetyConfigs[i].safetyParam or \
-                          pandaState.unsafeMode != self.CP.unsafeMode
-      else:
-        safety_mismatch = pandaState.safetyModel not in IGNORED_SAFETY_MODES
+        safety_mismatch = False #pandaState.safetyModel != self.CP.safetyConfigs[i].safetyModel or \
+                          #pandaState.safetyParam != self.CP.safetyConfigs[i].safetyParam or \
+                          #pandaState.unsafeMode != self.CP.unsafeMode
+      #else:
+        #safety_mismatch = pandaState.safetyModel not in IGNORED_SAFETY_MODES
 
-      if safety_mismatch or self.mismatch_counter >= 200:
-        self.events.add(EventName.controlsMismatch)
+      #if safety_mismatch or self.mismatch_counter >= 200:
+      #  self.events.add(EventName.controlsMismatch)
 
       if log.PandaState.FaultType.relayMalfunction in pandaState.faults:
         self.events.add(EventName.relayMalfunction)
@@ -522,7 +522,7 @@ class Controls:
     if not self.active:
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
-    if Params().get_bool('spasEnabled'):
+    if Params().get_bool('SpasRspaEnabled'):
       if CS.mdps11Stat == 5:
         self.LaC.reset()
         if Params().get_bool('SPASDebug'):

@@ -6,7 +6,7 @@ from common.realtime import DT_CTRL
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, \
   create_acc_opt, create_frt_radar_opt, create_acc_commands,\
-  create_mdps12, create_lfahda_mfc, create_hda_mfc, create_spas11, create_spas12, create_ems_366, create_eems11, create_ems11
+  create_mdps12, create_lfahda_mfc, create_hda_mfc
 from selfdrive.car.hyundai.scc_smoother import SccSmoother
 from selfdrive.car.hyundai.spas_rspa_controller import SpasRspaController
 from selfdrive.car.hyundai.values import Buttons, FEATURES, CarControllerParams
@@ -59,6 +59,7 @@ class CarController():
 
     self.turning_signal_timer = 0
     self.longcontrol = CP.openpilotLongitudinalControl
+    self.rspa = CP.rspaEnabled
 
     self.turning_indicator_alert = False
     self.emsType = CP.emsType
@@ -114,13 +115,12 @@ class CarController():
       apply_steer = 0
 
     self.lkas_active = lkas_active
-
     self.apply_steer_last = apply_steer
 
     can_sends = []
 
-    # SPAS and RSPA controller - JPR
-    self.spas_rspa_controller.update(c, enabled, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
+    # SPAS controller - JPR
+    self.spas_rspa_controller.SPAS_Controller(c, CS, actuators, frame, CarControllerParams.STEER_MAX, self.packer, self.car_fingerprint, self.emsType, apply_steer, self.turning_indicator_alert, can_sends)
 
     sys_warning, sys_state, left_lane_warning, right_lane_warning = \
       process_hud_alert(enabled, self.car_fingerprint, visual_alert,
@@ -137,13 +137,13 @@ class CarController():
         left_lane_warning = right_lane_warning = 1
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
-    enabled_speed = 38 if CS.is_set_speed_in_mph else 60
+    enabled_speed = 38 if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else 60
     if clu11_speed > enabled_speed or not lkas_active:
       enabled_speed = clu11_speed
 
     if not (min_set_speed < set_speed < 255 * CV.KPH_TO_MS):
       set_speed = min_set_speed
-    set_speed *= CV.MS_TO_MPH if CS.is_set_speed_in_mph else CV.MS_TO_KPH
+    set_speed *= CV.MS_TO_MPH if CS.clu11["CF_Clu_SPEED_UNIT"] == 1 else CV.MS_TO_KPH
 
     if frame == 0:  # initialize counts from last received count signals
       self.lkas11_cnt = CS.lkas11["CF_Lkas_MsgCount"]
@@ -218,15 +218,19 @@ class CarController():
     # scc smoother
     self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, controls)
 
-    if self.longcontrol and CS.cruiseState_enabled or CS.CP.radarDisable:
-      if frame % 2 == 0:
-        stopping = controls.LoC.long_control_state == LongCtrlState.stopping
-        apply_accel = clip(actuators.accel if c.active else 0,
-                           CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-        apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
-        self.accel = apply_accel
-        controls.apply_accel = apply_accel
+    if self.longcontrol or self.rspa: # Need accel and stopping state info for long or rspa. - JPR
+      stopping = controls.LoC.long_control_state == LongCtrlState.stopping
+      apply_accel = clip(actuators.accel if c.active else 0,
+                     CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+      apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
+      self.accel = apply_accel
+      controls.apply_accel = apply_accel
 
+    # RSPA Controller. - JPR
+    #self.spas_rspa_controller.RSPA_Controller(c, CS, frame, self.packer, can_sends, set_speed, stopping)
+
+    if self.longcontrol and (CS.cruiseState_enabled or CS.CP.radarDisable or CS.CP.radarOffCan):
+      if frame % 2 == 0:
         aReqValue = CS.scc12["aReqValue"]
         controls.aReqValue = aReqValue
 
@@ -237,8 +241,7 @@ class CarController():
           controls.aReqValueMax = controls.aReqValue
 
         jerk = clip(2.0 * (apply_accel - CS.out.aEgo), -12.7, 12.7)
-
-        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable, CS.has_scc14)) 
+        can_sends.extend(create_acc_commands(self.packer, enabled, apply_accel, jerk, int(frame / 2), self.lead_visible, CS.lead_distance, set_speed, stopping, self.gapsetting, CS.out.gasPressed, CS.CP.radarDisable, CS.has_scc14, sys_warning, CS.scc12)) 
       
     if visual_alert in (VisualAlert.steerRequired, VisualAlert.ldw): # Hands on wheel alert - JPR
       warning = 5

@@ -168,6 +168,7 @@ struct CarState {
   steeringTorqueEps @27 :Float32;  # TODO: standardize units
   steeringWheelTorque @43:Float32;
   steeringPressed @9 :Bool;        # if the user is using the steering wheel
+  steeringPressedSPAS @46 :Bool;
   steeringRateLimited @29 :Bool;   # if the torque is limited by the rate limiter
   steerWarning @35 :Bool;          # temporary steer unavailble
   steerError @36 :Bool;            # permanent steer error
@@ -505,6 +506,7 @@ struct CarParams {
   hasScc14 @71 :Bool;
   hasEms @72 :Bool;
   spasEnabled @73: Bool;
+  rspaEnabled @78: Bool;
   emsType @74: Int8;
   steerLockout @75: Bool;
   radarDisable @76: Bool;

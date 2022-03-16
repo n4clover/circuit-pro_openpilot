@@ -9,7 +9,6 @@ from selfdrive.car.hyundai.values import Buttons
 from common.params import Params
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, V_CRUISE_MIN, V_CRUISE_DELTA_KM, V_CRUISE_DELTA_MI
 from selfdrive.controls.lib.lane_planner import TRAJECTORY_SIZE
-from selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import AUTO_TR_CRUISE_GAP
 
 from selfdrive.ntune import ntune_scc_get
 from selfdrive.road_speed_limiter import road_speed_limiter_get_max_speed, road_speed_limiter_get_active, \
@@ -34,6 +33,14 @@ ButtonType = car.CarState.ButtonEvent.Type
 ButtonPrev = ButtonType.unknown
 ButtonCnt = 0
 LongPressed = False
+
+CRUISE_GAP_BP = [1., 2., 3., 4.]
+CRUISE_GAP_V = [1.2, 1.35, 1.5, 1.7]
+
+AUTO_TR_BP = [0., 10.*CV.KPH_TO_MS, 70.*CV.KPH_TO_MS, 110.*CV.KPH_TO_MS]
+AUTO_TR_V = [1., 1.2, 1.35, 1.45]
+
+AUTO_TR_CRUISE_GAP = 4
 
 class SccSmoother:
 

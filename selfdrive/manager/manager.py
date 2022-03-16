@@ -76,7 +76,7 @@ def manager_init() -> None:
     ("NewRadarInterface", "0"),
     ("LowSpeedAlerts", "1"),
     ("SteerLockout", "0"),
-    ("spasEnabled", "0"),
+    ("SpasRspaEnabled", "0"),
     ("DynamicSpas", "0"),
     ("SPASDebug", "0"),
   ]
