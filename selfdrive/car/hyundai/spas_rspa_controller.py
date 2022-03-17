@@ -3,7 +3,7 @@ import copy
 from cereal import car
 from common.params import Params
 from common.numpy_fast import clip, interp
-from selfdrive.config import Conversions as CV
+from common.conversions import Conversions as CV
 from common.realtime import DT_CTRL
 from selfdrive.car.hyundai.values import CHECKSUM, LEGACY_SAFETY_MODE_CAR
 import crcmod
