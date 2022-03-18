@@ -1,5 +1,5 @@
 from cereal import car
-from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, CAR, HYBRID_CAR, EV_HYBRID_CAR, SPAS_SAS11_CAR
+from selfdrive.car.hyundai.values import DBC, STEER_THRESHOLD, FEATURES, CAR, HYBRID_CAR, EV_HYBRID_CAR
 from selfdrive.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
@@ -55,7 +55,6 @@ class CarState(CarStateBase):
     self.spas_enabled = CP.spasEnabled
     self.rspa_enabled = CP.rspaEnabled
     self.mdps11_stat = 0
-    self.spas_mode_sequence = 1 if SPAS_SAS11_CAR else 2
 
     # Wheel Momentum/Rate Factor. - JPR
     self.angle_delta_bp = [0., 5., 10., 20., 30, 40, 50, 60, 70] # How Fast is SAS11 is reporting the rate in deg. - JPR
@@ -244,10 +243,7 @@ class CarState(CarStateBase):
       self.ems_366 = cp.vl["EMS_366"]
       self.ems11 = cp.vl["EMS11"]
       self.eems11 = cp.vl["E_EMS11"]
-      if self.spas_mode_sequence == 1:
-        self.sas11_angle = cp_mdps.vl["SAS11"]["SAS_Angle"]
-      elif self.spas_mode_sequence == 2:
-        self.mdps11_strang = cp_mdps.vl["MDPS11"]["CR_Mdps_StrAng"]
+      self.mdps11_strang = cp_mdps.vl["MDPS11"]["CR_Mdps_StrAng"]
       self.mdps11_stat_last = self.mdps11_stat
       self.mdps11_stat = cp_mdps.vl["MDPS11"]["CF_Mdps_Stat"]
       ret.mdps11Stat = cp_mdps.vl["MDPS11"]["CF_Mdps_Stat"]
