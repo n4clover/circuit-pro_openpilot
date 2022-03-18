@@ -224,7 +224,7 @@ class CarController():
 
     if self.longcontrol or self.rspa: # Need accel and stopping state info for long or rspa. - JPR
       stopping = controls.LoC.long_control_state == LongCtrlState.stopping
-      apply_accel = clip(actuators.accel if c.active else 0,
+      apply_accel = clip(actuators.accel if c.longActive else 0,
                      CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
       apply_accel = self.scc_smoother.get_apply_accel(CS, controls.sm, apply_accel, stopping)
       self.accel = apply_accel

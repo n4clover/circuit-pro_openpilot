@@ -146,7 +146,7 @@ class SpasRspaController:
   def RSPA_Controller(self, c, CS, frame, packer, can_sends, set_speed, stopping):
     if CS.rspa_enabled:
       if (frame % 1) == 0: # RSPA11 at 100hz. - JPR
-        can_sends.append(SpasRspaController.create_rspa11(packer, frame, self.en_rspa, CS.mdps_bus, c.active, set_speed, stopping, CS.out.gasPressed))
+        can_sends.append(SpasRspaController.create_rspa11(packer, frame, self.en_rspa, CS.mdps_bus, c.longActive, set_speed, stopping, CS.out.gasPressed))
 
   def SPAS_Controller(self, c, CS, actuators, frame, maxTQ, packer, car_fingerprint, emsType, apply_steer, turnsignalcut, can_sends):
     self.packer = packer
@@ -156,7 +156,7 @@ class SpasRspaController:
       self.rate = abs(CS.out.steeringAngleDeg - self.lastSteeringAngleDeg)
       apply_angle = clip(actuators.steeringAngleDeg, -1*(STEER_ANG_MAX), STEER_ANG_MAX)
       apply_diff = abs(apply_angle - CS.out.steeringAngleDeg)
-      spas_active = c.active and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)      
+      spas_active = c.latActive and CS.out.vEgo < 26.82 and (CS.out.vEgo < SPAS_SWITCH or apply_diff > 3.2 and self.dynamicSpas and not CS.out.steeringPressed or abs(apply_angle) > 3. and self.spas_active or maxTQ - STEER_MAX_OFFSET < apply_steer and self.dynamicSpas)      
       if (frame % 2) == 0: # Run this at same speed as the SPAS11 message BC thats how fast the steering updates. - JPR
         if CS.mdps11_stat == 5 and apply_diff > 1.75: # Rate limit for when steering angle is not apply_angle or "engage" rate. - JPR
           self.ratelimit += 0.03 # Increase each cycle - JPR
