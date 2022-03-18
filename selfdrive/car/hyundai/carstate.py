@@ -55,7 +55,7 @@ class CarState(CarStateBase):
     self.spas_enabled = CP.spasEnabled
     self.rspa_enabled = CP.rspaEnabled
     self.mdps11_stat = 0
-    self.spas_mode_sequence = 2 if LEGACY_SAFETY_MODE_CAR else 1
+    self.spas_mode_sequence = 1 if SPAS_SAS11_CAR else 2
 
     # Wheel Momentum/Rate Factor. - JPR
     self.angle_delta_bp = [0., 5., 10., 20., 30, 40, 50, 60, 70] # How Fast is SAS11 is reporting the rate in deg. - JPR
